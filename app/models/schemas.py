@@ -11,6 +11,12 @@ class SpeakerBase(BaseModel):
 class SpeakerCreate(SpeakerBase):
     pass
 
+class SocialAccount(BaseModel):
+    platform: str
+    identifier: str
+    url: Optional[str] = None
+    title: Optional[str] = None
+
 class SpeakerResponse(SpeakerBase):
     id: str
     overall_credibility: float
@@ -20,6 +26,7 @@ class SpeakerResponse(SpeakerBase):
     correct_predictions: int
     domain_scores: Dict[str, Any]
     created_at: datetime
+    social_accounts: List[SocialAccount] = []
 
     model_config = ConfigDict(from_attributes=True)
 

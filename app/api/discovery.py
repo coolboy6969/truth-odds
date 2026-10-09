@@ -29,6 +29,15 @@ def approve_candidate(candidate_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Candidate not found")
     return {"success": True, "speaker_id": speaker.id, "name": speaker.name}
 
+@router.post("/candidates/{candidate_id}/reject")
+def reject_candidate(candidate_id: str, db: Session = Depends(get_db)):
+    cand = db.query(DiscoveredSpeakerCandidate).filter(DiscoveredSpeakerCandidate.id == candidate_id).first()
+    if not cand:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    cand.status = "REJECTED"
+    db.commit()
+    return {"success": True, "candidate_id": cand.id, "name": cand.name}
+
 @router.get("/narratives")
 def get_narratives(db: Session = Depends(get_db)):
     clusters = db.query(NarrativeCluster).order_by(
