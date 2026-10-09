@@ -7,6 +7,18 @@ from app.services.prediction_service import PredictionService
 
 router = APIRouter(prefix="/api/demo", tags=["Demo & Seeding"])
 
+@router.post("/reset-db")
+def reset_database():
+    """
+    Completely drops all tables and re-creates them empty.
+    """
+    from app.database.session import engine
+    from app.models.entities import Base
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    return {"success": True, "message": "База данных успешно сброшена и очищена"}
+
+
 @router.post("/seed")
 def seed_demo_data(db: Session = Depends(get_db)):
     """
