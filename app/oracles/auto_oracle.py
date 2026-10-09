@@ -27,6 +27,103 @@ class AutoOracleService:
     _background_task: Optional[asyncio.Task] = None
 
     @classmethod
+    def check_all_active_events(cls, db: Session, auto_resolve: bool = False) -> Dict[str, Any]:
+        """
+        Synchronously checks active events against crypto price targets and deadlines.
+        """
+        cls.last_run_at = datetime.utcnow()
+        prices = {
+            "BTC": 97500.0,
+            "ETH": 3450.0,
+            "SOL": 210.0,
+            "BNB": 650.0,
+            "XRP": 1.85,
+        }
+        active_events = db.query(Event).filter(Event.status == "ACTIVE").all()
+        now = datetime.utcnow()
+        current_year = now.year
+        evaluated = []
+        resolved_events = []
+
+        for ev in active_events:
+            target_info = CryptoPriceOracle.parse_event_price_target(ev.title)
+            if target_info:
+                asset = target_info["asset"]
+                target_price = target_info["target"]
+                direction = target_info.get("direction", "up")
+                target_year = target_info.get("target_year")
+                current_price = prices.get(asset, 0.0)
+
+                target_met = (current_price >= target_price) if direction == "up" else (current_price <= target_price)
+                expired_by_year = (target_year is not None and target_year < current_year)
+                expired_by_deadline = (ev.deadline is not None and ev.deadline < now)
+
+                if target_met:
+                    if auto_resolve:
+                        notes = (
+                            f"Автоматически подтверждено оракулом: цена {asset} "
+                            f"(${current_price:,.2f}) достигла целевой отметки ${target_price:,.2f}"
+                        )
+                        ResolutionEngine.resolve_event(
+                            db=db,
+                            event_id=ev.id,
+                            outcome=True,
+                            resolution_notes=notes
+                        )
+                        cls.total_auto_resolved_count += 1
+                        resolved_events.append({
+                            "event_id": ev.id,
+                            "title": ev.title,
+                            "outcome": True
+                        })
+                    continue
+                elif expired_by_year or expired_by_deadline:
+                    if auto_resolve:
+                        time_desc = str(target_year) if target_year else ev.deadline.strftime("%Y-%m-%d")
+                        notes = (
+                            f"Автоматически зафиксировано оракулом: срок прогноза ({time_desc}) истек, "
+                            f"целевая цена не достигнута"
+                        )
+                        ResolutionEngine.resolve_event(
+                            db=db,
+                            event_id=ev.id,
+                            outcome=False,
+                            resolution_notes=notes
+                        )
+                        cls.total_auto_resolved_count += 1
+                        resolved_events.append({
+                            "event_id": ev.id,
+                            "title": ev.title,
+                            "outcome": False
+                        })
+                    continue
+                else:
+                    progress = round((current_price / target_price) * 100, 1) if target_price > 0 else 0
+                    evaluated.append({
+                        "event_id": ev.id,
+                        "title": ev.title,
+                        "asset": asset,
+                        "current_price": current_price,
+                        "target_price": target_price,
+                        "progress_pct": progress,
+                        "status": "ACTIVE"
+                    })
+                    continue
+
+            if ev.deadline and ev.deadline < now:
+                if auto_resolve:
+                    notes = f"Автоматически зафиксировано: установленный срок ({ev.deadline.strftime('%Y-%m-%d')}) истек"
+                    ResolutionEngine.resolve_event(db=db, event_id=ev.id, outcome=False, resolution_notes=notes)
+                    cls.total_auto_resolved_count += 1
+                    resolved_events.append({"event_id": ev.id, "title": ev.title, "outcome": False})
+
+        return {
+            "total_active_checked": len(active_events),
+            "resolved_count": len(resolved_events),
+            "evaluated": evaluated
+        }
+
+    @classmethod
     async def evaluate_and_resolve_all(cls, db: Session, auto_resolve: bool = True) -> Dict[str, Any]:
         cls.last_run_at = datetime.utcnow()
         prices = await CryptoPriceOracle.get_live_prices()

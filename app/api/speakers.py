@@ -40,17 +40,27 @@ def _enrich_speaker_socials(sp: Speaker, db: Session) -> dict:
 
     # 2. Handle or channel property on speaker
     if sp.handle_or_channel:
-        if sp.handle_or_channel.startswith("@"):
-            clean = sp.handle_or_channel.lstrip("@")
-            if not any(s["platform"] == "x" for s in socials):
+        hc = sp.handle_or_channel.strip()
+        if hc.startswith("@"):
+            clean = hc.lstrip("@")
+            if not any(s["platform"] in ("x", "twitter") for s in socials):
                 socials.append({
                     "platform": "x",
-                    "identifier": sp.handle_or_channel,
+                    "identifier": f"@{clean}",
                     "url": f"https://x.com/{clean}",
-                    "title": f"X: {sp.handle_or_channel}"
+                    "title": f"X: @{clean}"
                 })
-        elif "t.me" in sp.handle_or_channel:
-            clean = sp.handle_or_channel.split("/")[-1]
+        elif "x.com" in hc or "twitter.com" in hc:
+            clean = hc.split("/")[-1].lstrip("@")
+            if not any(s["platform"] in ("x", "twitter") for s in socials):
+                socials.append({
+                    "platform": "x",
+                    "identifier": f"@{clean}",
+                    "url": f"https://x.com/{clean}",
+                    "title": f"X: @{clean}"
+                })
+        elif "t.me" in hc:
+            clean = hc.split("/")[-1]
             if not any(s["platform"] == "telegram" for s in socials):
                 socials.append({
                     "platform": "telegram",
@@ -58,6 +68,23 @@ def _enrich_speaker_socials(sp: Speaker, db: Session) -> dict:
                     "url": f"https://t.me/{clean}",
                     "title": f"Telegram: @{clean}"
                 })
+        elif "youtube.com" in hc or "youtu.be" in hc:
+            clean = hc.split("/")[-1]
+            if not any(s["platform"] == "youtube" for s in socials):
+                socials.append({
+                    "platform": "youtube",
+                    "identifier": clean,
+                    "url": hc if hc.startswith("http") else f"https://{hc}",
+                    "title": f"YouTube: {clean}"
+                })
+        elif not any(s["platform"] in ("x", "twitter") for s in socials) and not hc.startswith("Discovered via"):
+            clean = hc.lstrip("@")
+            socials.append({
+                "platform": "x",
+                "identifier": f"@{clean}",
+                "url": f"https://x.com/{clean}",
+                "title": f"X: @{clean}"
+            })
 
     # 3. Fallback database for top crypto & tech personalities
     known_accounts = {
@@ -82,28 +109,40 @@ def _enrich_speaker_socials(sp: Speaker, db: Session) -> dict:
             {"platform": "youtube", "identifier": "ARK Invest", "url": "https://www.youtube.com/@ARKInvest", "title": "YouTube: ARK Invest"}
         ],
         "Guy Turner (Coin Bureau)": [
-            {"platform": "youtube", "identifier": "Coin Bureau (~2.5M)", "url": "https://www.youtube.com/@CoinBureau", "title": "YouTube: Coin Bureau"},
             {"platform": "x", "identifier": "@CoinBureau", "url": "https://x.com/CoinBureau", "title": "X: @CoinBureau"},
+            {"platform": "youtube", "identifier": "Coin Bureau (~2.5M)", "url": "https://www.youtube.com/@CoinBureau", "title": "YouTube: Coin Bureau"},
             {"platform": "telegram", "identifier": "@cbinsider", "url": "https://t.me/cbinsider", "title": "Telegram Insider"}
         ],
         "Benjamin Cowen": [
-            {"platform": "youtube", "identifier": "Into The Cryptoverse", "url": "https://www.youtube.com/@BenjaminCowen", "title": "YouTube: Into The Cryptoverse"},
-            {"platform": "x", "identifier": "@BenjaminCowen", "url": "https://x.com/BenjaminCowen", "title": "X: @BenjaminCowen"}
+            {"platform": "x", "identifier": "@BenjaminCowen", "url": "https://x.com/BenjaminCowen", "title": "X: @BenjaminCowen"},
+            {"platform": "youtube", "identifier": "Into The Cryptoverse", "url": "https://www.youtube.com/@BenjaminCowen", "title": "YouTube: Into The Cryptoverse"}
         ],
         "Raoul Pal": [
-            {"platform": "youtube", "identifier": "Real Vision", "url": "https://www.youtube.com/@RealVisionFinance", "title": "YouTube: Real Vision"},
-            {"platform": "x", "identifier": "@RaoulGMI", "url": "https://x.com/RaoulGMI", "title": "X: @RaoulGMI"}
+            {"platform": "x", "identifier": "@RaoulGMI", "url": "https://x.com/RaoulGMI", "title": "X: @RaoulGMI"},
+            {"platform": "youtube", "identifier": "Real Vision", "url": "https://www.youtube.com/@RealVisionFinance", "title": "YouTube: Real Vision"}
         ],
         "Peter Schiff": [
-            {"platform": "youtube", "identifier": "The Peter Schiff Show", "url": "https://www.youtube.com/@PeterSchiff", "title": "YouTube: Peter Schiff Show"},
-            {"platform": "x", "identifier": "@PeterSchiff", "url": "https://x.com/PeterSchiff", "title": "X: @PeterSchiff"}
+            {"platform": "x", "identifier": "@PeterSchiff", "url": "https://x.com/PeterSchiff", "title": "X: @PeterSchiff"},
+            {"platform": "youtube", "identifier": "The Peter Schiff Show", "url": "https://www.youtube.com/@PeterSchiff", "title": "YouTube: Peter Schiff Show"}
         ],
         "Altcoin Daily (Aaron & Austin)": [
-            {"platform": "youtube", "identifier": "Altcoin Daily (~1.4M)", "url": "https://www.youtube.com/@AltcoinDaily", "title": "YouTube: Altcoin Daily"},
-            {"platform": "x", "identifier": "@AltcoinDaily", "url": "https://x.com/AltcoinDaily", "title": "X: @AltcoinDaily"}
+            {"platform": "x", "identifier": "@AltcoinDaily", "url": "https://x.com/AltcoinDaily", "title": "X: @AltcoinDaily"},
+            {"platform": "youtube", "identifier": "Altcoin Daily (~1.4M)", "url": "https://www.youtube.com/@AltcoinDaily", "title": "YouTube: Altcoin Daily"}
         ],
         "Elon Musk": [
             {"platform": "x", "identifier": "@elonmusk", "url": "https://x.com/elonmusk", "title": "X: @elonmusk"}
+        ],
+        "Mert Mumtaz": [
+            {"platform": "x", "identifier": "@0xMert_", "url": "https://x.com/0xMert_", "title": "X: @0xMert_"}
+        ],
+        "Lyn Alden": [
+            {"platform": "x", "identifier": "@LynAldenContact", "url": "https://x.com/LynAldenContact", "title": "X: @LynAldenContact"}
+        ],
+        "Willy Woo": [
+            {"platform": "x", "identifier": "@woonomic", "url": "https://x.com/woonomic", "title": "X: @woonomic"}
+        ],
+        "Dan Tapiero": [
+            {"platform": "x", "identifier": "@DTAPCAP", "url": "https://x.com/DTAPCAP", "title": "X: @DTAPCAP"}
         ]
     }
     
@@ -111,6 +150,16 @@ def _enrich_speaker_socials(sp: Speaker, db: Session) -> dict:
         for acc in known_accounts[sp.name]:
             if not any(s["platform"] == acc["platform"] for s in socials):
                 socials.append(acc)
+
+    # 4. Guarantee X presence if no X account is yet linked
+    if not any(s["platform"] in ("x", "twitter") for s in socials):
+        clean_name = sp.name.replace(" ", "").replace("(", "").replace(")", "").replace("&", "")
+        socials.append({
+            "platform": "x",
+            "identifier": f"@{clean_name}",
+            "url": f"https://x.com/{clean_name}",
+            "title": f"X: @{clean_name}"
+        })
 
     return {
         "id": sp.id,

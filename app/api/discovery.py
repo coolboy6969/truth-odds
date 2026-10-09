@@ -62,9 +62,16 @@ def get_narratives(db: Session = Depends(get_db)):
 
 @router.post("/narratives")
 def create_narrative(payload: CreateNarrativeRequest, db: Session = Depends(get_db)):
+    from app.engine.auto_analysis import AutoEventAnalysisEngine
+    from app.oracles.auto_oracle import AutoOracleService
+    from app.models.entities import Event
+
+    domain = payload.domain.lower() if payload.domain else AutoEventAnalysisEngine.infer_domain(payload.topic_summary)
+
+    # 1. Create narrative cluster
     cluster = NarrativeCluster(
         topic_summary=payload.topic_summary.strip(),
-        domain=payload.domain.lower(),
+        domain=domain,
         key_phrases={"tokens": payload.keywords or [], "speakers": []},
         statement_count=1,
         unique_speakers_count=1,
@@ -73,7 +80,48 @@ def create_narrative(payload: CreateNarrativeRequest, db: Session = Depends(get_
     db.add(cluster)
     db.commit()
     db.refresh(cluster)
+
+    # 2. Automated system check & forecast:
+    # Check if a tracked event exists, if not create one and run automated analysis & Bayesian forecasting
+    existing_event = db.query(Event).filter(Event.title.ilike(payload.topic_summary.strip())).first()
+    if not existing_event:
+        ev = Event(
+            title=payload.topic_summary.strip(),
+            description=f"Тема проверена автоматической системой анализа. Ключевые слова: {', '.join(payload.keywords or [])}",
+            domain=domain,
+            base_rate=0.5,
+            current_probability=0.5,
+            status="ACTIVE"
+        )
+        db.add(ev)
+        db.commit()
+        db.refresh(ev)
+        ev = AutoEventAnalysisEngine.analyze_and_forecast_event(db=db, event=ev)
+    else:
+        ev = existing_event
+
+    # 3. Check live oracle verification (spot prices / deadlines)
+    AutoOracleService.check_all_active_events(db=db, auto_resolve=False)
+
+    # 4. Synchronize cluster counts with actual statements discovered
+    stmt_count = len(ev.statements)
+    unique_speakers = len(set(s.speaker_id for s in ev.statements))
+    cluster.statement_count = max(1, stmt_count)
+    cluster.unique_speakers_count = max(1, unique_speakers)
+    cluster.status = "MATURE" if cluster.statement_count >= 2 else "EMERGING"
+    db.commit()
+    db.refresh(cluster)
+
     return cluster
+
+@router.delete("/narratives/{cluster_id}")
+def delete_narrative(cluster_id: str, db: Session = Depends(get_db)):
+    cluster = db.query(NarrativeCluster).filter(NarrativeCluster.id == cluster_id).first()
+    if not cluster:
+        raise HTTPException(status_code=404, detail="Cluster not found")
+    db.delete(cluster)
+    db.commit()
+    return {"success": True, "message": f"Тема «{cluster.topic_summary}» успешно удалена"}
 
 @router.post("/narratives/{cluster_id}/promote")
 def promote_narrative(cluster_id: str, db: Session = Depends(get_db)):

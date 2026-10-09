@@ -119,6 +119,8 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
             speaker_name=payload.speaker_name,
             speaker_confidence=payload.speaker_confidence
         )
+        from app.oracles.auto_oracle import AutoOracleService
+        AutoOracleService.check_all_active_events(db=db, auto_resolve=False)
 
     stmts = []
     for st in ev.statements:
@@ -168,3 +170,15 @@ def resolve_event(
         return resolved
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.delete("/{event_id}")
+def delete_event(event_id: str, db: Session = Depends(get_db)):
+    ev = db.query(Event).filter(Event.id == event_id).first()
+    if not ev:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    # Delete associated statements
+    db.query(Statement).filter(Statement.event_id == event_id).delete()
+    db.delete(ev)
+    db.commit()
+    return {"success": True, "message": f"Событие «{ev.title}» успешно удалено"}

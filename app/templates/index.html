@@ -566,7 +566,7 @@
                     
                     <!-- Textarea input -->
                     <div class="flex items-start gap-2">
-                        <textarea id="promptInput" rows="1" onkeydown="handlePromptKeydown(event)" placeholder="Задайте тему или вопрос для автоматического расчета (например: Превысит ли Биткоин $150,000 к концу 2026 года?)..." class="w-full bg-transparent text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none resize-none leading-relaxed custom-scrollbar max-h-32 px-1 py-1"></textarea>
+                        <textarea id="promptInput" rows="1" onkeydown="handlePromptKeydown(event)" placeholder="Задайте тему или вопрос для автоматического расчета вероятности..." class="w-full bg-transparent text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none resize-none leading-relaxed custom-scrollbar max-h-32 px-1 py-1"></textarea>
                     </div>
 
                     <!-- Bottom Toolbar Inside Floating Capsule (NO Base Rate, HAS Persona Search & Domain) -->
@@ -604,7 +604,7 @@
 
 
     <!-- =================== EVENT DETAIL MODAL (DETAILED CALCULATION BREAKDOWN) =================== -->
-    <div id="eventDetailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div id="eventDetailModal" onclick="if(event.target === this) closeEventDetailModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
         <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-gemini-border overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             
             <!-- Modal Header -->
@@ -691,7 +691,11 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="px-6 py-3.5 border-t border-gemini-border bg-slate-50 flex justify-end">
+            <div class="px-6 py-3.5 border-t border-gemini-border bg-slate-50 flex items-center justify-between">
+                <button onclick="deleteEventFromModal()" class="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 transition flex items-center gap-1.5" title="Удалить это событие/тему из прогнозов">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Удалить тему/событие</span>
+                </button>
                 <button onclick="closeEventDetailModal()" class="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition">
                     Закрыть
                 </button>
@@ -701,7 +705,7 @@
 
 
     <!-- =================== ADD SPEAKER MODAL =================== -->
-    <div id="addSpeakerModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div id="addSpeakerModal" onclick="if(event.target === this) closeAddSpeakerModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gemini-border flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -740,7 +744,7 @@
 
 
     <!-- =================== CREATE CUSTOM TOPIC MODAL =================== -->
-    <div id="createTopicModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div id="createTopicModal" onclick="if(event.target === this) closeCreateTopicModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gemini-border flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -785,7 +789,7 @@
 
 
     <!-- =================== RESET DATABASE CONFIRMATION MODAL =================== -->
-    <div id="resetModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div id="resetModal" onclick="if(event.target === this) closeResetModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gemini-border flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
             <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -1171,9 +1175,14 @@
                                 <span><b>${statementsCount}</b> ${statementsCount === 1 ? 'эксперт' : (statementsCount > 1 && statementsCount < 5 ? 'эксперта' : 'экспертов')}</span>
                             </div>
 
-                            <div class="px-3.5 py-1.5 rounded-lg bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
-                                <span>Подробнее</span>
-                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
+                            <div class="flex items-center gap-2">
+                                <button onclick="event.stopPropagation(); deleteEvent('${ev.id}')" class="w-8 h-8 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить тему из прогнозов">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                                <div class="px-3.5 py-1.5 rounded-lg bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
+                                    <span>Подробнее</span>
+                                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1238,11 +1247,11 @@
                 if (socials.length > 0) {
                     socialBadges = socials.map(s => {
                         if (s.platform === 'youtube') {
-                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-[10px] font-semibold flex items-center gap-1 transition"><i class="fa-brands fa-youtube"></i> ${s.title || 'YouTube'}</a>`;
-                        } else if (s.platform === 'x') {
-                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[10px] font-semibold flex items-center gap-1 transition"><i class="fa-brands fa-x-twitter"></i> ${s.title || 'X / Twitter'}</a>`;
+                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-[10px] font-semibold flex items-center gap-1.5 transition"><i class="fa-brands fa-youtube"></i> <span>${s.title || 'YouTube'}</span></a>`;
+                        } else if (s.platform === 'x' || s.platform === 'twitter') {
+                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-black text-white text-[10px] font-semibold flex items-center gap-1.5 transition shadow-2xs"><i class="fa-brands fa-x-twitter text-white text-[11px]"></i> <span>${s.title || 'X (Twitter)'}</span></a>`;
                         } else if (s.platform === 'telegram') {
-                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 text-[10px] font-semibold flex items-center gap-1 transition"><i class="fa-brands fa-telegram"></i> ${s.title || 'Telegram'}</a>`;
+                            return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 text-[10px] font-semibold flex items-center gap-1.5 transition"><i class="fa-brands fa-telegram"></i> <span>${s.title || 'Telegram'}</span></a>`;
                         }
                         return '';
                     }).join('');
@@ -1577,8 +1586,13 @@
                 <div class="flex flex-col gap-4">
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-[11px] font-semibold uppercase font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">${nar.domain}</span>
-                            <span class="text-[11px] font-semibold text-slate-500">${nar.status}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-semibold uppercase font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">${nar.domain}</span>
+                                <span class="text-[11px] font-semibold text-slate-500">${nar.status}</span>
+                            </div>
+                            <button onclick="deselectNarrative()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition" title="Закрыть детальный просмотр">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
                         </div>
                         <h3 class="text-base md:text-lg font-bold text-slate-900 leading-snug">${nar.topic_summary}</h3>
                     </div>
@@ -1612,6 +1626,10 @@
                                 <i class="fa-solid fa-check"></i> По данной теме уже создано официальное событие в расчетах!
                             </div>
                         `}
+                        <button onclick="deleteNarrative('${nar.id}')" class="w-full py-2 px-4 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 transition flex items-center justify-center gap-2" title="Удалить эту тему">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>Удалить эту тему</span>
+                        </button>
                     </div>
                 </div>
             `;
@@ -1665,14 +1683,42 @@
 
                 if (!res.ok) throw new Error('Failed to create topic');
                 const created = await res.json();
-                showToast('Тема успешно добавлена в список для обсуждения!');
+                showToast('🤖 Тема добавлена и автоматически проверена системой: консенсус и вероятность рассчитаны!');
                 closeCreateTopicModal();
                 document.getElementById('newTopicTitle').value = '';
                 document.getElementById('newTopicKeywords').value = '';
                 await loadNarratives();
+                await loadEvents();
                 selectNarrative(created.id);
             } catch (e) {
                 showToast('Ошибка при создании темы', 'error');
+            }
+        }
+
+        function deselectNarrative() {
+            selectedNarrativeId = null;
+            renderNarratives();
+            const panel = document.getElementById('narrativeDetailPanel');
+            if (panel) {
+                panel.innerHTML = `
+                    <div class="p-8 text-center text-xs text-gemini-mutedText flex flex-col items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-left text-blue-500 text-lg"></i>
+                        <p class="font-medium">Выберите тему в списке слева, чтобы изучить аргументы и превратить её в отслеживаемое событие.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function deleteNarrative(id) {
+            if (!confirm('Вы действительно хотите удалить эту тему?')) return;
+            try {
+                const res = await fetch(`/api/discovery/narratives/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                showToast('Тема успешно удалена!');
+                deselectNarrative();
+                await loadNarratives();
+            } catch (e) {
+                showToast('Ошибка при удалении темы', 'error');
             }
         }
 
@@ -1909,9 +1955,9 @@
                         let socialBadges = '';
                         if (socials.length > 0) {
                             socialBadges = socials.map(s => {
-                                if (s.platform === 'youtube') return `<a href="${s.url}" target="_blank" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-brands fa-youtube"></i></a>`;
-                                if (s.platform === 'x') return `<a href="${s.url}" target="_blank" class="text-slate-700 hover:text-black text-xs"><i class="fa-brands fa-x-twitter"></i></a>`;
-                                if (s.platform === 'telegram') return `<a href="${s.url}" target="_blank" class="text-sky-500 hover:text-sky-700 text-xs"><i class="fa-brands fa-telegram"></i></a>`;
+                                if (s.platform === 'youtube') return `<a href="${s.url}" target="_blank" class="text-red-500 hover:text-red-700 text-xs" title="YouTube"><i class="fa-brands fa-youtube"></i></a>`;
+                                if (s.platform === 'x' || s.platform === 'twitter') return `<a href="${s.url}" target="_blank" class="text-slate-900 hover:text-black text-xs" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>`;
+                                if (s.platform === 'telegram') return `<a href="${s.url}" target="_blank" class="text-sky-500 hover:text-sky-700 text-xs" title="Telegram"><i class="fa-brands fa-telegram"></i></a>`;
                                 return '';
                             }).join(' ');
                         }
@@ -1953,6 +1999,24 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             activeModalEventId = null;
+        }
+
+        async function deleteEvent(id) {
+            if (!confirm('Вы уверены, что хотите удалить эту тему/событие из предсказаний?')) return;
+            try {
+                const res = await fetch(`/api/events/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                showToast('Тема/событие успешно удалено из предсказаний!');
+                if (activeModalEventId === id) closeEventDetailModal();
+                await loadEvents();
+            } catch (e) {
+                showToast('Ошибка при удалении события', 'error');
+            }
+        }
+
+        async function deleteEventFromModal() {
+            if (!activeModalEventId) return;
+            await deleteEvent(activeModalEventId);
         }
 
         async function submitModalResolution(outcome) {
@@ -2048,6 +2112,21 @@
                 closeResetModal();
                 closeCreateTopicModal();
                 closeAddSpeakerModal();
+            }
+        });
+
+        // Close Modals on Backdrop Click (Clicking outside modal box)
+        ['eventDetailModal', 'addSpeakerModal', 'createTopicModal', 'resetModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('click', (e) => {
+                    if (e.target === el) {
+                        if (id === 'eventDetailModal') closeEventDetailModal();
+                        else if (id === 'addSpeakerModal') closeAddSpeakerModal();
+                        else if (id === 'createTopicModal') closeCreateTopicModal();
+                        else if (id === 'resetModal') closeResetModal();
+                    }
+                });
             }
         });
     </script>
