@@ -183,6 +183,7 @@ def get_speakers(
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
+    from app.discovery.speaker_discovery import is_valid_analyst_name
     query = db.query(Speaker)
     if sort_by == "credibility":
         query = query.order_by(Speaker.overall_credibility.desc())
@@ -192,9 +193,23 @@ def get_speakers(
         query = query.order_by(Speaker.total_predictions.desc())
     else:
         query = query.order_by(Speaker.name.asc())
-        
-    speakers = query.limit(limit).all()
-    return [_enrich_speaker_socials(s, db) for s in speakers]
+
+    all_speakers = query.all()
+    unique_speakers = []
+    seen_names = set()
+
+    for s in all_speakers:
+        if not is_valid_analyst_name(s.name):
+            continue
+        name_key = s.name.strip().lower()
+        if name_key in seen_names:
+            continue
+        seen_names.add(name_key)
+        unique_speakers.append(s)
+        if len(unique_speakers) >= limit:
+            break
+
+    return [_enrich_speaker_socials(s, db) for s in unique_speakers]
 
 @router.get("/{speaker_id}", response_model=SpeakerResponse)
 def get_speaker(speaker_id: str, db: Session = Depends(get_db)):
@@ -205,10 +220,14 @@ def get_speaker(speaker_id: str, db: Session = Depends(get_db)):
 
 @router.post("", response_model=SpeakerResponse)
 def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
+    from app.discovery.speaker_discovery import is_valid_analyst_name
+    if not is_valid_analyst_name(payload.name):
+        raise HTTPException(status_code=400, detail="Недопустимое имя аналитика. Имя должно состоять из реальных имени и фамилии.")
+
     existing = db.query(Speaker).filter(Speaker.name.ilike(payload.name.strip())).first()
     if existing:
         return existing
-        
+
     sp = Speaker(
         name=payload.name.strip(),
         handle_or_channel=payload.handle_or_channel,
@@ -222,3 +241,55 @@ def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(sp)
     return sp
+
+@router.delete("/{speaker_id}")
+def delete_speaker(speaker_id: str, db: Session = Depends(get_db)):
+    speaker = db.query(Speaker).filter(Speaker.id == speaker_id).first()
+    if not speaker:
+        raise HTTPException(status_code=404, detail="Speaker not found")
+
+    speaker_name = speaker.name
+    # Collect affected events before deleting
+    affected_event_ids = list(set(s.event_id for s in speaker.statements))
+
+    # Unlink or delete monitored sources
+    db.query(MonitoredSource).filter(MonitoredSource.speaker_id == speaker_id).delete()
+
+    # Delete speaker
+    db.delete(speaker)
+
+    # Reject any candidate with this name so they don't immediately re-promote
+    from app.models.entities import DiscoveredSpeakerCandidate, Event
+    candidates = db.query(DiscoveredSpeakerCandidate).filter(DiscoveredSpeakerCandidate.name.ilike(speaker_name)).all()
+    for cand in candidates:
+        cand.status = "REJECTED"
+
+    db.commit()
+
+    # Recalculate probabilities of affected events
+    from app.engine.scoring import ForecasterScorer
+    from app.services.prediction_service import PredictionService
+    for ev_id in affected_event_ids:
+        event = db.query(Event).filter(Event.id == ev_id).first()
+        if event:
+            remaining_statements = event.statements or []
+            if remaining_statements:
+                stmt_dicts = []
+                for s in remaining_statements:
+                    sp = db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
+                    sp_weight = PredictionService.get_speaker_weight_for_domain(sp, event.domain) if sp else s.speaker_weight_applied
+                    stmt_dicts.append({
+                        "speaker_confidence": s.speaker_confidence,
+                        "speaker_weight": sp_weight
+                    })
+                event.current_probability = ForecasterScorer.aggregate_event_probability(stmt_dicts, event.base_rate)
+            else:
+                event.current_probability = event.base_rate
+    db.commit()
+
+    return {
+        "success": True,
+        "speaker_id": speaker_id,
+        "speaker_name": speaker_name,
+        "message": f"Аналитик «{speaker_name}» успешно удален из учета"
+    }

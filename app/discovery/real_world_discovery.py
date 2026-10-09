@@ -13,6 +13,7 @@ from app.extractor.llm_extractor import LLMPredictionExtractor
 from app.engine.auto_analysis import AutoEventAnalysisEngine
 from app.engine.scoring import ForecasterScorer
 from app.oracles.auto_oracle import AutoOracleService
+from app.discovery.speaker_discovery import is_valid_analyst_name, STOP_WORDS, normalize_analyst_url
 
 
 class RealWorldAnalystDiscoveryService:
@@ -22,13 +23,7 @@ class RealWorldAnalystDiscoveryService:
     their concrete predictions, target numbers, and records them with direct source attribution.
     """
 
-    NON_PERSON_WORDS = {
-        "bitcoin", "ethereum", "crypto", "wall street", "federal reserve", "sec",
-        "standard chartered", "yahoo finance", "cointelegraph", "market", "bull", "bear",
-        "coindesk", "bloomberg", "reuters", "cnbc", "forbes", "cryptorank", "beincrypto",
-        "биткоин", "эфириум", "крипта", "рынок", "фрс", "цб", "минфин", "россия", "сша",
-        "золото", "нефть", "доллар", "рубль", "новости", "аналитика", "прогноз"
-    }
+    NON_PERSON_WORDS = STOP_WORDS
 
     VERBS_REGEX = (
         r'(?:says|predicts|warns|forecasts|praises|bets|apologizes|sees|expects|calls|targets|notes|'
@@ -52,17 +47,19 @@ class RealWorldAnalystDiscoveryService:
     def clean_extracted_name(cls, raw_name: str) -> Optional[str]:
         if not raw_name:
             return None
-        cleaned = re.sub(r'^(analyst|expert|economist|trader|аналитик|эксперт|трейдер)\s+', '', raw_name.strip(), flags=re.IGNORECASE)
+        cleaned = raw_name.strip()
+        leading_pattern = r'^(?:analyst|expert|economist|trader|investor|аналитик|эксперт|трейдер|инвестор|for|для)\s+'
+        while re.search(leading_pattern, cleaned, flags=re.IGNORECASE):
+            cleaned = re.sub(leading_pattern, '', cleaned, flags=re.IGNORECASE).strip()
+
+        trailing_pattern = r'\s+(?:on|in|for|who|at|by|says|predicts|warns|на|в|для|кто|заявил|считает|о)$'
+        while re.search(trailing_pattern, cleaned, flags=re.IGNORECASE):
+            cleaned = re.sub(trailing_pattern, '', cleaned, flags=re.IGNORECASE).strip()
+
+        if not is_valid_analyst_name(cleaned):
+            return None
+
         words = cleaned.split()
-        if not (1 <= len(words) <= 3):
-            return None
-        if cleaned.lower() in cls.NON_PERSON_WORDS:
-            return None
-        if any(w.lower() in cls.NON_PERSON_WORDS for w in words):
-            return None
-        if len(cleaned) < 3 or len(cleaned) > 40:
-            return None
-        # Format properly
         return " ".join(w.capitalize() for w in words)
 
     @classmethod
@@ -180,10 +177,7 @@ class RealWorldAnalystDiscoveryService:
             return {"success": False, "error": "Пустой поисковый запрос", "candidates": []}
 
         # Check if query is likely a person name
-        is_person_query = (
-            len(query_clean.split()) in (2, 3) and
-            not any(w.lower() in cls.NON_PERSON_WORDS for w in query_clean.split())
-        )
+        is_person_query = is_valid_analyst_name(query_clean)
         speaker_hint = cls.clean_extracted_name(query_clean) if is_person_query else None
 
         # Build search query for media
@@ -285,7 +279,7 @@ class RealWorldAnalystDiscoveryService:
             if not speaker_name:
                 speaker_name = cls.extract_speaker_from_text(combined_text, default_hint=speaker_hint)
 
-            if not speaker_name:
+            if not speaker_name or not is_valid_analyst_name(speaker_name):
                 continue
 
             # Extract concrete predictions from text
@@ -305,36 +299,47 @@ class RealWorldAnalystDiscoveryService:
 
             total_claims_found += len(predictions)
 
-            # Register or update in DiscoveredSpeakerCandidate
+            clean_url = (art.get('url') or '').strip()
+            norm_url = normalize_analyst_url(clean_url)
+
+            # Register or update in DiscoveredSpeakerCandidate with strict deduplication
             cand = db.query(DiscoveredSpeakerCandidate).filter(
                 DiscoveredSpeakerCandidate.name.ilike(speaker_name)
             ).first()
+
+            # If URLs repeat, it is the exact same analyst: match by normalized source_url
+            if not cand and norm_url:
+                for c in db.query(DiscoveredSpeakerCandidate).all():
+                    if c.source_url and normalize_analyst_url(c.source_url) == norm_url:
+                        cand = c
+                        break
 
             quote_snippet = f"[{art['publisher']}] «{art['title']}»"
 
             if cand:
                 cand.mention_count += 1
                 cand.claim_density_score = min(1.0, cand.claim_density_score + 0.1)
-                if art['url']:
-                    cand.source_url = art['url']
+                if clean_url and not cand.source_url:
+                    cand.source_url = clean_url
                 if not cand.context_quote or len(cand.context_quote) < 30:
                     cand.context_quote = quote_snippet
 
-                # Append extracted predictions safely
+                # Append extracted predictions safely and deduplicate by hypothesis
                 existing_preds = cand.extracted_predictions or []
                 if isinstance(existing_preds, list):
-                    # deduplicate by hypothesis
-                    existing_hyps = {p.get('event_hypothesis', '').lower() for p in existing_preds}
+                    existing_hyps = {p.get('event_hypothesis', '').lower().strip() for p in existing_preds if p.get('event_hypothesis')}
                     for p in predictions:
-                        if p.get('event_hypothesis', '').lower() not in existing_hyps:
+                        hyp = (p.get('event_hypothesis') or '').lower().strip()
+                        if hyp and hyp not in existing_hyps:
                             existing_preds.append(p)
+                            existing_hyps.add(hyp)
                     cand.extracted_predictions = existing_preds[:10]
             else:
                 cand = DiscoveredSpeakerCandidate(
                     name=speaker_name,
                     discovered_via_channel=art['publisher'] or "Мировые медиа",
                     context_quote=quote_snippet,
-                    source_url=art['url'],
+                    source_url=clean_url or None,
                     mention_count=1,
                     claim_density_score=0.75 if predictions else 0.50,
                     status="CANDIDATE",

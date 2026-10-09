@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.entities import DiscoveredSpeakerCandidate, NarrativeCluster, Speaker
-from app.discovery.speaker_discovery import SpeakerDiscoveryEngine
+from app.discovery.speaker_discovery import SpeakerDiscoveryEngine, is_valid_analyst_name, normalize_analyst_url
 from app.discovery.event_discovery import EventDiscoveryEngine
 
 router = APIRouter(prefix="/api/discovery", tags=["Discovery Engine (Radar)"])
@@ -53,7 +53,32 @@ def get_candidates(db: Session = Depends(get_db)):
     candidates = db.query(DiscoveredSpeakerCandidate).order_by(
         DiscoveredSpeakerCandidate.mention_count.desc()
     ).all()
-    return candidates
+
+    unique_candidates = []
+    seen_names = set()
+    seen_urls = set()
+
+    for c in candidates:
+        # Strict validation: exclude random words like 'Год'
+        if not is_valid_analyst_name(c.name):
+            continue
+
+        name_key = c.name.strip().lower()
+        norm_url = normalize_analyst_url(c.source_url)
+
+        # Deduplication check: if links repeat or names repeat, this is the exact same analyst
+        if name_key in seen_names:
+            continue
+        if norm_url and norm_url in seen_urls:
+            continue
+
+        seen_names.add(name_key)
+        if norm_url:
+            seen_urls.add(norm_url)
+
+        unique_candidates.append(c)
+
+    return unique_candidates
 
 @router.post("/candidates/{candidate_id}/approve")
 def approve_candidate(candidate_id: str, db: Session = Depends(get_db)):

@@ -123,3 +123,89 @@ def test_real_world_live_media_scan():
     assert data["success"] is True
     assert "total_articles" in data
     assert "candidates_found" in data
+
+def test_speaker_stop_words_filter():
+    from app.discovery.speaker_discovery import is_valid_analyst_name
+    # Invalid stop words, verbs, temporal terms, headlines
+    assert not is_valid_analyst_name("Год")
+    assert not is_valid_analyst_name("Года")
+    assert not is_valid_analyst_name("Купить Сегодня")
+    assert not is_valid_analyst_name("Предсказывает Пробой")
+    assert not is_valid_analyst_name("Цены Xrp")
+    assert not is_valid_analyst_name("Предупредил")
+    assert not is_valid_analyst_name("Predicts Xrp")
+    assert not is_valid_analyst_name("Predicts Major")
+    assert not is_valid_analyst_name("Analyst")
+    assert not is_valid_analyst_name("Who Previously")
+    assert not is_valid_analyst_name("Price Prediction")
+    assert not is_valid_analyst_name("Dan Tapiero On")
+    assert not is_valid_analyst_name("Bitcoin 150000")
+
+    # Valid names
+    assert is_valid_analyst_name("Arthur Hayes")
+    assert is_valid_analyst_name("Cathie Wood")
+    assert is_valid_analyst_name("Артур Хейс")
+    assert is_valid_analyst_name("Роберт Кийосаки")
+    assert is_valid_analyst_name("PlanB")
+
+def test_delete_accepted_speaker_and_recalculate():
+    # 1. Create a test speaker
+    sp_resp = client.post("/api/speakers", json={
+        "name": "Alex Krüger",
+        "bio": "Macro and crypto trader",
+        "handle_or_channel": "@krugermacro"
+    })
+    assert sp_resp.status_code == 200
+    sp_id = sp_resp.json()["id"]
+
+    # 2. Verify speaker is listed
+    speakers = client.get("/api/speakers").json()
+    assert any(s["id"] == sp_id for s in speakers)
+
+    # 3. Delete the speaker
+    del_resp = client.delete(f"/api/speakers/{sp_id}")
+    assert del_resp.status_code == 200
+    assert del_resp.json()["success"] is True
+
+    # 4. Verify speaker is gone
+    speakers_after = client.get("/api/speakers").json()
+    assert not any(s["id"] == sp_id for s in speakers_after)
+
+def test_candidate_url_deduplication():
+    from app.database.session import SessionLocal
+    from app.discovery.speaker_discovery import SpeakerDiscoveryEngine
+    db = SessionLocal()
+    try:
+        url = "https://cointelegraph.com/news/sample-unique-article-test?utm_source=rss"
+        
+        # Register candidate first time
+        c1 = SpeakerDiscoveryEngine.register_or_update_candidate(
+            db=db,
+            name="Raoul Pal",
+            channel_title="Real Vision",
+            context_quote="Bitcoin will outperform all asset classes",
+            source_url=url
+        )
+        assert c1 is not None
+        c1_id = c1.id
+
+        # Register again with identical URL (tracking param stripped)
+        c2 = SpeakerDiscoveryEngine.register_or_update_candidate(
+            db=db,
+            name="Raoul Pal",
+            channel_title="Real Vision Second Feed",
+            context_quote="Ethereum to surge in late cycle",
+            source_url="https://cointelegraph.com/news/sample-unique-article-test"
+        )
+        # Should match same candidate, not create duplicate
+        assert c2 is not None
+        assert c2.id == c1_id
+        assert c2.mention_count >= 2
+
+        # Verify candidate list has no duplicates
+        cands = client.get("/api/discovery/candidates").json()
+        matching_cands = [c for c in cands if "Raoul Pal" in c["name"]]
+        assert len(matching_cands) <= 1
+    finally:
+        db.close()
+

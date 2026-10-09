@@ -1445,17 +1445,22 @@
                 return `
                     <div class="bg-white rounded-2xl p-5 border border-gemini-border hover:border-slate-300 hover:shadow-sm transition flex flex-col justify-between gap-4">
                         <div>
-                            <div class="flex items-start gap-3">
-                                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200 flex-shrink-0">
-                                    ${initials}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-bold text-slate-900 truncate">${sp.name}</h4>
-                                    <p class="text-xs text-gemini-grayText line-clamp-2 mt-0.5 leading-relaxed">${sp.bio || 'Аналитик'}</p>
-                                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
-                                        ${specPills}
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-3 flex-1 min-w-0">
+                                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200 flex-shrink-0">
+                                        ${initials}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-bold text-slate-900 truncate">${sp.name}</h4>
+                                        <p class="text-xs text-gemini-grayText line-clamp-2 mt-0.5 leading-relaxed">${sp.bio || 'Аналитик'}</p>
+                                        <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                                            ${specPills}
+                                        </div>
                                     </div>
                                 </div>
+                                <button onclick="confirmDeleteSpeaker('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs flex-shrink-0" title="Удалить аналитика «${sp.name}» из системы">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
                             </div>
 
                             <div class="grid grid-cols-3 gap-2 mt-4 p-2.5 rounded-lg bg-gemini-sidebar border border-gemini-border text-center">
@@ -1526,6 +1531,30 @@
                 await loadSpeakers();
             } catch (e) {
                 showToast('Ошибка при добавлении аналитика', 'error');
+            }
+        }
+
+        async function confirmDeleteSpeaker(speakerId, speakerName) {
+            if (!confirm(`Вы действительно хотите удалить аналитика «${speakerName}» из системы? Все его заявления будут удалены, а вероятности затронутых событий пересчитаны.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/speakers/${speakerId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(`Аналитик «${speakerName}» успешно удален!`);
+                    await loadSpeakers();
+                    if (typeof loadEvents === 'function') await loadEvents();
+                    if (typeof loadCandidates === 'function') await loadCandidates();
+                } else {
+                    showToast(data.detail || 'Ошибка при удалении аналитика', 'error');
+                }
+            } catch (e) {
+                console.error("Delete speaker error:", e);
+                showToast('Сетевая ошибка при удалении аналитика', 'error');
             }
         }
 
