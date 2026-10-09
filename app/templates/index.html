@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthOdds — Рейтинг Правдивости & Оценка Вероятности Событий</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        borderbg: '#334155'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0b0f19; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .glow-blue { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-borderbg bg-cardbg/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        TruthOdds <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Forecaster Engine</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Вероятность событий на основе взвешенной правдивости спикеров</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="seedDemo()" class="text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-database text-indigo-400"></i> Загрузить демо-данные
+                </button>
+                <a href="/docs" target="_blank" class="text-xs px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-code"></i> Swagger API
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-6 pt-6">
+        <div class="flex border-b border-borderbg space-x-8 text-sm font-medium">
+            <button onclick="switchTab('events')" id="tab-btn-events" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2">
+                <i class="fa-solid fa-bullseye"></i> Оценка событий
+            </button>
+            <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-trophy"></i> Рейтинг экспертов (Leaderboard)
+            </button>
+            <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Анализ YouTube / Цитаты
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- TAB 1: EVENTS -->
+        <section id="tab-events" class="space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Текущие события и их вероятность</h2>
+                    <p class="text-xs text-slate-400">Вероятность рассчитана байесовским объединением прогнозов с весом каждого автора</p>
+                </div>
+                <div class="flex gap-2">
+                    <select id="domainFilter" onchange="loadEvents()" class="bg-cardbg border border-borderbg rounded-lg text-xs px-3 py-2 text-slate-300">
+                        <option value="">Все категории</option>
+                        <option value="crypto">Криптовалюты</option>
+                        <option value="tech">Технологии / AI</option>
+                        <option value="macro">Макроэкономика</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Loaded dynamically -->
+                <div class="text-slate-500 text-sm">Загрузка событий...</div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SPEAKERS LEADERBOARD -->
+        <section id="tab-speakers" class="space-y-6 hidden">
+            <div>
+                <h2 class="text-xl font-bold text-white">Рейтинг правдивости экспертов</h2>
+                <p class="text-xs text-slate-400">Оценка на основе исторической точности прошлых высказываний (Brier Score и калибровка)</p>
+            </div>
+
+            <div class="bg-cardbg border border-borderbg rounded-xl overflow-hidden shadow-xl">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider border-b border-borderbg">
+                        <tr>
+                            <th class="px-6 py-4">Спикер</th>
+                            <th class="px-6 py-4">Рейтинг доверия</th>
+                            <th class="px-6 py-4">Brier Score</th>
+                            <th class="px-6 py-4">Прогнозов</th>
+                            <th class="px-6 py-4">Точность (Hit Rate)</th>
+                            <th class="px-6 py-4">Специализация</th>
+                        </tr>
+                    </thead>
+                    <tbody id="speakersTableBody" class="divide-y divide-borderbg text-slate-300">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 3: INGESTION FORM -->
+        <section id="tab-ingest" class="max-w-2xl mx-auto space-y-6 hidden">
+            <div class="bg-cardbg border border-borderbg rounded-xl p-6 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                    <i class="fa-brands fa-youtube text-red-500"></i> Анализ видео или цитаты
+                </h2>
+                <p class="text-xs text-slate-400 mb-6">
+                    Вставьте ссылку на YouTube (транскрипт будет извлечен автоматически) или вставьте текст высказывания вручную. Система найдет прогноз и обновит вероятность события.
+                </p>
+
+                <form onsubmit="handleIngest(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Имя спикера</label>
+                        <input type="text" id="ingestSpeaker" placeholder="Например: Илон Маск, Виталик Бутерин" class="w-full bg-slate-900 border border-borderbg rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Ссылка на YouTube или текст заявления</label>
+                        <textarea id="ingestContent" rows="4" placeholder="Вставьте YouTube URL (https://youtube.com/watch?v=...) или текст цитаты: 'Биткоин гарантированно вырастет до 150к до конца года...'" class="w-full bg-slate-900 border border-borderbg rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" required></textarea>
+                    </div>
+
+                    <button type="submit" id="ingestSubmitBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Извлечь прогноз и обновить вероятность
+                    </button>
+                </form>
+
+                <div id="ingestResult" class="mt-4 p-4 rounded-lg bg-slate-900/80 border border-borderbg text-xs hidden"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Resolution -->
+    <div id="resolveModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-cardbg border border-borderbg rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-gavel text-amber-400"></i> Резолюция события (Oracle)
+            </h3>
+            <p id="resolveEventTitle" class="text-sm text-slate-300"></p>
+            <p class="text-xs text-slate-400">
+                Укажите, свершилось ли событие на самом деле. Рейтинги всех спикеров, высказавшихся по этому событию, будут мгновенно пересчитаны!
+            </p>
+
+            <input type="hidden" id="resolveEventId">
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Обоснование / Пруф (опционально)</label>
+                <input type="text" id="resolveNotes" placeholder="Ссылка на новость или факт" class="w-full bg-slate-900 border border-borderbg rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="submitResolution(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-check"></i> Сбылось (TRUE)
+                </button>
+                <button onclick="submitResolution(false)" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-xmark"></i> Не сбылось (FALSE)
+                </button>
+                <button onclick="closeResolveModal()" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs transition">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frontend Script -->
+    <script>
+        function switchTab(tab) {
+            ['events', 'speakers', 'ingest'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('tab-btn-' + t).classList.remove('border-indigo-500', 'text-indigo-400');
+                document.getElementById('tab-btn-' + t).classList.add('border-transparent', 'text-slate-400');
+            });
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('tab-btn-' + tab).classList.remove('border-transparent', 'text-slate-400');
+            document.getElementById('tab-btn-' + tab).classList.add('border-indigo-500', 'text-indigo-400');
+
+            if (tab === 'events') loadEvents();
+            if (tab === 'speakers') loadSpeakers();
+        }
+
+        async function seedDemo() {
+            try {
+                const res = await fetch('/api/demo/seed', { method: 'POST' });
+                const data = await res.json();
+                alert('Демо-данные успешно загружены!');
+                loadEvents();
+                loadSpeakers();
+            } catch (e) {
+                alert('Ошибка загрузки демо-данных: ' + e);
+            }
+        }
+
+        async function loadEvents() {
+            const domain = document.getElementById('domainFilter').value;
+            const url = domain ? `/api/events?domain=${domain}` : '/api/events';
+            const res = await fetch(url);
+            const events = await res.json();
+            const container = document.getElementById('eventsList');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 text-center py-12 bg-cardbg rounded-xl border border-borderbg">
+                        <p class="text-slate-400 text-sm mb-3">Событий пока нет.</p>
+                        <button onclick="seedDemo()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium">Загрузить демо-события</button>
+                    </div>
+                `;
+                return;
+            }
+
+            events.forEach(ev => {
+                const probPct = Math.round(ev.current_probability * 100);
+                const isResolved = ev.status.startsWith('RESOLVED');
+                const outcomeColor = probPct >= 70 ? 'text-emerald-400' : (probPct >= 40 ? 'text-amber-400' : 'text-rose-400');
+                const barColor = probPct >= 70 ? 'bg-emerald-500' : (probPct >= 40 ? 'bg-amber-500' : 'bg-rose-500');
+
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">АКТИВНО</span>`;
+                if (ev.status === 'RESOLVED_TRUE') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">СБЫЛОСЬ (TRUE)</span>`;
+                } else if (ev.status === 'RESOLVED_FALSE') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">НЕ СБЫЛОСЬ (FALSE)</span>`;
+                }
+
+                let statementsHtml = '';
+                if (ev.statements && ev.statements.length > 0) {
+                    statementsHtml = `
+                        <div class="mt-4 pt-3 border-t border-borderbg space-y-2">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Мнения экспертов:</div>
+                            ${ev.statements.map(st => `
+                                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-borderbg/60 text-xs">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <div class="flex items-center gap-1.5 font-medium text-slate-200">
+                                            <i class="fa-solid fa-user-tie text-indigo-400 text-[10px]"></i>
+                                            <span>${st.speaker_name}</span>
+                                            <span class="text-[10px] px-1.5 py-0.2 rounded bg-indigo-900/50 text-indigo-300 font-mono" title="Рейтинг правдивости">
+                                                Доверие: ${Math.round(st.speaker_weight_applied * 100)}%
+                                            </span>
+                                        </div>
+                                        <span class="text-[11px] font-bold ${st.speaker_confidence >= 0.5 ? 'text-emerald-400' : 'text-rose-400'}">
+                                            ${Math.round(st.speaker_confidence * 100)}% оценка
+                                        </span>
+                                    </div>
+                                    <p class="text-slate-400 italic text-[11px]">«${st.raw_quote}»</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-cardbg border border-borderbg rounded-xl p-5 shadow-lg flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase font-mono">${ev.domain}</span>
+                            ${statusBadge}
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-3">${ev.title}</h3>
+
+                        <div class="mb-3">
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-xs text-slate-400">Итоговая вероятность:</span>
+                                <span class="text-2xl font-black font-mono ${outcomeColor}">${probPct}%</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-borderbg/40">
+                                <div class="${barColor} h-full transition-all duration-500" style="width: ${probPct}%"></div>
+                            </div>
+                        </div>
+
+                        ${statementsHtml}
+                    </div>
+
+                    ${!isResolved ? `
+                        <div class="mt-4 pt-3 border-t border-borderbg flex justify-end">
+                            <button onclick="openResolveModal('${ev.id}', '${ev.title.replace(/'/g, "\\'")}')" class="text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-gavel"></i> Разрешить событие (Oracle)
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function loadSpeakers() {
+            const res = await fetch('/api/speakers?sort_by=credibility');
+            const speakers = await res.json();
+            const tbody = document.getElementById('speakersTableBody');
+            tbody.innerHTML = '';
+
+            speakers.forEach((sp, idx) => {
+                const credPct = Math.round(sp.overall_credibility * 100);
+                let rankBadge = '';
+                if (credPct >= 75) {
+                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Superforecaster</span>`;
+                } else if (credPct >= 50) {
+                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/30">Надежный</span>`;
+                } else {
+                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30">Обратный индикатор</span>`;
+                }
+
+                // Domain breakdown badges
+                let domainBadges = '-';
+                if (sp.domain_scores && Object.keys(sp.domain_scores).length > 0) {
+                    domainBadges = Object.entries(sp.domain_scores).map(([d, sc]) => `
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-borderbg mr-1 text-slate-300">
+                            ${d}: ${Math.round(sc.credibility * 100)}% (${sc.sample_size})
+                        </span>
+                    `).join('');
+                }
+
+                const hitRatePct = sp.resolved_predictions > 0 
+                    ? Math.round((sp.correct_predictions / sp.resolved_predictions) * 100) + '%' 
+                    : 'Н/Д';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 flex items-center gap-3 font-medium text-white">
+                        <span class="text-xs text-slate-500 font-mono w-4">${idx + 1}</span>
+                        <div>
+                            <div>${sp.name}</div>
+                            <div class="text-xs text-slate-400">${sp.handle_or_channel || ''}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base font-bold font-mono ${credPct >= 50 ? 'text-emerald-400' : 'text-rose-400'}">${credPct}%</span>
+                            ${rankBadge}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs ${sp.overall_brier_score <= 0.15 ? 'text-emerald-400' : (sp.overall_brier_score <= 0.25 ? 'text-indigo-400' : 'text-rose-400')}">
+                        ${sp.overall_brier_score.toFixed(3)}
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs">
+                        ${sp.resolved_predictions} <span class="text-slate-500">/ ${sp.total_predictions} всего</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs text-slate-300">
+                        ${hitRatePct}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${domainBadges}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function handleIngest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('ingestSubmitBtn');
+            const resultBox = document.getElementById('ingestResult');
+            const speaker = document.getElementById('ingestSpeaker').value;
+            const content = document.getElementById('ingestContent').value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Обработка текста...`;
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/statements/ingest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: content,
+                        speaker_name: speaker,
+                        source_url: content.startsWith('http') ? content : 'Вручную',
+                        source_platform: content.includes('youtube') ? 'youtube' : 'social'
+                    })
+                });
+                const data = await res.json();
+                resultBox.classList.remove('hidden');
+                if (data.success) {
+                    resultBox.className = "mt-4 p-4 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-300";
+                    resultBox.innerHTML = `
+                        <p class="font-bold mb-1">Успешно извлечено прогнозов: ${data.count}</p>
+                        ${data.recorded.map(r => `
+                            <div class="mt-2 pl-2 border-l border-emerald-500/50">
+                                <div><b>Событие:</b> ${r.event}</div>
+                                <div><b>Оценка спикера:</b> ${Math.round(r.confidence * 100)}% (Учтенный вес спикера: ${Math.round(r.applied_weight * 100)}%)</div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('ingestContent').value = '';
+                } else {
+                    resultBox.className = "mt-4 p-4 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300";
+                    resultBox.innerHTML = `<b>Ошибка:</b> ${data.error || 'Не удалось извлечь прогноз'}`;
+                }
+            } catch (err) {
+                resultBox.classList.remove('hidden');
+                resultBox.className = "mt-4 p-4 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300";
+                resultBox.innerHTML = `<b>Ошибка сети:</b> ${err}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Извлечь прогноз и обновить вероятность`;
+            }
+        }
+
+        function openResolveModal(id, title) {
+            document.getElementById('resolveEventId').value = id;
+            document.getElementById('resolveEventTitle').innerText = title;
+            document.getElementById('resolveModal').classList.remove('hidden');
+            document.getElementById('resolveModal').classList.add('flex');
+        }
+
+        function closeResolveModal() {
+            document.getElementById('resolveModal').classList.add('hidden');
+            document.getElementById('resolveModal').classList.remove('flex');
+        }
+
+        async function submitResolution(outcome) {
+            const eventId = document.getElementById('resolveEventId').value;
+            const notes = document.getElementById('resolveNotes').value;
+
+            try {
+                const res = await fetch(`/api/events/${eventId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ outcome: outcome, resolution_notes: notes })
+                });
+                if (res.ok) {
+                    alert('Событие успешно разрешено! Рейтинги спикеров обновлены.');
+                    closeResolveModal();
+                    loadEvents();
+                } else {
+                    const err = await res.json();
+                    alert('Ошибка: ' + (err.detail || 'Не удалось обновить'));
+                }
+            } catch (e) {
+                alert('Ошибка: ' + e);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
