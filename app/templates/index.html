@@ -833,7 +833,7 @@
                 else if (probPercent <= 30) { probColor = 'text-rose-600'; barBg = 'bg-rose-500'; }
 
                 return `
-                    <div class="bg-white rounded-2xl p-4 md:p-5 border border-gemini-border hover:border-slate-300 hover:shadow-sm transition-all flex flex-col gap-3 group">
+                    <div onclick="openEventDetailModal('${ev.id}')" class="bg-white rounded-2xl p-4 md:p-5 border border-gemini-border hover:border-blue-400/80 hover:shadow-md cursor-pointer transition-all flex flex-col gap-3 group active:scale-[0.995]">
                         
                         <!-- Top Row: Domain, Status, Date -->
                         <div class="flex items-center justify-between text-[11px] text-gemini-mutedText">
@@ -849,7 +849,7 @@
                         </div>
 
                         <!-- Title -->
-                        <h3 class="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug cursor-pointer" onclick="openEventDetailModal('${ev.id}')">
+                        <h3 class="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug">
                             ${ev.title}
                         </h3>
 
@@ -863,17 +863,17 @@
                             </span>
                         </div>
 
-                        <!-- Footer: Analysts Involved & Details Button -->
+                        <!-- Footer: Analysts Involved & Details Indicator -->
                         <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
                             <div class="flex items-center gap-2 text-gemini-mutedText text-[11px]">
                                 <i class="fa-solid fa-users text-slate-400"></i>
                                 <span><b>${statementsCount}</b> ${statementsCount === 1 ? 'эксперт' : (statementsCount > 1 && statementsCount < 5 ? 'эксперта' : 'экспертов')}</span>
                             </div>
 
-                            <button onclick="openEventDetailModal('${ev.id}')" class="px-3.5 py-1.5 rounded-xl bg-gemini-sidebar hover:bg-gemini-hover text-slate-800 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
+                            <div class="px-3.5 py-1.5 rounded-xl bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
                                 <span>Подробнее</span>
-                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-                            </button>
+                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
+                            </div>
                         </div>
                     </div>
                 `;
