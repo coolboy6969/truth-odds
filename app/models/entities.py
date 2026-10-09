@@ -103,3 +103,40 @@ class MonitoredSource(Base):
 
     def __repr__(self) -> str:
         return f"<MonitoredSource(title='{self.channel_title}', platform='{self.platform}')>"
+
+
+class DiscoveredSpeakerCandidate(Base):
+    __tablename__ = "discovered_candidates"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    discovered_via_channel: Mapped[str] = mapped_column(String(255), nullable=False)
+    context_quote: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    mention_count: Mapped[int] = mapped_column(Integer, default=1)
+    claim_density_score: Mapped[float] = mapped_column(Float, default=0.5)
+    
+    # Status: CANDIDATE, APPROVED, REJECTED
+    status: Mapped[str] = mapped_column(String(50), default="CANDIDATE", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<Candidate(name='{self.name}', mentions={self.mention_count}, status='{self.status}')>"
+
+
+class NarrativeCluster(Base):
+    __tablename__ = "narrative_clusters"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    topic_summary: Mapped[str] = mapped_column(String(500), nullable=False)
+    domain: Mapped[str] = mapped_column(String(100), default="crypto")
+    key_phrases: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict) # extracted keywords
+    statement_count: Mapped[int] = mapped_column(Integer, default=1)
+    unique_speakers_count: Mapped[int] = mapped_column(Integer, default=1)
+    
+    # Status: EMERGING (1-2 mentions), MATURE (>=3 mentions, ready to promote), PROMOTED (event created)
+    status: Mapped[str] = mapped_column(String(50), default="EMERGING", index=True)
+    promoted_event_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<NarrativeCluster(topic='{self.topic_summary[:30]}...', count={self.statement_count})>"

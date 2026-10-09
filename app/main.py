@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database.session import init_db
-from app.api import speakers, events, statements, demo, crypto_seed, sources
+from app.api import speakers, events, statements, demo, crypto_seed, sources, discovery
 
 # Initialize database tables
 init_db()
@@ -35,6 +35,7 @@ app.include_router(statements.router)
 app.include_router(demo.router)
 app.include_router(crypto_seed.router)
 app.include_router(sources.router)
+app.include_router(discovery.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):
