@@ -84,19 +84,19 @@
     <div class="bg-white border-b border-gray-200 px-6 py-2.5">
         <div class="max-w-7xl mx-auto flex gap-2 overflow-x-auto text-sm font-medium">
             <button onclick="switchTab('events')" id="tab-btn-events" class="google-pill px-4 py-2 bg-blue-600 text-white flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-bullseye text-xs"></i> События и шансы
+                <i class="fa-solid fa-bullseye text-xs"></i> Ожидаемые события
             </button>
             <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-solid fa-trophy text-xs text-amber-500"></i> Рейтинг авторов
+                <i class="fa-solid fa-trophy text-xs text-amber-500"></i> Рейтинг экспертов
             </button>
             <button onclick="switchTab('sources')" id="tab-btn-sources" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-brands fa-youtube text-xs text-red-500"></i> Каналы на слежке
+                <i class="fa-brands fa-youtube text-xs text-red-500"></i> Отслеживаемые каналы
             </button>
             <button onclick="switchTab('radar')" id="tab-btn-radar" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
                 <i class="fa-solid fa-compass text-xs text-blue-500"></i> Поиск новых тем
             </button>
             <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-solid fa-plus text-xs"></i> Проверить видео или пост
+                <i class="fa-solid fa-plus text-xs"></i> Анализ публикации
             </button>
         </div>
     </div>
@@ -106,17 +106,43 @@
 
         <!-- TAB 1: EVENTS & CHANCES -->
         <section id="tab-events" class="space-y-6">
+            
+            <!-- Поле добавления собственного события / темы для прогноза -->
+            <div class="google-card p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm border border-blue-200">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-900">Добавить событие или тему для прогноза</h3>
+                        <p class="text-xs text-gray-500">Укажите формулировку события, чтобы отслеживать мнения экспертов и рассчитывать вероятность</p>
+                    </div>
+                </div>
+                <form onsubmit="handleCreateCustomEvent(event)" class="flex flex-col sm:flex-row gap-2.5">
+                    <input type="text" id="customEventTitle" placeholder="Например: 'Биткоин превысит $200,000 в 2026 году' или 'ФРС снизит ключевую ставку до конца года'" class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required>
+                    <select id="customEventDomain" class="bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-700 focus:outline-none focus:border-blue-500">
+                        <option value="crypto">Криптовалюта</option>
+                        <option value="tech">Технологии и ИИ</option>
+                        <option value="macro">Экономика</option>
+                        <option value="general">Общая тема</option>
+                    </select>
+                    <button type="submit" id="createEventBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Добавить событие
+                    </button>
+                </form>
+            </div>
+
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-medium text-gray-900">Будущие события и шансы</h2>
-                    <p class="text-xs text-gray-500">Шанс рассчитывается с учетом того, насколько точно авторы угадывали в прошлом</p>
+                    <h2 class="text-lg font-medium text-gray-900">Ожидаемые события и вероятность</h2>
+                    <p class="text-xs text-gray-500">Вероятность исхода рассчитывается математически на основе подтвержденной точности мнений экспертов</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="checkCryptoOracle(false)" class="text-xs font-medium px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-arrows-rotate text-emerald-600"></i> Сверить текущие цены
+                        <i class="fa-solid fa-arrows-rotate text-emerald-600"></i> Проверить котировки
                     </button>
                     <select id="domainFilter" onchange="loadEvents()" class="bg-white border border-gray-300 rounded-full text-xs px-3.5 py-2 text-gray-700 focus:outline-none focus:border-blue-500">
-                        <option value="">Все темы</option>
+                        <option value="">Все категории</option>
                         <option value="crypto">Криптовалюта</option>
                         <option value="tech">Технологии и ИИ</option>
                         <option value="macro">Экономика</option>
@@ -133,19 +159,19 @@
         <!-- TAB 2: SPEAKERS LEADERBOARD -->
         <section id="tab-speakers" class="space-y-6 hidden">
             <div>
-                <h2 class="text-lg font-medium text-gray-900">Кто из авторов чаще оказывается прав</h2>
-                <p class="text-xs text-gray-500">Рейтинг строится только по реальным фактам: сказал — проверили — сбылось или нет</p>
+                <h2 class="text-lg font-medium text-gray-900">Рейтинг точности экспертов и аналитиков</h2>
+                <p class="text-xs text-gray-500">Рейтинг доверия формируется на основе сверки прошлых заявлений с фактическими результатами</p>
             </div>
 
             <div class="google-card overflow-hidden">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-3.5 font-medium">Автор / Блогер</th>
-                            <th class="px-6 py-3.5 font-medium">Уровень доверия</th>
-                            <th class="px-6 py-3.5 font-medium">Процент попаданий</th>
-                            <th class="px-6 py-3.5 font-medium">Проверено прогнозов</th>
-                            <th class="px-6 py-3.5 font-medium">Ошибки (меньше = лучше)</th>
+                            <th class="px-6 py-3.5 font-medium">Эксперт / Аналитик</th>
+                            <th class="px-6 py-3.5 font-medium">Индекс доверия</th>
+                            <th class="px-6 py-3.5 font-medium">Точность прогнозов</th>
+                            <th class="px-6 py-3.5 font-medium">Подтвержденные прогнозы</th>
+                            <th class="px-6 py-3.5 font-medium">Погрешность (Brier Score)</th>
                         </tr>
                     </thead>
                     <tbody id="speakersTableBody" class="divide-y divide-gray-100 text-gray-700">
@@ -172,9 +198,9 @@
                     <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <tr>
                             <th class="px-6 py-3.5 font-medium">Канал</th>
-                            <th class="px-6 py-3.5 font-medium">Автор</th>
-                            <th class="px-6 py-3.5 font-medium">Точность автора</th>
-                            <th class="px-6 py-3.5 font-medium">Последняя проверка</th>
+                            <th class="px-6 py-3.5 font-medium">Эксперт</th>
+                            <th class="px-6 py-3.5 font-medium">Индекс доверия</th>
+                            <th class="px-6 py-3.5 font-medium">Дата проверки</th>
                             <th class="px-6 py-3.5 text-right font-medium">Действие</th>
                         </tr>
                     </thead>
@@ -189,11 +215,11 @@
         <section id="tab-radar" class="space-y-6 hidden">
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-medium text-gray-900">Поиск новых авторов и тем</h2>
-                    <p class="text-xs text-gray-500">Система находит новых гостей из интервью и темы, которые сейчас все обсуждают</p>
+                    <h2 class="text-lg font-medium text-gray-900">Обнаружение новых тем и персон</h2>
+                    <p class="text-xs text-gray-500">Алгоритм выявляет приглашенных аналитиков в интервью и актуальные дискуссии в сообществах</p>
                 </div>
                 <button onclick="seedRadarDemo()" class="text-xs font-medium px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Показать пример поиска
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Загрузить пример данных
                 </button>
             </div>
 
@@ -204,22 +230,22 @@
                 <div class="google-card p-5">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-sm font-medium text-gray-900 flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus text-blue-600"></i> Замеченные новые эксперты
+                            <i class="fa-solid fa-user-plus text-blue-600"></i> Выявленные аналитики
                         </h3>
                         <span id="candidatesCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">0 авторов</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-4">
-                        Персоны, которых часто зовут в подкасты и которые делают четкие прогнозы с датами
+                        Специалисты, регулярно выступающие в подкастах с проверяемыми суждениями
                     </p>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider border-b border-gray-200">
                                 <tr>
-                                    <th class="py-2.5 px-3 font-medium">Автор</th>
-                                    <th class="py-2.5 px-3 font-medium">Где замечен</th>
-                                    <th class="py-2.5 px-3 font-medium text-center">Упоминаний</th>
-                                    <th class="py-2.5 px-3 text-right font-medium">Добавить</th>
+                                    <th class="py-2.5 px-3 font-medium">Персона</th>
+                                    <th class="py-2.5 px-3 font-medium">Источник</th>
+                                    <th class="py-2.5 px-3 font-medium text-center">Упоминания</th>
+                                    <th class="py-2.5 px-3 text-right font-medium">Действие</th>
                                 </tr>
                             </thead>
                             <tbody id="candidatesTableBody" class="divide-y divide-gray-100 text-gray-700">
@@ -233,12 +259,12 @@
                 <div class="google-card p-5">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-sm font-medium text-gray-900 flex items-center gap-2">
-                            <i class="fa-solid fa-fire text-amber-500"></i> Горячие темы в соцсетях
+                            <i class="fa-solid fa-fire text-amber-500"></i> Актуальные дискуссии в сообществах
                         </h3>
                         <span id="narrativesCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">0 тем</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-4">
-                        Когда 3 или более авторов спорят на одну тему, мы можем создать из нее событие
+                        При накоплении мнений от 3 и более независимых авторов тема готова к созданию события
                     </p>
 
                     <div id="narrativesList" class="space-y-3">
@@ -251,16 +277,16 @@
             <!-- Stream Scanner -->
             <div class="google-card p-5">
                 <h3 class="text-sm font-medium text-gray-900 mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Быстрая проверка текста или поста
+                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Экспресс-анализ публикаций
                 </h3>
                 <p class="text-xs text-gray-500 mb-4">
-                    Вставьте фрагмент интервью или твит — система сама найдет автора и тему
+                    Введите фрагмент текста, твит или цитату для автоматического извлечения спикера и гипотезы
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-2">
                     <input type="text" id="streamScannerInput" placeholder="Например: 'В интервью с Lyn Alden обсуждали, что Биткоин достигнет $200k...'" class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500">
                     <button onclick="handleScanStream()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
-                        Найти в тексте
+                        Выполнить анализ
                     </button>
                 </div>
                 <div id="streamScanResult" class="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 hidden"></div>
@@ -271,25 +297,25 @@
         <section id="tab-ingest" class="max-w-xl mx-auto space-y-6 hidden">
             <div class="google-card p-6 shadow-sm">
                 <h2 class="text-base font-medium text-gray-900 mb-1 flex items-center gap-2">
-                    <i class="fa-brands fa-youtube text-red-600"></i> Разобрать прогноз из видео или поста
+                    <i class="fa-brands fa-youtube text-red-600"></i> Анализ прогноза из видео или публикации
                 </h2>
                 <p class="text-xs text-gray-500 mb-5">
-                    Вставьте ссылку на ролик YouTube или скопируйте текст цитаты. Алгоритм поймет, что обещает автор, с какой уверенностью и до какого срока.
+                    Укажите ссылку на YouTube или введите текст цитаты. Система выделит суть прогноза, временной горизонт и уверенность эксперта.
                 </p>
 
                 <form onsubmit="handleIngest(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Имя автора или блогера</label>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Автор или аналитик</label>
                         <input type="text" id="ingestSpeaker" placeholder="Например: Илон Маск, Виталик Бутерин" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка на YouTube или текст цитаты</label>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка на YouTube или фрагмент текста</label>
                         <textarea id="ingestContent" rows="4" placeholder="Вставьте ссылку на YouTube (https://youtube.com/watch?v=...) или цитату: 'Биткоин гарантированно вырастет до 150к до конца года...'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required></textarea>
                     </div>
 
                     <button type="submit" id="ingestSubmitBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full text-xs transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-sparkles"></i> Найти прогноз и посчитать шанс
+                        <i class="fa-solid fa-sparkles"></i> Извлечь прогноз и обновить вероятность
                     </button>
                 </form>
 
@@ -304,7 +330,7 @@
         <div class="google-card max-w-md w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-start">
                 <h3 class="text-base font-medium text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-flag-checkered text-blue-600"></i> Подвести итог события
+                    <i class="fa-solid fa-flag-checkered text-blue-600"></i> Фиксация фактического результата
                 </h3>
                 <button onclick="closeResolveModal()" class="text-gray-400 hover:text-gray-600 text-sm">
                     <i class="fa-solid fa-xmark"></i>
@@ -313,21 +339,21 @@
             
             <p id="resolveEventTitle" class="text-sm font-medium text-gray-800 bg-gray-50 p-3 rounded-xl border border-gray-200"></p>
             <p class="text-xs text-gray-500">
-                Укажите фактический результат. Рейтинги всех авторов, делавших прогноз по этому событию, сразу обновятся!
+                Укажите подтвержденный исход события. Рейтинги точности и калибровка всех высказавшихся авторов будут пересчитаны автоматически.
             </p>
 
             <input type="hidden" id="resolveEventId">
             <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка на доказательство или новость (необязательно)</label>
-                <input type="text" id="resolveNotes" placeholder="Например: Ссылка на CoinMarketCap или новость" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-gray-900">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Источник подтверждения (ссылка на новость или факт)</label>
+                <input type="text" id="resolveNotes" placeholder="Например: Ссылка на официальное подтверждение или биржевые данные" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-gray-900">
             </div>
 
             <div class="flex gap-2.5 pt-2">
                 <button onclick="submitResolution(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-check"></i> Сбылось (Да)
+                    <i class="fa-solid fa-check"></i> Сбылось (True)
                 </button>
                 <button onclick="submitResolution(false)" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-xmark"></i> Не сбылось (Нет)
+                    <i class="fa-solid fa-xmark"></i> Не сбылось (False)
                 </button>
                 <button onclick="closeResolveModal()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-medium transition">
                     Отмена
@@ -375,6 +401,45 @@
             }
         }
 
+        async function handleCreateCustomEvent(e) {
+            e.preventDefault();
+            const titleInput = document.getElementById('customEventTitle');
+            const domainSelect = document.getElementById('customEventDomain');
+            const btn = document.getElementById('createEventBtn');
+
+            const title = titleInput.value.trim();
+            const domain = domainSelect.value;
+            if (!title) return;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Добавление...`;
+
+            try {
+                const res = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        domain: domain,
+                        base_rate: 0.5
+                    })
+                });
+                if (res.ok) {
+                    titleInput.value = '';
+                    alert('Событие успешно добавлено! Теперь оно отображается в списке.');
+                    loadEvents();
+                } else {
+                    const err = await res.json();
+                    alert('Ошибка: ' + (err.detail || 'Не удалось создать событие'));
+                }
+            } catch (err) {
+                alert('Ошибка сети: ' + err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i> Добавить событие`;
+            }
+        }
+
         async function loadEvents() {
             const domain = document.getElementById('domainFilter').value;
             const url = domain ? `/api/events?domain=${domain}` : '/api/events';
@@ -408,18 +473,18 @@
                     barColor = "bg-amber-500";
                 }
 
-                let statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">Идет подсчет</span>`;
+                let statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">Активно</span>`;
                 if (ev.status === 'RESOLVED_TRUE') {
-                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Сбылось (Да)</span>`;
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Сбылось (True)</span>`;
                 } else if (ev.status === 'RESOLVED_FALSE') {
-                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">Не сбылось (Нет)</span>`;
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">Не сбылось (False)</span>`;
                 }
 
                 let statementsHtml = '';
                 if (ev.statements && ev.statements.length > 0) {
                     statementsHtml = `
                         <div class="mt-4 pt-3 border-t border-gray-100 space-y-2">
-                            <div class="text-[11px] font-medium text-gray-500 uppercase">Что сказали авторы:</div>
+                            <div class="text-[11px] font-medium text-gray-500 uppercase">Заявления и прогнозы экспертов:</div>
                             ${ev.statements.map(st => `
                                 <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 text-xs">
                                     <div class="flex justify-between items-center mb-1">
@@ -427,11 +492,11 @@
                                             <i class="fa-solid fa-user-check text-blue-600 text-[11px]"></i>
                                             <span>${st.speaker_name}</span>
                                             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-gray-600 border border-gray-200">
-                                                Точность: ${Math.round(st.speaker_weight_applied * 100)}%
+                                                Доверие: ${Math.round(st.speaker_weight_applied * 100)}%
                                             </span>
                                         </div>
                                         <span class="text-[11px] font-bold ${st.speaker_confidence >= 0.5 ? 'text-emerald-700' : 'text-rose-700'}">
-                                            Оценка: ${Math.round(st.speaker_confidence * 100)}%
+                                            Прогноз: ${Math.round(st.speaker_confidence * 100)}%
                                         </span>
                                     </div>
                                     <p class="text-gray-600 italic text-[11px]">«${st.raw_quote}»</p>
@@ -453,7 +518,7 @@
 
                         <div class="mb-2">
                             <div class="flex justify-between items-center mb-1.5">
-                                <span class="text-xs text-gray-500">Шанс, что сбудется:</span>
+                                <span class="text-xs text-gray-500">Расчетная вероятность:</span>
                                 <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border ${probColorClass}">${probPct}%</span>
                             </div>
                             <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
@@ -467,7 +532,7 @@
                     ${!isResolved ? `
                         <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end">
                             <button onclick="openResolveModal('${ev.id}', '${ev.title.replace(/'/g, "\\'")}')" class="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-flag-checkered text-blue-600"></i> Подвести итог
+                                <i class="fa-solid fa-flag-checkered text-blue-600"></i> Зафиксировать результат
                             </button>
                         </div>
                     ` : ''}
@@ -495,7 +560,7 @@
 
                 const hitRatePct = sp.resolved_predictions > 0 
                     ? Math.round((sp.correct_predictions / sp.resolved_predictions) * 100) + '%' 
-                    : 'Новый';
+                    : 'Нет данных';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 transition";
@@ -517,7 +582,7 @@
                         ${hitRatePct}
                     </td>
                     <td class="px-6 py-4 text-xs text-gray-600">
-                        <b>${sp.correct_predictions}</b> угадано из <b>${sp.resolved_predictions}</b>
+                        <b>${sp.correct_predictions}</b> из <b>${sp.resolved_predictions}</b> подтверждено
                     </td>
                     <td class="px-6 py-4 text-xs text-gray-500 font-mono">
                         ${sp.overall_brier_score.toFixed(3)}
@@ -631,8 +696,8 @@
                             <td class="py-2.5 px-3 font-medium text-center text-blue-700">${c.mention_count}</td>
                             <td class="py-2.5 px-3 text-right">
                                 ${isApproved 
-                                    ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">Добавлен</span>`
-                                    : `<button onclick="approveCandidate('${c.id}')" class="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition">Добавить в базу</button>`
+                                    ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">В рейтинге</span>`
+                                    : `<button onclick="approveCandidate('${c.id}')" class="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition">Включить в рейтинг</button>`
                                 }
                             </td>
                         `;
@@ -656,11 +721,11 @@
                         const card = document.createElement('div');
                         card.className = `p-3.5 rounded-xl border ${isMature ? 'bg-amber-50/50 border-amber-200' : (isPromoted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-gray-50 border-gray-200')} flex flex-col justify-between`;
                         
-                        let badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">Спорят: ${n.unique_speakers_count} автора</span>`;
+                        let badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">Мнений: ${n.unique_speakers_count}</span>`;
                         if (isMature) {
-                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">Готово к запуску (${n.unique_speakers_count} авторов)</span>`;
+                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">Кворум достигнут (${n.unique_speakers_count} экспертов)</span>`;
                         } else if (isPromoted) {
-                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Уже добавлено в события</span>`;
+                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Событие сформировано</span>`;
                         }
 
                         const speakersList = n.key_phrases?.speakers ? n.key_phrases.speakers.join(', ') : 'Несколько авторов';
@@ -672,13 +737,13 @@
                                     ${badge}
                                 </div>
                                 <h4 class="text-xs font-medium text-gray-900 mb-1.5 leading-snug">${n.topic_summary}</h4>
-                                <div class="text-[11px] text-gray-500 mb-2"><b>Спикеры:</b> ${speakersList}</div>
+                                <div class="text-[11px] text-gray-500 mb-2"><b>Участники:</b> ${speakersList}</div>
                             </div>
                             <div class="flex justify-between items-center pt-2 border-t border-gray-200/60">
-                                <span class="text-[11px] text-gray-500">Высказываний: ${n.statement_count}</span>
+                                <span class="text-[11px] text-gray-500">Заявлений: ${n.statement_count}</span>
                                 ${!isPromoted ? `
                                     <button onclick="promoteNarrative('${n.id}')" class="text-[10px] font-medium px-3 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-xs">
-                                        <i class="fa-solid fa-plus text-[9px]"></i> Создать событие
+                                        <i class="fa-solid fa-plus text-[9px]"></i> Сформировать событие
                                     </button>
                                 ` : ''}
                             </div>
