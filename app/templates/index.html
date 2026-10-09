@@ -275,15 +275,15 @@
                             <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
                                 <div class="relative flex-1 min-w-[180px]">
                                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="text" id="eventSearchInput" oninput="applyEventFilters()" placeholder="Поиск по названию события..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500">
+                                    <input type="text" id="eventSearchInput" oninput="applyEventFilters()" placeholder="Поиск по названию события..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500">
                                 </div>
-                                <select id="eventDomainFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="eventDomainFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="">Все сферы</option>
                                     <option value="crypto">Крипто</option>
                                     <option value="macro">Макро</option>
                                     <option value="tech">Технологии</option>
                                 </select>
-                                <select id="eventStatusFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="eventStatusFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="">Все статусы</option>
                                     <option value="ACTIVE">Только активные</option>
                                     <option value="RESOLVED">Завершенные</option>
@@ -292,12 +292,12 @@
 
                             <!-- Sorting Dropdown & Oracle Button -->
                             <div class="flex items-center gap-2">
-                                <button onclick="triggerAutoOracleCheck()" class="px-3 py-1.5 rounded-xl bg-gemini-sidebar hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition" title="Сверить активные прогнозы с ценами и дедлайнами прямо сейчас">
+                                <button onclick="triggerAutoOracleCheck()" class="px-3 py-1.5 rounded-lg bg-gemini-sidebar hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition" title="Сверить активные прогнозы с ценами и дедлайнами прямо сейчас">
                                     <i class="fa-solid fa-scale-balanced text-emerald-600"></i>
                                     <span>Автопроверка</span>
                                 </button>
                                 
-                                <select id="eventSortSelect" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
+                                <select id="eventSortSelect" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
                                     <option value="date_desc">📅 Сначала новые</option>
                                     <option value="date_asc">📅 Сначала старые</option>
                                     <option value="prob_desc">📈 Вероятность (max → min)</option>
@@ -324,9 +324,9 @@
                             <div class="flex items-center gap-2 flex-1">
                                 <div class="relative flex-1">
                                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="text" id="speakerSearchInput" oninput="applySpeakerFilters()" placeholder="Поиск аналитика по имени, тегу или каналу..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none">
+                                    <input type="text" id="speakerSearchInput" oninput="applySpeakerFilters()" placeholder="Поиск аналитика по имени, тегу или каналу..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none">
                                 </div>
-                                <select id="speakerSortSelect" onchange="applySpeakerFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
+                                <select id="speakerSortSelect" onchange="applySpeakerFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
                                     <option value="credibility">⭐ По надежности</option>
                                     <option value="brier">🎯 По Brier Score</option>
                                     <option value="predictions">📊 По числу прогнозов</option>
@@ -334,7 +334,7 @@
                                 </select>
                             </div>
 
-                            <button onclick="openAddSpeakerModal()" class="px-4 py-2 rounded-xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs flex-shrink-0">
+                            <button onclick="openAddSpeakerModal()" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs flex-shrink-0">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span>Добавить аналитика в учет</span>
                             </button>
@@ -354,7 +354,7 @@
                         <!-- Radar Info Card & Stats -->
                         <div class="bg-white rounded-2xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                             <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-base">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-base">
                                     <i class="fa-solid fa-satellite-dish"></i>
                                 </div>
                                 <div>
@@ -374,11 +374,11 @@
                             </div>
                             
                             <div class="flex items-center gap-2 flex-shrink-0">
-                                <button onclick="approveAllPendingCandidates()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Одобрить всех ожидающих кандидатов">
+                                <button onclick="approveAllPendingCandidates()" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Одобрить всех ожидающих кандидатов">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span>Одобрить всех</span>
                                 </button>
-                                <button onclick="seedRadarDemo()" class="px-3.5 py-2 rounded-xl bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
+                                <button onclick="seedRadarDemo()" class="px-3.5 py-2 rounded-lg bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
                                     <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
                                     <span>Обновить радар</span>
                                 </button>
@@ -392,13 +392,13 @@
                                 <input type="text" id="candidateSearchInput" oninput="applyCandidateFilters()" placeholder="Поиск кандидата по имени или источнику..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="">Все статусы</option>
                                     <option value="CANDIDATE" selected>Ожидают решения</option>
                                     <option value="APPROVED">Одобренные</option>
                                     <option value="REJECTED">Отклоненные</option>
                                 </select>
-                                <select id="candidateSortSelect" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="candidateSortSelect" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="mentions_desc">По упоминаниям (max)</option>
                                     <option value="density_desc">По плотности прогнозов</option>
                                     <option value="name_asc">По имени</option>
@@ -422,7 +422,7 @@
                         <!-- Top Header & Discussion Starter -->
                         <div class="bg-white rounded-2xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                             <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-base">
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-base">
                                     <i class="fa-solid fa-comments"></i>
                                 </div>
                                 <div>
@@ -432,7 +432,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <button onclick="openCreateTopicModal()" class="px-4 py-2 rounded-xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs flex-shrink-0">
+                            <button onclick="openCreateTopicModal()" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs flex-shrink-0">
                                 <i class="fa-solid fa-plus"></i>
                                 <span>Создать свою тему</span>
                             </button>
@@ -445,13 +445,13 @@
                                 <input type="text" id="narrativeSearchInput" oninput="applyNarrativeFilters()" placeholder="Поиск тем и дискуссий..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
                             </div>
                             <div class="flex items-center gap-2">
-                                <select id="narrativeDomainFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="narrativeDomainFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="">Все сферы</option>
                                     <option value="crypto">Крипто</option>
                                     <option value="macro">Макро</option>
                                     <option value="tech">Технологии</option>
                                 </select>
-                                <select id="narrativeStatusFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                <select id="narrativeStatusFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
                                     <option value="">Все статусы</option>
                                     <option value="EMERGING">Формируется</option>
                                     <option value="MATURE">Готова к событию</option>
@@ -495,7 +495,7 @@
                         
                         <div class="bg-white rounded-2xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                             <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-base">
+                                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-base">
                                     <i class="fa-brands fa-youtube"></i>
                                 </div>
                                 <div>
@@ -505,7 +505,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <button onclick="loadSources()" class="px-3.5 py-2 rounded-xl bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-2 transition flex-shrink-0">
+                            <button onclick="loadSources()" class="px-3.5 py-2 rounded-lg bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-2 transition flex-shrink-0">
                                 <i class="fa-solid fa-arrows-rotate text-red-600"></i>
                                 <span>Проверить каналы</span>
                             </button>
@@ -524,7 +524,7 @@
                         
                         <div class="bg-white rounded-2xl p-6 border border-gemini-border flex flex-col gap-4 shadow-2xs">
                             <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-base">
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-base">
                                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                                 </div>
                                 <div>
@@ -538,16 +538,16 @@
                             <div class="flex flex-col gap-3 mt-2">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-700 mb-1">Имя эксперта (необязательно, если указано в тексте):</label>
-                                    <input type="text" id="parseSpeakerInput" placeholder="Например: Michael Saylor" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                                    <input type="text" id="parseSpeakerInput" placeholder="Например: Michael Saylor" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-700 mb-1">Текст публикации или цитата с прогнозом:</label>
-                                    <textarea id="parseTextInput" rows="4" placeholder="Например: Michael Saylor: «Я абсолютно уверен на 90%, что Биткоин достигнет $150,000 к концу 2026 года благодаря халвингу»" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                                    <textarea id="parseTextInput" rows="4" placeholder="Например: Michael Saylor: «Я абсолютно уверен на 90%, что Биткоин достигнет $150,000 к концу 2026 года благодаря халвингу»" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
                                 </div>
 
                                 <div class="flex justify-end gap-2 pt-2">
-                                    <button onclick="submitParseText()" id="parseSubmitBtn" class="px-5 py-2.5 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
+                                    <button onclick="submitParseText()" id="parseSubmitBtn" class="px-5 py-2.5 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
                                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                                         <span>Разобрать и учесть прогноз</span>
                                     </button>
@@ -678,13 +678,13 @@
                     </div>
                     
                     <div id="modalResolveControls" class="flex flex-wrap items-center gap-2 pt-1">
-                        <button onclick="submitModalResolution(true)" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                        <button onclick="submitModalResolution(true)" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
                             <i class="fa-solid fa-check"></i> Сбылось (Правда)
                         </button>
-                        <button onclick="submitModalResolution(false)" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                        <button onclick="submitModalResolution(false)" class="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
                             <i class="fa-solid fa-xmark"></i> Не сбылось (Ложь)
                         </button>
-                        <input type="text" id="modalResolveNotes" placeholder="Заметка оракула (источник подтверждения)..." class="flex-1 min-w-[200px] px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                        <input type="text" id="modalResolveNotes" placeholder="Заметка оракула (источник подтверждения)..." class="flex-1 min-w-[200px] px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
 
@@ -692,7 +692,7 @@
 
             <!-- Modal Footer -->
             <div class="px-6 py-3.5 border-t border-gemini-border bg-slate-50 flex justify-end">
-                <button onclick="closeEventDetailModal()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition">
+                <button onclick="closeEventDetailModal()" class="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition">
                     Закрыть
                 </button>
             </div>
@@ -715,23 +715,23 @@
             <div class="flex flex-col gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Имя аналитика / Название канала:</label>
-                    <input type="text" id="newSpeakerName" placeholder="Например: Michael Saylor" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newSpeakerName" placeholder="Например: Michael Saylor" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Никнейм в соцсетях или канал:</label>
-                    <input type="text" id="newSpeakerHandle" placeholder="@saylor или URL YouTube" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newSpeakerHandle" placeholder="@saylor или URL YouTube" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Специализация и краткое био:</label>
-                    <input type="text" id="newSpeakerBio" placeholder="Биткоин-максималист, макро-стратег" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newSpeakerBio" placeholder="Биткоин-максималист, макро-стратег" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button onclick="closeAddSpeakerModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                <button onclick="closeAddSpeakerModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
                     Отмена
                 </button>
-                <button onclick="submitNewSpeaker()" id="btnSubmitNewSpeaker" class="px-4 py-2 rounded-xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition shadow-sm">
+                <button onclick="submitNewSpeaker()" id="btnSubmitNewSpeaker" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition shadow-sm">
                     Добавить в базу
                 </button>
             </div>
@@ -754,12 +754,12 @@
             <div class="flex flex-col gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Формулировка темы или вопроса:</label>
-                    <input type="text" id="newTopicTitle" placeholder="Например: Вытеснит ли Solana сеть Ethereum в DeFi к 2026 году?" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newTopicTitle" placeholder="Например: Вытеснит ли Solana сеть Ethereum в DeFi к 2026 году?" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Сфера дискуссии:</label>
-                    <select id="newTopicDomain" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <select id="newTopicDomain" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                         <option value="crypto">🪙 Криптовалюты</option>
                         <option value="macro">📈 Макроэкономика</option>
                         <option value="tech">🤖 Технологии и AI</option>
@@ -768,15 +768,15 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Ключевые слова (через запятую):</label>
-                    <input type="text" id="newTopicKeywords" placeholder="solana, ethereum, defi, tps, market share" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newTopicKeywords" placeholder="solana, ethereum, defi, tps, market share" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button onclick="closeCreateTopicModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                <button onclick="closeCreateTopicModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
                     Отмена
                 </button>
-                <button onclick="submitNewTopic()" id="btnSubmitNewTopic" class="px-4 py-2 rounded-xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition shadow-sm">
+                <button onclick="submitNewTopic()" id="btnSubmitNewTopic" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition shadow-sm">
                     Создать тему
                 </button>
             </div>
@@ -787,7 +787,7 @@
     <!-- =================== RESET DATABASE CONFIRMATION MODAL =================== -->
     <div id="resetModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gemini-border flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
@@ -797,10 +797,10 @@
                 </p>
             </div>
             <div class="flex items-center justify-end gap-2.5 pt-2">
-                <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                <button onclick="closeResetModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
                     Отмена
                 </button>
-                <button onclick="confirmResetDatabase()" id="confirmResetBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition shadow-sm flex items-center gap-1.5">
+                <button onclick="confirmResetDatabase()" id="confirmResetBtn" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition shadow-sm flex items-center gap-1.5">
                     <i class="fa-solid fa-trash-can"></i>
                     <span>Да, очистить базу</span>
                 </button>
@@ -968,7 +968,7 @@
             let html = '';
             matched.slice(0, 6).forEach(c => {
                 html += `
-                    <div onclick="selectSpeakerFromDropdown('${c.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl hover:bg-slate-100 cursor-pointer flex flex-col text-left transition">
+                    <div onclick="selectSpeakerFromDropdown('${c.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 cursor-pointer flex flex-col text-left transition">
                         <span class="text-xs font-bold text-slate-800">${c.name}</span>
                         <span class="text-[10px] text-slate-500 truncate">${c.role}</span>
                     </div>
@@ -977,7 +977,7 @@
 
             if (q && !matched.some(m => m.name.toLowerCase() === q)) {
                 html += `
-                    <div onclick="selectSpeakerFromDropdown('${q.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl hover:bg-blue-50 text-blue-600 cursor-pointer flex items-center gap-1.5 text-xs font-semibold border-t border-slate-100 transition">
+                    <div onclick="selectSpeakerFromDropdown('${q.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg hover:bg-blue-50 text-blue-600 cursor-pointer flex items-center gap-1.5 text-xs font-semibold border-t border-slate-100 transition">
                         <i class="fa-solid fa-plus text-[10px]"></i> Учесть нового автора: «${q}»
                     </div>
                 `;
@@ -1091,14 +1091,14 @@
                 if (rawEvents.length === 0) {
                     container.innerHTML = `
                         <div class="bg-white rounded-3xl p-8 border border-gemini-border text-center flex flex-col items-center justify-center gap-3">
-                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
                                 <i class="fa-solid fa-chart-line"></i>
                             </div>
                             <h3 class="text-base font-bold text-slate-800">База данных пуста</h3>
                             <p class="text-xs text-gemini-grayText max-w-md leading-relaxed">
                                 Задайте вопрос в нижней строке ввода для мгновенного автоматического расчета вероятности, либо загрузите проверенных авторов.
                             </p>
-                            <button onclick="seedCryptoTop10()" class="mt-2 px-4 py-2.5 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
+                            <button onclick="seedCryptoTop10()" class="mt-2 px-4 py-2.5 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
                                 <i class="fa-solid fa-users"></i>
                                 <span>Загрузить проверенный Топ-10 аналитиков</span>
                             </button>
@@ -1171,7 +1171,7 @@
                                 <span><b>${statementsCount}</b> ${statementsCount === 1 ? 'эксперт' : (statementsCount > 1 && statementsCount < 5 ? 'эксперта' : 'экспертов')}</span>
                             </div>
 
-                            <div class="px-3.5 py-1.5 rounded-xl bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
+                            <div class="px-3.5 py-1.5 rounded-lg bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
                                 <span>Подробнее</span>
                                 <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
                             </div>
@@ -1254,7 +1254,7 @@
                     <div class="bg-white rounded-2xl p-5 border border-gemini-border hover:border-slate-300 hover:shadow-sm transition flex flex-col justify-between gap-4">
                         <div>
                             <div class="flex items-start gap-3">
-                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200 flex-shrink-0">
+                                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200 flex-shrink-0">
                                     ${initials}
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -1263,7 +1263,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 mt-4 p-2.5 rounded-xl bg-gemini-sidebar border border-gemini-border text-center">
+                            <div class="grid grid-cols-3 gap-2 mt-4 p-2.5 rounded-lg bg-gemini-sidebar border border-gemini-border text-center">
                                 <div>
                                     <span class="text-[10px] text-gemini-mutedText block">Надежность:</span>
                                     <b class="text-xs font-mono text-blue-600 font-bold">${credPercent}%</b>
@@ -1401,10 +1401,10 @@
                 } else {
                     actionBtns = `
                         <div class="flex items-center gap-2">
-                            <button onclick="approveCandidate('${cand.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
+                            <button onclick="approveCandidate('${cand.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
                                 <i class="fa-solid fa-check"></i> Одобрить
                             </button>
-                            <button onclick="rejectCandidate('${cand.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1">
+                            <button onclick="rejectCandidate('${cand.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1">
                                 <i class="fa-solid fa-xmark"></i> Отклонить
                             </button>
                         </div>
@@ -1425,7 +1425,7 @@
                             </div>
 
                             <h4 class="text-sm font-bold text-slate-900 mt-1">${cand.name}</h4>
-                            <p class="text-xs text-slate-600 bg-white p-2 rounded-xl border border-slate-100 mt-1.5 italic line-clamp-2">
+                            <p class="text-xs text-slate-600 bg-white p-2 rounded-lg border border-slate-100 mt-1.5 italic line-clamp-2">
                                 «${cand.context_quote || 'Зафиксировано прогнозное утверждение'}»
                             </p>
                         </div>
@@ -1583,7 +1583,7 @@
                         <h3 class="text-base md:text-lg font-bold text-slate-900 leading-snug">${nar.topic_summary}</h3>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 p-3 bg-gemini-sidebar rounded-2xl border border-gemini-border text-center">
+                    <div class="grid grid-cols-2 gap-3 p-3 bg-gemini-sidebar rounded-xl border border-gemini-border text-center">
                         <div>
                             <span class="text-[10px] text-gemini-mutedText block">Всего утверждений:</span>
                             <b class="text-sm font-bold text-slate-800 font-mono">${nar.statement_count}</b>
@@ -1603,12 +1603,12 @@
 
                     <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
                         ${!isPromoted ? `
-                            <button onclick="promoteNarrative('${nar.id}')" class="w-full py-2.5 px-4 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="promoteNarrative('${nar.id}')" class="w-full py-2.5 px-4 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-chart-line"></i>
                                 <span>Превратить в отслеживаемое событие с прогнозом</span>
                             </button>
                         ` : `
-                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                            <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
                                 <i class="fa-solid fa-check"></i> По данной теме уже создано официальное событие в расчетах!
                             </div>
                         `}
@@ -1706,7 +1706,7 @@
                 return `
                     <div class="bg-white rounded-2xl p-5 border border-gemini-border hover:shadow-sm transition flex flex-col justify-between gap-3">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-base">
+                            <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-base">
                                 <i class="fa-brands fa-youtube"></i>
                             </div>
                             <div class="flex-1 min-w-0">
@@ -1720,7 +1720,7 @@
                             <span class="text-[10px] text-gemini-mutedText">
                                 ${src.last_scanned_at ? `Скан: ${new Date(src.last_scanned_at).toLocaleDateString()}` : 'Ожидает проверки'}
                             </span>
-                            <button onclick="scanSource('${src.id}')" class="px-3 py-1.5 rounded-xl bg-gemini-sidebar hover:bg-gemini-hover text-slate-800 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
+                            <button onclick="scanSource('${src.id}')" class="px-3 py-1.5 rounded-lg bg-gemini-sidebar hover:bg-gemini-hover text-slate-800 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
                                 <i class="fa-solid fa-arrows-rotate text-red-600"></i> Сканировать
                             </button>
                         </div>
@@ -1926,7 +1926,7 @@
                                     </div>
                                     <span class="font-mono font-bold text-xs ${stConf >= 60 ? 'text-blue-600' : 'text-slate-600'}">Прогноз: ${stConf}%</span>
                                 </div>
-                                <p class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 italic">
+                                <p class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-100 italic">
                                     «${st.raw_quote}»
                                 </p>
                                 ${st.source_url ? `
