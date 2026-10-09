@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 from app.models.entities import Speaker, Event, Statement
 from app.engine.scoring import ForecasterScorer
+from app.engine.clustering import SemanticEventMatcher
 from app.extractor.llm_extractor import LLMPredictionExtractor
 from app.ingestion.youtube import YouTubeIngestionService
 
@@ -34,19 +35,28 @@ class PredictionService:
     @classmethod
     def get_or_create_event(cls, db: Session, title: str, domain: str = "general", base_rate: float = 0.5) -> Event:
         title_clean = title.strip()
-        # Find existing event by close title match or create new
+        
+        # 1. Exact or case-insensitive match
         event = db.query(Event).filter(Event.title.ilike(title_clean)).first()
-        if not event:
-            event = Event(
-                title=title_clean,
-                domain=domain.lower(),
-                base_rate=base_rate,
-                current_probability=base_rate,
-                status="ACTIVE"
-            )
-            db.add(event)
-            db.commit()
-            db.refresh(event)
+        if event:
+            return event
+
+        # 2. Semantic deduplication match
+        matched_event = SemanticEventMatcher.find_matching_event(db, title_clean, domain)
+        if matched_event:
+            return matched_event
+
+        # 3. Create brand new event
+        event = Event(
+            title=title_clean,
+            domain=domain.lower(),
+            base_rate=base_rate,
+            current_probability=base_rate,
+            status="ACTIVE"
+        )
+        db.add(event)
+        db.commit()
+        db.refresh(event)
         return event
 
     @classmethod
@@ -77,16 +87,30 @@ class PredictionService:
         # Get speaker's domain weight
         weight = cls.get_speaker_weight_for_domain(speaker, event.domain)
         
-        statement = Statement(
-            speaker_id=speaker.id,
-            event_id=event.id,
-            source_platform=source_platform,
-            source_url=source_url,
-            raw_quote=raw_quote,
-            speaker_confidence=speaker_confidence,
-            speaker_weight_applied=weight
-        )
-        db.add(statement)
+        # Prevent exact duplicate statement insertion
+        existing_stmt = db.query(Statement).filter(
+            Statement.speaker_id == speaker.id,
+            Statement.event_id == event.id,
+            Statement.raw_quote == raw_quote
+        ).first()
+
+        if existing_stmt:
+            existing_stmt.speaker_confidence = speaker_confidence
+            existing_stmt.speaker_weight_applied = weight
+            existing_stmt.source_url = source_url
+            statement = existing_stmt
+        else:
+            statement = Statement(
+                speaker_id=speaker.id,
+                event_id=event.id,
+                source_platform=source_platform,
+                source_url=source_url,
+                raw_quote=raw_quote,
+                speaker_confidence=speaker_confidence,
+                speaker_weight_applied=weight
+            )
+            db.add(statement)
+
         db.commit()
         db.refresh(statement)
         

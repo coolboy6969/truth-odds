@@ -48,11 +48,16 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button onclick="seedDemo()" class="text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-database text-indigo-400"></i> Загрузить демо-данные
+                <div id="cryptoTicker" class="hidden sm:flex items-center gap-3 text-xs bg-slate-900/90 border border-borderbg px-3 py-1.5 rounded-lg font-mono">
+                    <span class="text-amber-400 font-bold">BTC: <span id="ticker-btc">$...</span></span>
+                    <span class="text-indigo-400 font-bold">ETH: <span id="ticker-eth">$...</span></span>
+                    <span class="text-purple-400 font-bold">SOL: <span id="ticker-sol">$...</span></span>
+                </div>
+                <button onclick="seedCryptoTop10()" class="text-xs px-3 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white font-semibold shadow-md flex items-center gap-1.5 transition">
+                    <i class="fa-brands fa-bitcoin"></i> Топ-10 Крипто
                 </button>
-                <a href="/docs" target="_blank" class="text-xs px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-code"></i> Swagger API
+                <a href="/docs" target="_blank" class="text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg font-medium flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-code"></i> API Docs
                 </a>
             </div>
         </div>
@@ -67,6 +72,9 @@
             <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
                 <i class="fa-solid fa-trophy"></i> Рейтинг экспертов (Leaderboard)
             </button>
+            <button onclick="switchTab('sources')" id="tab-btn-sources" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-satellite-dish"></i> Мониторинг каналов (Watchlist)
+            </button>
             <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
                 <i class="fa-solid fa-plus-circle"></i> Анализ YouTube / Цитаты
             </button>
@@ -78,12 +86,15 @@
 
         <!-- TAB 1: EVENTS -->
         <section id="tab-events" class="space-y-6">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-white">Текущие события и их вероятность</h2>
                     <p class="text-xs text-slate-400">Вероятность рассчитана байесовским объединением прогнозов с весом каждого автора</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex items-center gap-2">
+                    <button onclick="checkCryptoOracle(false)" class="text-xs px-3 py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-bolt"></i> Оракул цен (Проверить цели)
+                    </button>
                     <select id="domainFilter" onchange="loadEvents()" class="bg-cardbg border border-borderbg rounded-lg text-xs px-3 py-2 text-slate-300">
                         <option value="">Все категории</option>
                         <option value="crypto">Криптовалюты</option>
@@ -125,7 +136,38 @@
             </div>
         </section>
 
-        <!-- TAB 3: INGESTION FORM -->
+        <!-- TAB 3: MONITORED SOURCES (WATCHLIST) -->
+        <section id="tab-sources" class="space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Отслеживаемые каналы и источники</h2>
+                    <p class="text-xs text-slate-400">Автоматический мониторинг через YouTube RSS без ограничений API</p>
+                </div>
+                <button onclick="loadSources()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg flex items-center gap-1">
+                    <i class="fa-solid fa-rotate"></i> Обновить список
+                </button>
+            </div>
+
+            <div class="bg-cardbg border border-borderbg rounded-xl overflow-hidden shadow-xl">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider border-b border-borderbg">
+                        <tr>
+                            <th class="px-6 py-4">Канал / Платформа</th>
+                            <th class="px-6 py-4">Эксперт</th>
+                            <th class="px-6 py-4">Рейтинг автора</th>
+                            <th class="px-6 py-4">ID Канала</th>
+                            <th class="px-6 py-4">Последнее сканирование</th>
+                            <th class="px-6 py-4 text-right">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sourcesTableBody" class="divide-y divide-borderbg text-slate-300">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 4: INGESTION FORM -->
         <section id="tab-ingest" class="max-w-2xl mx-auto space-y-6 hidden">
             <div class="bg-cardbg border border-borderbg rounded-xl p-6 shadow-xl">
                 <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
@@ -191,17 +233,39 @@
     <!-- Frontend Script -->
     <script>
         function switchTab(tab) {
-            ['events', 'speakers', 'ingest'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('tab-btn-' + t).classList.remove('border-indigo-500', 'text-indigo-400');
-                document.getElementById('tab-btn-' + t).classList.add('border-transparent', 'text-slate-400');
+            ['events', 'speakers', 'sources', 'ingest'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                const btn = document.getElementById('tab-btn-' + t);
+                if (el) el.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('border-indigo-500', 'text-indigo-400');
+                    btn.classList.add('border-transparent', 'text-slate-400');
+                }
             });
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            document.getElementById('tab-btn-' + tab).classList.remove('border-transparent', 'text-slate-400');
-            document.getElementById('tab-btn-' + tab).classList.add('border-indigo-500', 'text-indigo-400');
+            const activeEl = document.getElementById('tab-' + tab);
+            const activeBtn = document.getElementById('tab-btn-' + tab);
+            if (activeEl) activeEl.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'text-slate-400');
+                activeBtn.classList.add('border-indigo-500', 'text-indigo-400');
+            }
 
             if (tab === 'events') loadEvents();
             if (tab === 'speakers') loadSpeakers();
+            if (tab === 'sources') loadSources();
+        }
+
+        async function seedCryptoTop10() {
+            try {
+                const res = await fetch('/api/crypto/seed-top10', { method: 'POST' });
+                const data = await res.json();
+                alert('Топ-10 Крипто-экспертов и каналов успешно загружены!');
+                loadEvents();
+                loadSpeakers();
+                loadSources();
+            } catch (e) {
+                alert('Ошибка загрузки Топ-10: ' + e);
+            }
         }
 
         async function seedDemo() {
@@ -457,9 +521,113 @@
             }
         }
 
+        async function loadSources() {
+            try {
+                const res = await fetch('/api/sources');
+                const sources = await res.json();
+                const tbody = document.getElementById('sourcesTableBody');
+                tbody.innerHTML = '';
+
+                if (sources.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-slate-400 text-xs">
+                                Источники еще не добавлены. Нажмите «Топ-10 Крипто» в шапке для автоматической загрузки проверенных каналов.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                sources.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/40 transition";
+                    const lastScan = s.last_scanned_at ? new Date(s.last_scanned_at).toLocaleString() : 'Никогда';
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                            <i class="fa-brands fa-youtube text-red-500 text-base"></i>
+                            <span>${s.channel_title}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">
+                            ${s.speaker_name}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-xs">
+                            <span class="px-2 py-0.5 rounded bg-indigo-900/40 text-indigo-300 border border-indigo-500/30">
+                                Доверие: ${Math.round(s.speaker_credibility * 100)}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-xs text-slate-400">
+                            ${s.channel_identifier}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400">
+                            ${lastScan}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="scanSource('${s.id}')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white transition flex items-center gap-1 ml-auto">
+                                <i class="fa-solid fa-satellite-dish"></i> Сканировать
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Failed to load sources:", err);
+            }
+        }
+
+        async function scanSource(sourceId) {
+            try {
+                const res = await fetch(`/api/sources/${sourceId}/scan`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Канал ${data.channel} отсканирован! Обработано видео: ${data.videos_scanned}`);
+                    loadEvents();
+                    loadSources();
+                } else {
+                    alert(`Статус: ${data.message || data.error}`);
+                }
+            } catch (err) {
+                alert('Ошибка сканирования: ' + err);
+            }
+        }
+
+        async function loadLivePrices() {
+            try {
+                const res = await fetch('/api/sources/oracle/prices');
+                const prices = await res.json();
+                if (prices.BTC) {
+                    document.getElementById('ticker-btc').innerText = '$' + prices.BTC.toLocaleString();
+                    document.getElementById('ticker-eth').innerText = '$' + prices.ETH.toLocaleString();
+                    document.getElementById('ticker-sol').innerText = '$' + prices.SOL.toLocaleString();
+                }
+            } catch (err) {
+                console.warn('Could not fetch live ticker:', err);
+            }
+        }
+
+        async function checkCryptoOracle(autoResolve = false) {
+            try {
+                const res = await fetch(`/api/sources/oracle/check?auto_resolve=${autoResolve}`, { method: 'POST' });
+                const evals = await res.json();
+                if (evals.length === 0) {
+                    alert('Нет активных событий по криптовалютам с ценовыми целями.');
+                    return;
+                }
+                let msg = 'Результаты проверки Оракула цен:\n\n';
+                evals.forEach(e => {
+                    msg += `• ${e.event_title}\n  Текущая цена: $${e.current_price.toLocaleString()} | Цель: $${e.target_price.toLocaleString()} (${e.progress_pct}% выполнения)\n  Цель достигнута: ${e.target_reached ? 'ДА' : 'НЕТ'}\n\n`;
+                });
+                alert(msg);
+                loadEvents();
+            } catch (err) {
+                alert('Ошибка оракула: ' + err);
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadEvents();
+            loadLivePrices();
         });
     </script>
 </body>

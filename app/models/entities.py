@@ -83,3 +83,23 @@ class Statement(Base):
 
     def __repr__(self) -> str:
         return f"<Statement(speaker='{self.speaker_id}', conf={self.speaker_confidence:.2f})>"
+
+
+class MonitoredSource(Base):
+    __tablename__ = "monitored_sources"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    speaker_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("speakers.id"), nullable=True)
+    platform: Mapped[str] = mapped_column(String(50), default="youtube") # youtube, twitter, telegram
+    channel_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_identifier: Mapped[str] = mapped_column(String(255), nullable=False) # channel_id, @handle
+    feed_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    
+    last_scanned_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    speaker: Mapped[Optional["Speaker"]] = relationship("Speaker")
+
+    def __repr__(self) -> str:
+        return f"<MonitoredSource(title='{self.channel_title}', platform='{self.platform}')>"
