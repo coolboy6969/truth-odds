@@ -269,42 +269,54 @@
                     <section id="view-events" class="tab-content flex flex-col gap-5">
                         
                         <!-- Event Controls & Sorting Toolbar -->
-                        <div class="bg-white rounded-2xl p-3 border border-gemini-border flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-                            
-                            <!-- Search & Domain Filter -->
-                            <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                                <div class="relative flex-1 min-w-[180px]">
-                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="text" id="eventSearchInput" oninput="applyEventFilters()" placeholder="Поиск по названию события..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500">
+                        <div class="bg-white rounded-2xl p-3 md:p-3.5 border border-gemini-border flex flex-col gap-2.5 shadow-2xs">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <!-- Search & Domain Filter -->
+                                <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+                                    <div class="relative flex-1 min-w-[180px]">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                        <input type="text" id="eventSearchInput" oninput="applyEventFilters()" placeholder="Поиск по названию или тегу сферы..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                    <select id="eventDomainFilter" onchange="setEventDomainFilter(this.value)" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                        <option value="">Все сферы</option>
+                                        <option value="crypto">Крипто</option>
+                                        <option value="macro">Макро</option>
+                                        <option value="tech">Технологии</option>
+                                        <option value="general">Общее</option>
+                                    </select>
+                                    <select id="eventStatusFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                        <option value="">Все статусы</option>
+                                        <option value="ACTIVE">Только активные</option>
+                                        <option value="RESOLVED">Завершенные</option>
+                                    </select>
                                 </div>
-                                <select id="eventDomainFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
-                                    <option value="">Все сферы</option>
-                                    <option value="crypto">Крипто</option>
-                                    <option value="macro">Макро</option>
-                                    <option value="tech">Технологии</option>
-                                </select>
-                                <select id="eventStatusFilter" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
-                                    <option value="">Все статусы</option>
-                                    <option value="ACTIVE">Только активные</option>
-                                    <option value="RESOLVED">Завершенные</option>
-                                </select>
+
+                                <!-- Sorting Dropdown & Oracle Button -->
+                                <div class="flex items-center gap-2">
+                                    <button onclick="triggerAutoOracleCheck()" class="px-3 py-1.5 rounded-lg bg-gemini-sidebar hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition" title="Сверить активные прогнозы с ценами и дедлайнами прямо сейчас">
+                                        <i class="fa-solid fa-scale-balanced text-emerald-600"></i>
+                                        <span>Автопроверка</span>
+                                    </button>
+                                    
+                                    <select id="eventSortSelect" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
+                                        <option value="date_desc">📅 Сначала новые</option>
+                                        <option value="date_asc">📅 Сначала старые</option>
+                                        <option value="prob_desc">📈 Вероятность (max → min)</option>
+                                        <option value="prob_asc">📉 Вероятность (min → max)</option>
+                                        <option value="statements_desc">👥 Число экспертов (max)</option>
+                                        <option value="title_asc">🔤 По алфавиту</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Sorting Dropdown & Oracle Button -->
-                            <div class="flex items-center gap-2">
-                                <button onclick="triggerAutoOracleCheck()" class="px-3 py-1.5 rounded-lg bg-gemini-sidebar hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition" title="Сверить активные прогнозы с ценами и дедлайнами прямо сейчас">
-                                    <i class="fa-solid fa-scale-balanced text-emerald-600"></i>
-                                    <span>Автопроверка</span>
-                                </button>
-                                
-                                <select id="eventSortSelect" onchange="applyEventFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
-                                    <option value="date_desc">📅 Сначала новые</option>
-                                    <option value="date_asc">📅 Сначала старые</option>
-                                    <option value="prob_desc">📈 Вероятность (max → min)</option>
-                                    <option value="prob_asc">📉 Вероятность (min → max)</option>
-                                    <option value="statements_desc">👥 Число экспертов (max)</option>
-                                    <option value="title_asc">🔤 По алфавиту</option>
-                                </select>
+                            <!-- Interactive Domain Tag Chips -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+                                <span class="text-[11px] text-gemini-mutedText font-semibold mr-1">Теги сфер:</span>
+                                <button onclick="setEventDomainFilter('')" id="domainTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все темы</button>
+                                <button onclick="setEventDomainFilter('crypto')" id="domainTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 hover:border-amber-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Криптовалюты</span></button>
+                                <button onclick="setEventDomainFilter('macro')" id="domainTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макроэкономика</span></button>
+                                <button onclick="setEventDomainFilter('tech')" id="domainTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 hover:border-blue-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                                <button onclick="setEventDomainFilter('general')" id="domainTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-slate-500 text-[10px]"></i> <span>Общее</span></button>
                             </div>
                         </div>
 
@@ -320,24 +332,35 @@
                     <section id="view-speakers" class="tab-content hidden flex flex-col gap-5">
                         
                         <!-- Top Action & Search Bar for Analysts -->
-                        <div class="bg-white rounded-2xl p-4 border border-gemini-border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-2xs">
-                            <div class="flex items-center gap-2 flex-1">
-                                <div class="relative flex-1">
-                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="text" id="speakerSearchInput" oninput="applySpeakerFilters()" placeholder="Поиск аналитика по имени, тегу или каналу..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none">
+                        <div class="bg-white rounded-2xl p-4 border border-gemini-border flex flex-col gap-3 shadow-2xs">
+                            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <div class="relative flex-1">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                        <input type="text" id="speakerSearchInput" oninput="applySpeakerFilters()" placeholder="Поиск аналитика по имени, тегу сферы или каналу..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none">
+                                    </div>
+                                    <select id="speakerSortSelect" onchange="applySpeakerFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
+                                        <option value="credibility">⭐ По надежности</option>
+                                        <option value="brier">🎯 По Brier Score</option>
+                                        <option value="predictions">📊 По числу прогнозов</option>
+                                        <option value="name">🔤 По имени</option>
+                                    </select>
                                 </div>
-                                <select id="speakerSortSelect" onchange="applySpeakerFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
-                                    <option value="credibility">⭐ По надежности</option>
-                                    <option value="brier">🎯 По Brier Score</option>
-                                    <option value="predictions">📊 По числу прогнозов</option>
-                                    <option value="name">🔤 По имени</option>
-                                </select>
+
+                                <button onclick="openAddSpeakerModal()" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs flex-shrink-0">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    <span>Добавить аналитика в учет</span>
+                                </button>
                             </div>
 
-                            <button onclick="openAddSpeakerModal()" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs flex-shrink-0">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Добавить аналитика в учет</span>
-                            </button>
+                            <!-- Interactive Speaker Domain Tag Chips -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+                                <span class="text-[11px] text-gemini-mutedText font-semibold mr-1">Теги сфер:</span>
+                                <button onclick="setSpeakerDomainFilter('')" id="spTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все аналитики</button>
+                                <button onclick="setSpeakerDomainFilter('crypto')" id="spTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 hover:border-amber-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Крипто</span></button>
+                                <button onclick="setSpeakerDomainFilter('macro')" id="spTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макро</span></button>
+                                <button onclick="setSpeakerDomainFilter('tech')" id="spTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 hover:border-blue-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                            </div>
                         </div>
 
                         <!-- Speakers Grid -->
@@ -420,24 +443,37 @@
                     <section id="view-narratives" class="tab-content hidden flex flex-col gap-5">
 
                         <!-- Discussions Filter Bar -->
-                        <div class="bg-white rounded-2xl p-3 border border-gemini-border flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-                            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                                <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs ml-2"></i>
-                                <input type="text" id="narrativeSearchInput" oninput="applyNarrativeFilters()" placeholder="Поиск тем и дискуссий..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
+                        <div class="bg-white rounded-2xl p-3 md:p-3.5 border border-gemini-border flex flex-col gap-2.5 shadow-2xs">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs ml-2"></i>
+                                    <input type="text" id="narrativeSearchInput" oninput="applyNarrativeFilters()" placeholder="Поиск тем и дискуссий (по названию или #тегу)..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <select id="narrativeDomainFilter" onchange="setNarrativeDomainFilter(this.value)" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                        <option value="">Все сферы</option>
+                                        <option value="crypto">Крипто</option>
+                                        <option value="macro">Макро</option>
+                                        <option value="tech">Технологии</option>
+                                        <option value="general">Общее</option>
+                                    </select>
+                                    <select id="narrativeStatusFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                        <option value="">Все статусы</option>
+                                        <option value="EMERGING">Формируется</option>
+                                        <option value="MATURE">Готова к событию</option>
+                                        <option value="PROMOTED">Событие создано</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <select id="narrativeDomainFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
-                                    <option value="">Все сферы</option>
-                                    <option value="crypto">Крипто</option>
-                                    <option value="macro">Макро</option>
-                                    <option value="tech">Технологии</option>
-                                </select>
-                                <select id="narrativeStatusFilter" onchange="applyNarrativeFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
-                                    <option value="">Все статусы</option>
-                                    <option value="EMERGING">Формируется</option>
-                                    <option value="MATURE">Готова к событию</option>
-                                    <option value="PROMOTED">Событие создано</option>
-                                </select>
+
+                            <!-- Interactive Discussions Domain Tag Chips -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+                                <span class="text-[11px] text-gemini-mutedText font-semibold mr-1">Теги сфер:</span>
+                                <button onclick="setNarrativeDomainFilter('')" id="narTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все темы</button>
+                                <button onclick="setNarrativeDomainFilter('crypto')" id="narTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 hover:border-amber-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Крипто</span></button>
+                                <button onclick="setNarrativeDomainFilter('macro')" id="narTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макро</span></button>
+                                <button onclick="setNarrativeDomainFilter('tech')" id="narTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 hover:border-blue-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                                <button onclick="setNarrativeDomainFilter('general')" id="narTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-slate-500 text-[10px]"></i> <span>Общее</span></button>
                             </div>
                         </div>
 
@@ -556,6 +592,7 @@
                             
                             <!-- Domain select pill -->
                             <select id="promptDomain" class="text-xs bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 text-slate-700 font-medium focus:outline-none focus:border-blue-500">
+                                <option value="auto" selected>✨ Авто-тег сферы</option>
                                 <option value="crypto">🪙 Криптовалюты</option>
                                 <option value="macro">📈 Макроэкономика</option>
                                 <option value="tech">🤖 Технологии и AI</option>
@@ -1041,6 +1078,33 @@
             }
         }
 
+        const domainMeta = {
+            crypto: { label: 'Криптовалюты', icon: 'fa-bitcoin-sign', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+            macro: { label: 'Макроэкономика', icon: 'fa-arrow-trend-up', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            tech: { label: 'Технологии & AI', icon: 'fa-robot', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+            general: { label: 'Общее', icon: 'fa-globe', color: 'bg-slate-100 text-slate-700 border-slate-200' }
+        };
+
+        function setEventDomainFilter(domain) {
+            const sel = document.getElementById('eventDomainFilter');
+            if (sel) sel.value = domain;
+            updateDomainTagButtons(domain);
+            applyEventFilters();
+        }
+
+        function updateDomainTagButtons(activeDomain) {
+            ['all', 'crypto', 'macro', 'tech', 'general'].forEach(d => {
+                const btn = document.getElementById(`domainTagBtn-${d}`);
+                if (!btn) return;
+                const isActive = (d === 'all' && !activeDomain) || (d === activeDomain);
+                if (isActive) {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs flex items-center gap-1';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1';
+                }
+            });
+        }
+
         function applyEventFilters() {
             renderEvents();
         }
@@ -1050,12 +1114,20 @@
             if (!container) return;
 
             const search = (document.getElementById('eventSearchInput')?.value || '').toLowerCase().trim();
+            const cleanSearch = search.replace(/^#/, '');
             const domainFilter = document.getElementById('eventDomainFilter')?.value || '';
             const statusFilter = document.getElementById('eventStatusFilter')?.value || '';
             const sortVal = document.getElementById('eventSortSelect')?.value || 'date_desc';
 
             let filtered = rawEvents.filter(ev => {
-                if (search && !ev.title.toLowerCase().includes(search) && !(ev.description || '').toLowerCase().includes(search)) return false;
+                if (cleanSearch) {
+                    const evDomain = (ev.domain || 'general').toLowerCase();
+                    const domainRus = (domainMeta[evDomain]?.label || '').toLowerCase();
+                    const matchesTitle = ev.title.toLowerCase().includes(cleanSearch);
+                    const matchesDesc = (ev.description || '').toLowerCase().includes(cleanSearch);
+                    const matchesDomain = evDomain.includes(cleanSearch) || domainRus.includes(cleanSearch);
+                    if (!matchesTitle && !matchesDesc && !matchesDomain) return false;
+                }
                 if (domainFilter && ev.domain.toLowerCase() !== domainFilter.toLowerCase()) return false;
                 if (statusFilter === 'ACTIVE' && ev.status !== 'ACTIVE') return false;
                 if (statusFilter === 'RESOLVED' && !ev.status.startsWith('RESOLVED')) return false;
@@ -1111,10 +1183,15 @@
                         : `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-xmark text-[9px]"></i> Не сбылось</span>`;
                 }
 
-                let domainIcon = 'fa-tag';
-                if (ev.domain === 'crypto') domainIcon = 'fa-bitcoin-sign';
-                else if (ev.domain === 'macro') domainIcon = 'fa-arrow-trend-up';
-                else if (ev.domain === 'tech') domainIcon = 'fa-robot';
+                const dm = domainMeta[ev.domain?.toLowerCase()] || { label: ev.domain || 'Общее', icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+                const domainTagBadge = `
+                    <button onclick="event.stopPropagation(); setEventDomainFilter('${(ev.domain || 'general').toLowerCase()}')" 
+                            class="px-2.5 py-0.5 rounded-full ${dm.color} border text-[10px] font-semibold flex items-center gap-1 hover:brightness-95 transition" 
+                            title="Фильтровать события по тегу «${dm.label}»">
+                        <i class="fa-solid ${dm.icon} text-[10px]"></i>
+                        <span>${dm.label}</span>
+                    </button>
+                `;
 
                 const statementsCount = ev.statements?.length || 0;
                 
@@ -1127,10 +1204,7 @@
                     <div onclick="openEventDetailModal('${ev.id}')" class="bg-white rounded-2xl p-4 md:p-5 border border-gemini-border hover:border-blue-400/80 hover:shadow-md cursor-pointer transition-all flex flex-col gap-3 group active:scale-[0.995]">
                         <div class="flex items-center justify-between text-[11px] text-gemini-mutedText">
                             <div class="flex items-center gap-2">
-                                <span class="capitalize font-semibold text-slate-700 flex items-center gap-1.5">
-                                    <i class="fa-solid ${domainIcon} text-slate-400 text-xs"></i>
-                                    ${ev.domain}
-                                </span>
+                                ${domainTagBadge}
                                 <span>•</span>
                                 ${statusBadge}
                             </div>
@@ -1184,6 +1258,27 @@
             }
         }
 
+        let activeSpeakerDomainFilter = '';
+
+        function setSpeakerDomainFilter(domain) {
+            activeSpeakerDomainFilter = domain;
+            ['all', 'crypto', 'macro', 'tech'].forEach(d => {
+                const btn = document.getElementById(`spTagBtn-${d}`);
+                if (!btn) return;
+                const isActive = (d === 'all' && !domain) || (d === domain);
+                if (isActive) {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200';
+                }
+            });
+            applySpeakerFilters();
+        }
+
+        function filterSpeakersByTag(tag) {
+            setSpeakerDomainFilter(tag);
+        }
+
         function applySpeakerFilters() {
             renderSpeakers();
         }
@@ -1194,9 +1289,46 @@
 
             const search = (document.getElementById('speakerSearchInput')?.value || '').toLowerCase().trim();
             const sortVal = document.getElementById('speakerSortSelect')?.value || 'credibility';
+            const cleanSearch = search.replace(/^#/, '');
 
             let filtered = rawSpeakers.filter(sp => {
-                if (search && !sp.name.toLowerCase().includes(search) && !(sp.bio || '').toLowerCase().includes(search) && !(sp.handle_or_channel || '').toLowerCase().includes(search)) return false;
+                const bioLow = (sp.bio || '').toLowerCase();
+                const nameLow = sp.name.toLowerCase();
+                const handleLow = (sp.handle_or_channel || '').toLowerCase();
+                const domainScores = sp.domain_scores || {};
+                
+                let domains = Object.keys(domainScores).filter(k => k !== 'general' && domainScores[k]?.count > 0);
+                if (domains.length === 0) {
+                    const combined = bioLow + ' ' + nameLow;
+                    if (combined.includes('биткоин') || combined.includes('crypto') || combined.includes('крипто') || combined.includes('btc') || combined.includes('chain')) domains.push('crypto');
+                    if (combined.includes('макро') || combined.includes('экономист') || combined.includes('инфляци') || combined.includes('фондов') || combined.includes('золот')) domains.push('macro');
+                    if (combined.includes('ai') || combined.includes('ии') || combined.includes('технолог') || combined.includes('xai') || combined.includes('tesla')) domains.push('tech');
+                }
+                if (domains.length === 0) domains.push('crypto');
+
+                if (activeSpeakerDomainFilter && !domains.includes(activeSpeakerDomainFilter)) {
+                    return false;
+                }
+
+                if (cleanSearch) {
+                    const inName = nameLow.includes(cleanSearch);
+                    const inBio = bioLow.includes(cleanSearch);
+                    const inHandle = handleLow.includes(cleanSearch);
+                    const inSocials = (sp.social_accounts || []).some(s => 
+                        (s.identifier || '').toLowerCase().includes(cleanSearch) || 
+                        (s.platform || '').toLowerCase().includes(cleanSearch) ||
+                        (s.title || '').toLowerCase().includes(cleanSearch)
+                    );
+                    const domainAliases = {
+                        crypto: ['крипто', 'криптовалюты', 'биткоин', 'btc', 'bitcoin'],
+                        macro: ['макро', 'макроэкономика', 'экономика'],
+                        tech: ['технологии', 'ии', 'ai', 'tech', 'робот']
+                    };
+                    const inDomainKeywords = domains.some(d => (domainAliases[d] || []).some(alias => cleanSearch.includes(alias) || alias.includes(cleanSearch)));
+                    const inDomainName = domains.some(d => d.includes(cleanSearch));
+
+                    if (!inName && !inBio && !inHandle && !inSocials && !inDomainKeywords && !inDomainName) return false;
+                }
                 return true;
             });
 
@@ -1211,7 +1343,7 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-white rounded-2xl p-8 border border-gemini-border text-center text-xs text-gemini-grayText">
-                        Принятых аналитиков пока нет. Нажмите «Добавить аналитика в учет» или загрузите проверенный Топ-10 авторов.
+                        Принятых аналитиков по выбранным фильтрам пока нет. Нажмите «Добавить аналитика в учет» или загрузите проверенный Топ-10 авторов.
                     </div>
                 `;
                 return;
@@ -1221,6 +1353,26 @@
                 const credPercent = Math.round(sp.overall_credibility * 100);
                 const brier = (sp.overall_brier_score || 0.25).toFixed(2);
                 const initials = sp.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+
+                const domainScores = sp.domain_scores || {};
+                let domains = Object.keys(domainScores).filter(k => k !== 'general' && domainScores[k]?.count > 0);
+                if (domains.length === 0) {
+                    const combined = (sp.bio || '').toLowerCase() + ' ' + sp.name.toLowerCase();
+                    if (combined.includes('биткоин') || combined.includes('crypto') || combined.includes('крипто') || combined.includes('btc')) domains.push('crypto');
+                    if (combined.includes('макро') || combined.includes('экономист') || combined.includes('инфляци') || combined.includes('фондов') || combined.includes('золот')) domains.push('macro');
+                    if (combined.includes('ai') || combined.includes('ии') || combined.includes('технолог') || combined.includes('xai') || combined.includes('tesla')) domains.push('tech');
+                }
+                if (domains.length === 0) domains.push('crypto');
+
+                const specPills = domains.map(dom => {
+                    const dm = domainMeta[dom] || { label: dom, icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+                    return `
+                        <button onclick="filterSpeakersByTag('${dom}')" class="px-2 py-0.5 rounded-full ${dm.color} border text-[10px] font-semibold flex items-center gap-1 hover:brightness-95 transition" title="Фильтровать аналитиков по сфере «${dm.label}»">
+                            <i class="fa-solid ${dm.icon} text-[9px]"></i>
+                            <span>${dm.label}</span>
+                        </button>
+                    `;
+                }).join(' ');
 
                 const socials = sp.social_accounts || [];
                 let socialBadges = '';
@@ -1250,6 +1402,9 @@
                                 <div class="flex-1 min-w-0">
                                     <h4 class="text-sm font-bold text-slate-900 truncate">${sp.name}</h4>
                                     <p class="text-xs text-gemini-grayText line-clamp-2 mt-0.5 leading-relaxed">${sp.bio || 'Аналитик'}</p>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                                        ${specPills}
+                                    </div>
                                 </div>
                             </div>
 
@@ -1358,7 +1513,7 @@
             const sortVal = document.getElementById('candidateSortSelect')?.value || 'mentions_desc';
 
             let filtered = rawCandidates.filter(c => {
-                if (search && !c.name.toLowerCase().includes(search) && !(c.discovered_via_channel || '').toLowerCase().includes(search)) return false;
+                if (search && !c.name.toLowerCase().includes(search) && !(c.discovered_via_channel || '').toLowerCase().includes(search) && !(c.context_quote || '').toLowerCase().includes(search)) return false;
                 if (statusFilter && c.status !== statusFilter) return false;
                 return true;
             });
@@ -1483,6 +1638,30 @@
             }
         }
 
+        function setNarrativeDomainFilter(domain) {
+            const sel = document.getElementById('narrativeDomainFilter');
+            if (sel) sel.value = domain;
+            ['all', 'crypto', 'macro', 'tech', 'general'].forEach(d => {
+                const btn = document.getElementById(`narTagBtn-${d}`);
+                if (!btn) return;
+                const isActive = (d === 'all' && !domain) || (d === domain);
+                if (isActive) {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200';
+                }
+            });
+            applyNarrativeFilters();
+        }
+
+        function filterNarrativesByTag(tag) {
+            const input = document.getElementById('narrativeSearchInput');
+            if (input) {
+                input.value = tag.startsWith('#') ? tag : `#${tag}`;
+                applyNarrativeFilters();
+            }
+        }
+
         function applyNarrativeFilters() {
             renderNarratives();
         }
@@ -1492,11 +1671,20 @@
             if (!container) return;
 
             const search = (document.getElementById('narrativeSearchInput')?.value || '').toLowerCase().trim();
+            const cleanSearch = search.replace(/^#/, '');
             const domainFilter = document.getElementById('narrativeDomainFilter')?.value || '';
             const statusFilter = document.getElementById('narrativeStatusFilter')?.value || '';
 
             let filtered = rawNarratives.filter(nar => {
-                if (search && !nar.topic_summary.toLowerCase().includes(search)) return false;
+                if (cleanSearch) {
+                    const matchesSummary = nar.topic_summary.toLowerCase().includes(cleanSearch);
+                    const tokens = (nar.key_phrases?.tokens || []).map(t => t.toLowerCase());
+                    const matchesTokens = tokens.some(t => t.includes(cleanSearch));
+                    const narDomain = (nar.domain || '').toLowerCase();
+                    const domainRus = (domainMeta[narDomain]?.label || '').toLowerCase();
+                    const matchesDomain = narDomain.includes(cleanSearch) || domainRus.includes(cleanSearch);
+                    if (!matchesSummary && !matchesTokens && !matchesDomain) return false;
+                }
                 if (domainFilter && nar.domain.toLowerCase() !== domainFilter.toLowerCase()) return false;
                 if (statusFilter && nar.status !== statusFilter) return false;
                 return true;
@@ -1527,13 +1715,33 @@
                     ? 'border-blue-500 bg-blue-50/60 shadow-sm ring-1 ring-blue-300' 
                     : 'border-gemini-border bg-white hover:border-slate-300 hover:bg-slate-50';
 
+                const dm = domainMeta[nar.domain?.toLowerCase()] || { label: nar.domain || 'Общее', icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+                const domainTagBadge = `
+                    <button onclick="event.stopPropagation(); setNarrativeDomainFilter('${(nar.domain || 'general').toLowerCase()}')" 
+                            class="px-2 py-0.5 rounded-full ${dm.color} border text-[10px] font-semibold flex items-center gap-1 hover:brightness-95 transition" 
+                            title="Фильтровать темы по сфере «${dm.label}»">
+                        <i class="fa-solid ${dm.icon} text-[9px]"></i>
+                        <span>${dm.label}</span>
+                    </button>
+                `;
+
+                const tokens = nar.key_phrases?.tokens || [];
+                const cardTokens = tokens.slice(0, 3).map(t => `
+                    <span onclick="event.stopPropagation(); filterNarrativesByTag('${t}')" 
+                          class="px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 text-[10px] border border-slate-200 font-mono transition" 
+                          title="Поиск по тегу #${t}">
+                        #${t}
+                    </span>
+                `).join(' ');
+
                 return `
                     <div onclick="selectNarrative('${nar.id}')" class="p-4 rounded-2xl border ${selectedClasses} cursor-pointer transition-all flex flex-col gap-2">
                         <div class="flex items-center justify-between text-[10px]">
-                            <span class="font-semibold uppercase text-slate-500 font-mono">${nar.domain}</span>
+                            ${domainTagBadge}
                             ${statusBadge}
                         </div>
                         <h4 class="text-xs md:text-sm font-bold text-slate-900 leading-snug">${nar.topic_summary}</h4>
+                        ${cardTokens ? `<div class="flex flex-wrap gap-1 pt-0.5">${cardTokens}</div>` : ''}
                         <div class="flex items-center gap-3 text-[11px] text-gemini-mutedText pt-1 border-t border-slate-100">
                             <span>Высказываний: <b>${nar.statement_count}</b></span>
                             <span>•</span>
@@ -1560,15 +1768,27 @@
 
             const isPromoted = nar.status === 'PROMOTED';
             const tokens = nar.key_phrases?.tokens || [];
-            let tokenPills = tokens.slice(0, 8).map(t => `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] border border-slate-200 font-mono">#${t}</span>`).join(' ');
-            if (!tokenPills) tokenPills = `<span class="text-xs text-slate-400">Ключевые фразы извлекаются</span>`;
+            let tokenPills = tokens.slice(0, 10).map(t => `
+                <button onclick="filterNarrativesByTag('${t}')" 
+                        class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 text-[11px] border border-slate-200 hover:border-blue-300 font-mono transition flex items-center gap-1 shadow-2xs" 
+                        title="Нажмите для фильтрации тем по тегу #${t}">
+                    <i class="fa-solid fa-hashtag text-[9px] text-slate-400"></i>
+                    <span>${t}</span>
+                </button>
+            `).join(' ');
+            if (!tokenPills) tokenPills = `<span class="text-xs text-slate-400">Ключевые теги извлекаются</span>`;
+
+            const dm = domainMeta[nar.domain?.toLowerCase()] || { label: nar.domain || 'Общее', icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
 
             panel.innerHTML = `
                 <div class="flex flex-col gap-4">
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="text-[11px] font-semibold uppercase font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">${nar.domain}</span>
+                                <button onclick="setNarrativeDomainFilter('${(nar.domain || 'general').toLowerCase()}')" class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${dm.color} border flex items-center gap-1">
+                                    <i class="fa-solid ${dm.icon} text-[9px]"></i>
+                                    <span>${dm.label}</span>
+                                </button>
                                 <span class="text-[11px] font-semibold text-slate-500">${nar.status}</span>
                             </div>
                             <button onclick="deselectNarrative()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition" title="Закрыть детальный просмотр">
@@ -1590,7 +1810,7 @@
                     </div>
 
                     <div>
-                        <span class="text-[10px] font-bold text-gemini-mutedText uppercase tracking-wider block mb-2">Ключевые понятия темы:</span>
+                        <span class="text-[10px] font-bold text-gemini-mutedText uppercase tracking-wider block mb-2">Ключевые теги темы (нажмите для фильтра):</span>
                         <div class="flex flex-wrap gap-1.5">
                             ${tokenPills}
                         </div>
@@ -1879,7 +2099,11 @@
 
                 document.getElementById('modalEventTitle').textContent = ev.title;
                 document.getElementById('modalEventDesc').textContent = ev.description || 'Событие автоматически проанализировано Байесовской моделью консенсуса.';
-                document.getElementById('modalEventDomainBadge').textContent = ev.domain.toUpperCase();
+                
+                const dm = domainMeta[(ev.domain || 'general').toLowerCase()] || { label: ev.domain || 'Общее', icon: 'fa-tag', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+                const domBadge = document.getElementById('modalEventDomainBadge');
+                domBadge.innerHTML = `<i class="fa-solid ${dm.icon} text-[9px] mr-1"></i> ${dm.label}`;
+                domBadge.className = `text-[11px] font-semibold px-2.5 py-1 rounded-full ${dm.color} border flex items-center gap-1`;
                 
                 const isResolved = ev.status.startsWith('RESOLVED');
                 const isTrue = ev.status === 'RESOLVED_TRUE';

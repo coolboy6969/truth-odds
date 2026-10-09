@@ -89,11 +89,28 @@ class AutoEventAnalysisEngine:
     @classmethod
     def infer_domain(cls, title: str) -> str:
         t = title.lower()
-        if any(w in t for w in ["биткоин", "btc", "bitcoin", "эфириум", "eth", "ethereum", "solana", "солана", "крипто", "etf", "халвинг"]):
+        crypto_keywords = [
+            "биткоин", "btc", "bitcoin", "эфириум", "eth", "ethereum", "solana", "солана",
+            "крипто", "криптовалют", "etf", "халвинг", "альткоин", "дефи", "defi", "блокчейн",
+            "токен", "xrp", "ripple", "binance", "bnb", "usdt", "стейблкоин", "майнинг"
+        ]
+        tech_keywords = [
+            "ai", "agi", "ии", "интеллект", "нейросеть", "нейросети", "gpt", "openai", "claude",
+            "deepseek", "tesla", "робот", "робототехник", "apple", "microsoft", "google", "meta",
+            "nvidia", "чип", "чипы", "полупроводник", "софт", "квантов", "космос", "spacex", "стартап"
+        ]
+        macro_keywords = [
+            "рецессия", "инфляция", "фрс", "доллар", "ввп", "ставка", "s&p", "s&p500", "nasdaq",
+            "акций", "акции", "фондовый", "рынок", "кризис", "экономик", "госдолг", "долг",
+            "облигаци", "золото", "нефть", "центробанк", "цб", "безработиц", "выборы", "президент", "трамп"
+        ]
+
+        # Prioritize domain by matching keywords
+        if any(w in t for w in crypto_keywords):
             return "crypto"
-        elif any(w in t for w in ["ai", "agi", "ии", "интеллект", "нейросеть", "tesla", "робот"]):
+        elif any(w in t for w in tech_keywords):
             return "tech"
-        elif any(w in t for w in ["рецессия", "инфляция", "фрс", "доллар", "ввп", "ставка", "s&p", "акций", "кризис"]):
+        elif any(w in t for w in macro_keywords):
             return "macro"
         return "general"
 
@@ -109,11 +126,12 @@ class AutoEventAnalysisEngine:
         Runs automated semantic analysis, links or creates expert forecasters,
         records their predictions, and computes the Bayesian aggregated probability.
         """
-        # 1. Refine domain if set to general
-        if event.domain == "general":
-            inferred = cls.infer_domain(event.title)
-            if inferred != "general":
-                event.domain = inferred
+        # 1. Refine domain automatically based on title semantics
+        inferred = cls.infer_domain(event.title)
+        if event.domain in ("auto", "general"):
+            event.domain = inferred
+        elif event.domain == "crypto" and inferred in ("tech", "macro"):
+            event.domain = inferred
 
         # 2. If a specific speaker was searched/specified by the user
         if speaker_name and speaker_name.strip():
