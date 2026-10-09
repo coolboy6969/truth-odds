@@ -97,6 +97,8 @@ def get_event(event_id: str, db: Session = Depends(get_db)):
 
 @router.post("", response_model=EventResponse)
 def create_event(payload: EventCreate, db: Session = Depends(get_db)):
+    from app.engine.auto_analysis import AutoEventAnalysisEngine
+
     ev = Event(
         title=payload.title.strip(),
         description=payload.description,
@@ -109,7 +111,46 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
     db.add(ev)
     db.commit()
     db.refresh(ev)
-    return ev
+
+    if payload.auto_analyze:
+        ev = AutoEventAnalysisEngine.analyze_and_forecast_event(
+            db=db,
+            event=ev,
+            speaker_name=payload.speaker_name,
+            speaker_confidence=payload.speaker_confidence
+        )
+
+    stmts = []
+    for st in ev.statements:
+        sp = db.query(Speaker).filter(Speaker.id == st.speaker_id).first()
+        stmts.append({
+            "id": st.id,
+            "speaker_id": st.speaker_id,
+            "speaker_name": sp.name if sp else "Unknown",
+            "speaker_credibility": sp.overall_credibility if sp else 0.5,
+            "event_id": st.event_id,
+            "source_platform": st.source_platform,
+            "source_url": st.source_url,
+            "raw_quote": st.raw_quote,
+            "speaker_confidence": st.speaker_confidence,
+            "speaker_weight_applied": st.speaker_weight_applied,
+            "created_at": st.created_at
+        })
+
+    return {
+        "id": ev.id,
+        "title": ev.title,
+        "description": ev.description,
+        "domain": ev.domain,
+        "base_rate": ev.base_rate,
+        "current_probability": ev.current_probability,
+        "deadline": ev.deadline,
+        "status": ev.status,
+        "resolution_notes": ev.resolution_notes,
+        "resolved_at": ev.resolved_at,
+        "created_at": ev.created_at,
+        "statements": stmts
+    }
 
 @router.post("/{event_id}/resolve", response_model=EventResponse)
 def resolve_event(

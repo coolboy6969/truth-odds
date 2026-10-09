@@ -11,6 +11,7 @@ def test_health_check():
     assert response.json()["status"] == "ok"
 
 def test_seed_demo_and_verify_scoring():
+    client.post("/api/demo/reset-db")
     # Seed data
     resp_seed = client.post("/api/demo/seed")
     assert resp_seed.status_code == 200

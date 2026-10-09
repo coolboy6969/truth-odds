@@ -77,3 +77,32 @@ def test_auto_oracle_endpoints():
     assert data["success"] is True
     assert "summary" in data
 
+def test_automated_event_analysis_and_forecasting():
+    client.post("/api/demo/reset-db")
+    # 1. Create event with auto analysis
+    ev_res = client.post("/api/events", json={
+        "title": "Биткоин превысит $150,000 к концу 2026 года",
+        "domain": "general",
+        "auto_analyze": True
+    })
+    assert ev_res.status_code == 200
+    data = ev_res.json()
+    assert data["domain"] == "crypto"
+    assert len(data["statements"]) >= 2
+    # Verify probability is calculated based on consensus (not static 0.5)
+    assert data["current_probability"] != 0.5
+
+    # 2. Create event with attached speaker
+    ev2_res = client.post("/api/events", json={
+        "title": "Создание AGI сверхинтеллекта до конца 2026",
+        "speaker_name": "Elon Musk",
+        "domain": "general",
+        "auto_analyze": True
+    })
+    assert ev2_res.status_code == 200
+    data2 = ev2_res.json()
+    assert data2["domain"] == "tech"
+    speakers_in_ev = [s["speaker_name"] for s in data2["statements"]]
+    assert "Elon Musk" in speakers_in_ev
+
+

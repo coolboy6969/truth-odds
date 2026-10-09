@@ -39,7 +39,9 @@ class EventBase(BaseModel):
     deadline: Optional[datetime] = None
 
 class EventCreate(EventBase):
-    pass
+    speaker_name: Optional[str] = None
+    speaker_confidence: Optional[float] = None
+    auto_analyze: bool = True
 
 class EventResolveRequest(BaseModel):
     outcome: bool = Field(..., description="True if event occurred, False if not")
