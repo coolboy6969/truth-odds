@@ -112,6 +112,8 @@ class DiscoveredSpeakerCandidate(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     discovered_via_channel: Mapped[str] = mapped_column(String(255), nullable=False)
     context_quote: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    extracted_predictions: Mapped[Optional[Any]] = mapped_column(JSON, default=list, nullable=True)
     mention_count: Mapped[int] = mapped_column(Integer, default=1)
     claim_density_score: Mapped[float] = mapped_column(Float, default=0.5)
     

@@ -83,3 +83,43 @@ def test_seed_radar_demo():
     resp = client.post("/api/discovery/seed-radar-demo")
     assert resp.status_code == 200
     assert resp.json()["success"] is True
+
+def test_real_world_analyst_search_and_bayesian_integration():
+    # 1. Search for a real-world analyst via live media search
+    resp = client.post("/api/discovery/radar/search-person", json={
+        "query": "Arthur Hayes",
+        "auto_record": False
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["total_articles"] > 0
+    assert data["candidates_found"] > 0
+
+    # 2. Check candidate is present in Radar candidates
+    cands = client.get("/api/discovery/candidates").json()
+    hayes_cand = next((c for c in cands if "Arthur Hayes" in c["name"]), None)
+    assert hayes_cand is not None
+    assert hayes_cand["status"] in ("CANDIDATE", "APPROVED")
+
+    # 3. Approve candidate and verify statements are recorded
+    resp_appr = client.post(f"/api/discovery/candidates/{hayes_cand['id']}/approve")
+    assert resp_appr.status_code == 200
+    appr_data = resp_appr.json()
+    assert appr_data["success"] is True
+
+    # 4. Verify candidate is now in accepted Speakers list
+    speakers = client.get("/api/speakers").json()
+    assert any("Arthur Hayes" in s["name"] for s in speakers)
+
+    # 5. Verify events have statements from this speaker
+    events = client.get("/api/events").json()
+    assert len(events) > 0
+
+def test_real_world_live_media_scan():
+    resp = client.post("/api/discovery/radar/live-scan")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert "total_articles" in data
+    assert "candidates_found" in data

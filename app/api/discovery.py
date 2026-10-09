@@ -15,6 +15,39 @@ class DiscoverStreamRequest(BaseModel):
     speaker_hint: Optional[str] = None
     domain: str = "crypto"
 
+from app.discovery.real_world_discovery import RealWorldAnalystDiscoveryService
+
+class SearchPersonRequest(BaseModel):
+    query: str
+    auto_record: bool = False
+
+@router.post("/radar/search-person")
+async def search_real_world_person(payload: SearchPersonRequest, db: Session = Depends(get_db)):
+    """
+    Searches live global web/media for a real-life analyst or topic,
+    extracts quotes, statements, forecasts, and registers candidate.
+    """
+    result = await RealWorldAnalystDiscoveryService.search_real_world(
+        query=payload.query,
+        db=db,
+        limit=15,
+        auto_record=payload.auto_record
+    )
+    return result
+
+@router.post("/radar/live-scan")
+async def live_media_scan(db: Session = Depends(get_db)):
+    """
+    Autonomously scans fresh live streams (Cointelegraph, Google News crypto & macro)
+    for new analysts and statements.
+    """
+    result = await RealWorldAnalystDiscoveryService.scan_live_media(
+        db=db,
+        max_articles=25,
+        auto_record=False
+    )
+    return result
+
 @router.get("/candidates")
 def get_candidates(db: Session = Depends(get_db)):
     candidates = db.query(DiscoveredSpeakerCandidate).order_by(
@@ -24,10 +57,13 @@ def get_candidates(db: Session = Depends(get_db)):
 
 @router.post("/candidates/{candidate_id}/approve")
 def approve_candidate(candidate_id: str, db: Session = Depends(get_db)):
-    speaker = SpeakerDiscoveryEngine.promote_candidate_to_speaker(db, candidate_id)
-    if not speaker:
-        raise HTTPException(status_code=404, detail="Candidate not found")
-    return {"success": True, "speaker_id": speaker.id, "name": speaker.name}
+    res = RealWorldAnalystDiscoveryService.approve_and_record_claims(db, candidate_id)
+    if not res.get("success"):
+        speaker = SpeakerDiscoveryEngine.promote_candidate_to_speaker(db, candidate_id)
+        if not speaker:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        return {"success": True, "speaker_id": speaker.id, "name": speaker.name, "statements_recorded": 0}
+    return res
 
 @router.post("/candidates/{candidate_id}/reject")
 def reject_candidate(candidate_id: str, db: Session = Depends(get_db)):
@@ -42,11 +78,13 @@ def reject_candidate(candidate_id: str, db: Session = Depends(get_db)):
 def approve_all_candidates(db: Session = Depends(get_db)):
     pending = db.query(DiscoveredSpeakerCandidate).filter(DiscoveredSpeakerCandidate.status == "CANDIDATE").all()
     count = 0
+    total_stmts = 0
     for cand in pending:
-        sp = SpeakerDiscoveryEngine.promote_candidate_to_speaker(db, cand.id)
-        if sp:
+        res = RealWorldAnalystDiscoveryService.approve_and_record_claims(db, cand.id)
+        if res.get("success"):
             count += 1
-    return {"success": True, "approved_count": count}
+            total_stmts += res.get("statements_recorded", 0)
+    return {"success": True, "approved_count": count, "statements_recorded": total_stmts}
 
 class CreateNarrativeRequest(BaseModel):
     topic_summary: str

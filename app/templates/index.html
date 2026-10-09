@@ -140,22 +140,8 @@
                 </nav>
             </div>
 
-            <!-- Bottom Part: System Tools & Local Status -->
+            <!-- Bottom Part: Reset Database & Local Status -->
             <div class="p-3 border-t border-gemini-border bg-gemini-sidebar/50 flex flex-col gap-2">
-                <div class="px-2 text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider">
-                    Быстрые действия
-                </div>
-
-                <button onclick="seedCryptoTop10()" class="w-full text-left px-2.5 py-1.5 rounded-xl hover:bg-gemini-hover text-slate-700 text-xs flex items-center gap-2 transition">
-                    <i class="fa-solid fa-user-check text-blue-600 text-xs w-4 text-center"></i>
-                    <span>Загрузить Топ-10 крипто</span>
-                </button>
-
-                <button onclick="triggerAutoOracleCheck()" class="w-full text-left px-2.5 py-1.5 rounded-xl hover:bg-gemini-hover text-slate-700 text-xs flex items-center gap-2 transition">
-                    <i class="fa-solid fa-scale-balanced text-emerald-600 text-xs w-4 text-center"></i>
-                    <span>Сверить с оракулом</span>
-                </button>
-
                 <button onclick="openResetModal()" class="w-full text-left px-2.5 py-1.5 rounded-xl hover:bg-rose-50 text-rose-600 text-xs flex items-center gap-2 transition">
                     <i class="fa-solid fa-trash-can text-rose-500 text-xs w-4 text-center"></i>
                     <span>Сбросить базу данных</span>
@@ -375,36 +361,87 @@
                     <section id="view-candidates" class="tab-content hidden flex flex-col gap-5">
                         
                         <!-- Radar Info Card & Stats -->
-                        <div class="bg-white rounded-2xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+                        <div class="bg-white rounded-3xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                             <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-base">
+                                <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-lg border border-indigo-100">
                                     <i class="fa-solid fa-satellite-dish"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-sm font-bold text-slate-800">Радар кандидатов в аналитики</h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-sm font-bold text-slate-800">Радар кандидатов в аналитики</h3>
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span>Live Web Scanner</span>
+                                        </span>
+                                    </div>
                                     <p class="text-xs text-gemini-grayText mt-0.5">
-                                        Система сканирует цитаты в видео и публикациях соцсетей, находя кандидатов с прогнозами. Одобряйте проверенных лиц для перевода в принятые аналитики.
+                                        Автономный поиск и извлечение прогнозов реальных аналитиков из Google News, Cointelegraph, Bloomberg, CNBC, РБК и соцсетей. При одобрении их заявления мгновенно переводятся в расчетные вероятности событий.
                                     </p>
                                     <!-- Stats Counters -->
                                     <div class="flex items-center gap-3 mt-2 text-[11px] font-semibold text-slate-600">
-                                        <span>Найдено кандидатов: <b id="candStatTotal" class="text-indigo-600">0</b></span>
+                                        <span>Найдено кандидатов: <b id="candStatTotal" class="text-indigo-600 font-mono">0</b></span>
                                         <span>•</span>
-                                        <span>Ожидают решения: <b id="candStatPending" class="text-amber-600">0</b></span>
+                                        <span>Ожидают решения: <b id="candStatPending" class="text-amber-600 font-mono">0</b></span>
                                         <span>•</span>
-                                        <span>Одобрено: <b id="candStatApproved" class="text-emerald-600">0</b></span>
+                                        <span>Одобрено: <b id="candStatApproved" class="text-emerald-600 font-mono">0</b></span>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="flex items-center gap-2 flex-shrink-0">
-                                <button onclick="approveAllPendingCandidates()" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Одобрить всех ожидающих кандидатов">
+                                <button onclick="triggerLiveMediaScan()" id="radarLiveScanBtn" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Сканировать свежие медиапотоки на новых аналитиков">
+                                    <i class="fa-solid fa-tower-broadcast"></i>
+                                    <span>📡 Сканировать медиа</span>
+                                </button>
+                                <button onclick="approveAllPendingCandidates()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Одобрить всех ожидающих кандидатов и учесть их прогнозы">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span>Одобрить всех</span>
                                 </button>
-                                <button onclick="seedRadarDemo()" class="px-3.5 py-2 rounded-lg bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition">
+                                <button onclick="loadCandidates()" class="px-3 py-2 rounded-xl bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-1.5 transition" title="Обновить список кандидатов">
                                     <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
-                                    <span>Обновить радар</span>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Real-World Live Search Box for Any Analyst or Topic -->
+                        <div class="bg-white rounded-3xl p-4 md:p-5 border border-gemini-border flex flex-col gap-3 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </div>
+                                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Поиск реальных аналитиков и их заявлений в сети</h4>
+                                </div>
+                                <span class="text-[11px] text-gemini-mutedText">Google News • Cointelegraph • Мировые медиа</span>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row items-stretch gap-2">
+                                <div class="relative flex-1">
+                                    <input type="text" id="realWorldSearchQueryInput" onkeydown="if(event.key==='Enter') runRealWorldAnalystSearch()" placeholder="Введите имя эксперта (Arthur Hayes, Cathie Wood, Роберт Кийосаки...) или тему (Bitcoin 150k, Ставка ФРС...)" class="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition">
+                                    <i class="fa-solid fa-user-tie text-slate-400 text-xs absolute left-3.5 top-3"></i>
+                                </div>
+                                <button onclick="runRealWorldAnalystSearch()" id="realWorldSearchBtn" class="px-5 py-2.5 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm flex-shrink-0">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>Найти в сети и разобрать</span>
+                                </button>
+                            </div>
+
+                            <!-- Quick preset pills for popular analysts -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                                <span class="text-gemini-mutedText font-semibold mr-1">Быстрый поиск:</span>
+                                <button onclick="runRealWorldAnalystSearch('Arthur Hayes')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Arthur Hayes</button>
+                                <button onclick="runRealWorldAnalystSearch('Cathie Wood')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Cathie Wood</button>
+                                <button onclick="runRealWorldAnalystSearch('Peter Brandt')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Peter Brandt</button>
+                                <button onclick="runRealWorldAnalystSearch('Tom Lee')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Tom Lee</button>
+                                <button onclick="runRealWorldAnalystSearch('Роберт Кийосаки')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Роберт Кийосаки</button>
+                                <button onclick="runRealWorldAnalystSearch('Александр Герчик')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition font-medium">Александр Герчик</button>
+                                <button onclick="runRealWorldAnalystSearch('Bitcoin 150000 prediction')" class="px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition font-medium">🪙 Bitcoin $150k</button>
+                            </div>
+
+                            <!-- Live Scan Progress Notification -->
+                            <div id="radarLiveScanProgress" class="hidden p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center gap-2.5 animate-pulse">
+                                <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-sm"></i>
+                                <span class="font-medium">Сканируем мировые медиа, находим аналитиков и разбираем их заявления...</span>
                             </div>
                         </div>
 
@@ -412,7 +449,7 @@
                         <div class="bg-white rounded-2xl p-3 border border-gemini-border flex flex-wrap items-center justify-between gap-3 shadow-2xs">
                             <div class="flex items-center gap-2 flex-1 min-w-[200px]">
                                 <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs ml-2"></i>
-                                <input type="text" id="candidateSearchInput" oninput="applyCandidateFilters()" placeholder="Поиск кандидата по имени или источнику..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
+                                <input type="text" id="candidateSearchInput" oninput="applyCandidateFilters()" placeholder="Поиск в найденных кандидатах (по имени или источнику)..." class="flex-1 py-1 px-2 text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none">
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
@@ -1341,9 +1378,22 @@
             });
 
             if (filtered.length === 0) {
+                const searchQ = (document.getElementById('speakerSearchInput')?.value || '').trim();
+                let searchMediaAction = '';
+                if (searchQ) {
+                    searchMediaAction = `
+                        <div class="mt-3">
+                            <button onclick="jumpToRadarSearch('${searchQ.replace(/'/g, "\\'")}')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition inline-flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-satellite-dish"></i>
+                                <span>Найти «${searchQ}» в мировых медиа через Радар</span>
+                            </button>
+                        </div>
+                    `;
+                }
                 container.innerHTML = `
-                    <div class="col-span-full bg-white rounded-2xl p-8 border border-gemini-border text-center text-xs text-gemini-grayText">
-                        Принятых аналитиков по выбранным фильтрам пока нет. Нажмите «Добавить аналитика в учет» или загрузите проверенный Топ-10 авторов.
+                    <div class="col-span-full bg-white rounded-2xl p-8 border border-gemini-border text-center text-xs text-gemini-grayText flex flex-col items-center justify-center">
+                        <p>Принятых аналитиков по выбранным критериям не найдено.</p>
+                        ${searchMediaAction}
                     </div>
                 `;
                 return;
@@ -1527,8 +1577,10 @@
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-200 text-center text-xs text-gemini-grayText">
-                        Кандидатов по выбранным фильтрам не найдено. Нажмите «Обновить радар».
+                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-200 text-center text-xs text-gemini-grayText flex flex-col items-center justify-center gap-2">
+                        <i class="fa-solid fa-satellite-dish text-indigo-400 text-xl"></i>
+                        <p class="font-medium text-slate-700">Кандидатов по выбранным фильтрам не найдено.</p>
+                        <p class="text-slate-500">Воспользуйтесь строкой поиска выше или нажмите «Сканировать медиа» для поиска свежих заявлений.</p>
                     </div>
                 `;
                 return;
@@ -1538,44 +1590,112 @@
                 const isApproved = cand.status === 'APPROVED';
                 const isRejected = cand.status === 'REJECTED';
 
+                const predictionsList = (cand.extracted_predictions || []);
+                let claimsHtml = '';
+                if (predictionsList.length > 0) {
+                    claimsHtml = `
+                        <div class="mt-2.5 flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-crosshairs text-blue-500"></i> Реальные прогнозы из публикаций:
+                            </span>
+                            <div class="flex flex-col gap-1.5">
+                                ${predictionsList.slice(0, 3).map(p => `
+                                    <div class="p-2 rounded-xl bg-white border border-slate-200/90 text-xs flex items-start justify-between gap-2 shadow-2xs">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-1.5 text-[10px] mb-0.5">
+                                                <span class="px-1.5 py-0.5 rounded font-semibold ${p.domain === 'crypto' ? 'bg-amber-100 text-amber-800' : p.domain === 'macro' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${p.domain || 'general'}</span>
+                                                <span class="text-slate-400">•</span>
+                                                <span class="text-slate-500 font-medium truncate">${p.publisher || cand.discovered_via_channel || 'Медиа'}</span>
+                                            </div>
+                                            <div class="font-medium text-slate-800 line-clamp-2 leading-snug">«${p.event_hypothesis || p.raw_quote}»</div>
+                                        </div>
+                                        <div class="text-right flex-shrink-0 self-center">
+                                            <span class="text-[10px] text-slate-400 block">Уверенность:</span>
+                                            <span class="font-bold text-xs font-mono text-blue-600">${Math.round((p.speaker_confidence || 0.7) * 100)}%</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let sourceLink = '';
+                if (cand.source_url) {
+                    sourceLink = `
+                        <span>•</span>
+                        <a href="${cand.source_url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold inline-flex items-center gap-1">
+                            <span>Статья в источнике</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        </a>
+                    `;
+                }
+
                 let actionBtns = '';
                 if (isApproved) {
-                    actionBtns = `<span class="text-[11px] font-semibold text-emerald-600"><i class="fa-solid fa-check"></i> Принят в аналитики</span>`;
-                } else if (isRejected) {
-                    actionBtns = `<span class="text-[11px] font-semibold text-rose-500"><i class="fa-solid fa-xmark"></i> Отклонен</span>`;
-                } else {
                     actionBtns = `
                         <div class="flex items-center gap-2">
-                            <button onclick="approveCandidate('${cand.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
-                                <i class="fa-solid fa-check"></i> Одобрить
+                            <span class="text-xs font-semibold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-check"></i> Принят в аналитики</span>
+                            <button onclick="runRealWorldAnalystSearch('${cand.name.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1" title="Искать еще свежие прогнозы этого эксперта">
+                                <i class="fa-solid fa-magnifying-glass"></i> Найти еще
                             </button>
-                            <button onclick="rejectCandidate('${cand.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1">
-                                <i class="fa-solid fa-xmark"></i> Отклонить
+                        </div>
+                    `;
+                } else if (isRejected) {
+                    actionBtns = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-rose-500 flex items-center gap-1"><i class="fa-solid fa-xmark"></i> Отклонен</span>
+                            <button onclick="approveCandidate('${cand.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold transition flex items-center gap-1">
+                                Вернуть
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionBtns = `
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="approveCandidate('${cand.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Одобрить и учесть прогнозы</span>
+                            </button>
+                            <button onclick="runRealWorldAnalystSearch('${cand.name.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition flex items-center gap-1" title="Искать другие публикации с прогнозами этого эксперта">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>Искать еще</span>
+                            </button>
+                            <button onclick="rejectCandidate('${cand.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Отклонить</span>
                             </button>
                         </div>
                     `;
                 }
 
                 return `
-                    <div class="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-blue-300 hover:bg-white transition flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-blue-300 hover:bg-white transition flex flex-col justify-between gap-3 shadow-2xs">
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 text-[11px] text-gemini-mutedText">
-                                <span class="font-medium text-slate-700 flex items-center gap-1">
-                                    <i class="fa-solid fa-satellite-dish text-indigo-500"></i> ${cand.discovered_via_channel}
+                            <div class="flex flex-wrap items-center gap-2 text-[11px] text-gemini-mutedText">
+                                <span class="font-medium text-slate-700 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200">
+                                    <i class="fa-solid fa-newspaper text-indigo-500"></i> ${cand.discovered_via_channel}
                                 </span>
                                 <span>•</span>
                                 <span class="font-mono">Упоминаний: <b>${cand.mention_count}</b></span>
                                 <span>•</span>
-                                <span>Плотность прогнозов: <b>${Math.round(cand.claim_density_score * 100)}%</b></span>
+                                <span>Плотность прогнозов: <b class="text-blue-600">${Math.round(cand.claim_density_score * 100)}%</b></span>
+                                ${sourceLink}
                             </div>
 
-                            <h4 class="text-sm font-bold text-slate-900 mt-1">${cand.name}</h4>
-                            <p class="text-xs text-slate-600 bg-white p-2 rounded-lg border border-slate-100 mt-1.5 italic line-clamp-2">
-                                «${cand.context_quote || 'Зафиксировано прогнозное утверждение'}»
+                            <h4 class="text-sm font-bold text-slate-900 mt-1.5 flex items-center gap-1.5">
+                                <span>${cand.name}</span>
+                                ${cand.mention_count >= 2 ? '<span class="text-blue-600 text-[11px]" title="Многократные упоминания в медиа"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                            </h4>
+                            
+                            <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 mt-1.5 italic leading-relaxed">
+                                «${cand.context_quote || 'Зафиксировано прогнозное утверждение в мировых медиа'}»
                             </p>
+
+                            ${claimsHtml}
                         </div>
 
-                        <div class="flex-shrink-0 self-end md:self-center">
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
                             ${actionBtns}
                         </div>
                     </div>
@@ -1587,9 +1707,12 @@
             try {
                 const res = await fetch(`/api/discovery/candidates/${id}/approve`, { method: 'POST' });
                 if (!res.ok) throw new Error('Approval failed');
-                showToast('Кандидат одобрен и добавлен в принятые аналитики!');
+                const data = await res.json();
+                const count = data.statements_recorded || 0;
+                showToast(`Аналитик «${data.speaker_name || data.name || ''}» одобрен! Учтено прогнозов: ${count}`);
                 await loadCandidates();
                 await loadSpeakers();
+                await loadEvents();
             } catch (e) {
                 showToast('Ошибка при одобрении кандидата', 'error');
             }
@@ -1611,12 +1734,90 @@
                 const res = await fetch('/api/discovery/candidates/approve-all', { method: 'POST' });
                 if (!res.ok) throw new Error('Batch approval failed');
                 const data = await res.json();
-                showToast(`Переведено в аналитики: ${data.approved_count || 0}`);
+                showToast(`Переведено в аналитики: ${data.approved_count || 0}. Учтено прогнозов: ${data.statements_recorded || 0}`);
                 await loadCandidates();
                 await loadSpeakers();
+                await loadEvents();
             } catch (e) {
                 showToast('Ошибка массового одобрения', 'error');
             }
+        }
+
+        async function runRealWorldAnalystSearch(queryOverride = null) {
+            const input = document.getElementById('realWorldSearchQueryInput');
+            const query = (queryOverride || input?.value || '').trim();
+            if (!query) {
+                showToast('Введите имя аналитика или тему для поиска в медиа', 'error');
+                return;
+            }
+            if (input && queryOverride) {
+                input.value = queryOverride;
+            }
+
+            const btn = document.getElementById('realWorldSearchBtn');
+            const progress = document.getElementById('radarLiveScanProgress');
+            if (btn) btn.disabled = true;
+            if (progress) {
+                progress.classList.remove('hidden');
+                const pSpan = progress.querySelector('span');
+                if (pSpan) pSpan.textContent = `Сканируем мировые медиа на заявления «${query}»...`;
+            }
+
+            try {
+                const res = await fetch('/api/discovery/radar/search-person', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, auto_record: false })
+                });
+                if (!res.ok) throw new Error('Media search failed');
+                const data = await res.json();
+                const foundCount = data.candidates_found || 0;
+                const claimsCount = data.total_claims_found || 0;
+                showToast(`Поиск завершен: найдено ${foundCount} аналитиков и ${claimsCount} прогнозов в медиа!`);
+                await loadCandidates();
+            } catch (e) {
+                console.error(e);
+                showToast('Ошибка при поиске аналитика в медиа', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+                if (progress) progress.classList.add('hidden');
+            }
+        }
+
+        async function triggerLiveMediaScan() {
+            const btn = document.getElementById('radarLiveScanBtn');
+            const progress = document.getElementById('radarLiveScanProgress');
+            if (btn) btn.disabled = true;
+            if (progress) {
+                progress.classList.remove('hidden');
+                const pSpan = progress.querySelector('span');
+                if (pSpan) pSpan.textContent = 'Сканируем Cointelegraph, Google News и финансовые ленты...';
+            }
+
+            try {
+                const res = await fetch('/api/discovery/radar/live-scan', {
+                    method: 'POST'
+                });
+                if (!res.ok) throw new Error('Live scan failed');
+                const data = await res.json();
+                const foundCount = data.candidates_found || 0;
+                const claimsCount = data.total_claims_found || 0;
+                showToast(`Сканирование завершено: найдено ${foundCount} кандидатов и ${claimsCount} прогнозов!`);
+                await loadCandidates();
+            } catch (e) {
+                console.error(e);
+                showToast('Ошибка при сканировании медиа-потоков', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+                if (progress) progress.classList.add('hidden');
+            }
+        }
+
+        function jumpToRadarSearch(name) {
+            switchTab('candidates');
+            const input = document.getElementById('realWorldSearchQueryInput');
+            if (input) input.value = name;
+            runRealWorldAnalystSearch(name);
         }
 
         // =================== TAB 4: NARRATIVES & DISCUSSIONS ===================
