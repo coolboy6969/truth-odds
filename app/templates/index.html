@@ -8,126 +8,200 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
-            color: #202124;
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .google-card {
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .workstation-card, .google-card {
             background: #ffffff;
-            border: 1px solid #dadce0;
-            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
             transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        .google-card:hover {
-            box-shadow: 0 1px 6px rgba(32,33,36,0.15);
-            border-color: #c0c4c9;
-        }
-        .google-pill {
-            border-radius: 9999px;
-            transition: all 0.15s ease;
-        }
-        .chrome-bar {
-            background-color: #ffffff;
-            border-bottom: 1px solid #dadce0;
+        .workstation-card:hover, .google-card:hover {
+            box-shadow: 0 4px 14px 0 rgba(15, 23, 42, 0.07);
+            border-color: #cbd5e1;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
 
-    <!-- Chrome-Style Header -->
-    <header class="chrome-bar sticky top-0 z-50 px-6 py-3">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+    <!-- Executive Analyst Workstation Command Bar -->
+    <header class="bg-[#0B0F19] border-b border-slate-800 sticky top-0 z-50 px-6 py-2.5 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
             
-            <!-- Logo & Title -->
+            <!-- Left: Workstation Identity & Status -->
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
-                    <i class="fa-solid fa-chart-pie text-lg"></i>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-slate-900 flex items-center justify-center text-white shadow-md border border-indigo-400/30">
+                    <i class="fa-solid fa-chart-line text-sm"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xl font-medium tracking-tight text-gray-900">TruthOdds</span>
-                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200">Прогнозы & Факты</span>
+                        <span class="text-base font-bold tracking-tight text-white font-mono">TruthOdds</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded font-mono font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">Рабочая станция</span>
+                        <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Локально
+                        </span>
                     </div>
-                    <p class="text-xs text-gray-500">Проверяем точность авторов и рассчитываем реальный шанс событий</p>
+                    <p class="text-[11px] text-slate-400">Личный аналитический комплекс • Оценка шансов и калибровка прогнозов</p>
                 </div>
             </div>
 
-            <!-- Ticker & Action Buttons -->
-            <div class="flex items-center gap-3">
-                <!-- Live Crypto Price Capsule (Chrome Omnibox style) -->
-                <div id="cryptoTicker" class="hidden md:flex items-center gap-4 text-xs bg-gray-100 hover:bg-gray-200/80 px-4 py-2 rounded-full border border-gray-200 transition">
-                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
-                        <i class="fa-brands fa-bitcoin text-amber-500"></i> BTC: <b id="ticker-btc" class="text-gray-900">$...</b>
-                    </span>
-                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
-                        <i class="fa-brands fa-ethereum text-indigo-500"></i> ETH: <b id="ticker-eth" class="text-gray-900">$...</b>
-                    </span>
-                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt text-purple-500"></i> SOL: <b id="ticker-sol" class="text-gray-900">$...</b>
-                    </span>
+            <!-- Center: Live Financial / Oracle Ticker -->
+            <div id="cryptoTicker" class="hidden lg:flex items-center gap-3.5 bg-slate-900/90 border border-slate-800 text-xs px-3.5 py-1.5 rounded-lg font-mono text-slate-300 shadow-inner">
+                <span class="flex items-center gap-1.5 text-slate-400 text-[11px] pr-2 border-r border-slate-800 font-sans">
+                    <i class="fa-solid fa-satellite-dish text-indigo-400"></i> Котировки:
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-brands fa-bitcoin text-amber-400 text-xs"></i> BTC: <b id="ticker-btc" class="text-white font-medium">$...</b>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-brands fa-ethereum text-indigo-400 text-xs"></i> ETH: <b id="ticker-eth" class="text-white font-medium">$...</b>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-purple-400 text-xs"></i> SOL: <b id="ticker-sol" class="text-white font-medium">$...</b>
+                </span>
+                <button onclick="checkCryptoOracle(false)" title="Сверить текущие цели с котировками" class="ml-1 text-[11px] text-indigo-400 hover:text-indigo-300 transition">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+
+            <!-- Right: Workstation Controls & Personal Tools -->
+            <div class="flex items-center gap-2.5">
+                <!-- Primary Action: New Forecast -->
+                <button onclick="focusNewEventInput()" class="text-xs font-medium px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-plus text-[11px]"></i> Новый прогноз
+                </button>
+
+                <!-- Quick Sync Button -->
+                <button onclick="syncAllData()" id="syncBtn" class="text-xs font-medium px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition" title="Синхронизировать все данные">
+                    <i class="fa-solid fa-rotate text-slate-400"></i>
+                    <span class="hidden sm:inline">Синхронизация</span>
+                </button>
+
+                <!-- Database Tools Menu Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleToolsMenu()" id="toolsMenuBtn" class="text-xs font-medium px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-sliders text-slate-400"></i>
+                        <span>Управление базой</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-0.5"></i>
+                    </button>
+                    
+                    <div id="toolsDropdown" class="hidden absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1.5 z-50 text-xs text-slate-200">
+                        <div class="px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                            Инструменты базы данных
+                        </div>
+                        <button onclick="seedCryptoTop10(); closeToolsMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-200 transition">
+                            <i class="fa-solid fa-users text-indigo-400 w-4 text-center"></i>
+                            <div>
+                                <div class="font-medium">Загрузить 10 авторов</div>
+                                <div class="text-[10px] text-slate-400">Эталонная база крипто-аналитиков</div>
+                            </div>
+                        </button>
+                        <button onclick="checkCryptoOracle(false); closeToolsMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-200 transition">
+                            <i class="fa-solid fa-arrow-trend-up text-emerald-400 w-4 text-center"></i>
+                            <div>
+                                <div class="font-medium">Проверить котировки (Оракул)</div>
+                                <div class="text-[10px] text-slate-400">Сверка целевых цен с рынком</div>
+                            </div>
+                        </button>
+                        <button onclick="switchTab('sources'); closeToolsMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-200 transition">
+                            <i class="fa-brands fa-youtube text-red-400 w-4 text-center"></i>
+                            <div>
+                                <div class="font-medium">Мониторинг каналов</div>
+                                <div class="text-[10px] text-slate-400">Проверка новых транскриптов</div>
+                            </div>
+                        </button>
+                        <div class="border-t border-slate-800 my-1"></div>
+                        <a href="/docs" target="_blank" onclick="closeToolsMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-300 transition">
+                            <i class="fa-solid fa-code text-cyan-400 w-4 text-center"></i>
+                            <div>
+                                <div class="font-medium">Спецификация API (Swagger)</div>
+                                <div class="text-[10px] text-slate-400">Интеграция с локальными скриптами</div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
-                <button onclick="seedCryptoTop10()" class="text-xs font-medium px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-users"></i> Загрузить 10 авторов
-                </button>
-                <a href="/docs" target="_blank" class="text-xs font-medium px-3.5 py-2 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-code"></i> API
-                </a>
+                <!-- Single-User Operator Badge -->
+                <div class="hidden md:flex items-center gap-2 pl-2 border-l border-slate-800">
+                    <div class="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-[11px] font-medium text-slate-200 leading-tight">Аналитик</div>
+                        <div class="text-[9px] text-slate-400">Личный профиль</div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Google-Style Rounded Pill Navigation Tabs -->
-    <div class="bg-white border-b border-gray-200 px-6 py-2.5">
-        <div class="max-w-7xl mx-auto flex gap-2 overflow-x-auto text-sm font-medium">
-            <button onclick="switchTab('events')" id="tab-btn-events" class="google-pill px-4 py-2 bg-blue-600 text-white flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-bullseye text-xs"></i> Ожидаемые события
+    <!-- Workstation Navigation Tabs -->
+    <div class="bg-[#111827] border-b border-slate-800 px-6 py-2">
+        <div class="max-w-7xl mx-auto flex gap-1.5 overflow-x-auto text-xs font-medium">
+            <button onclick="switchTab('events')" id="tab-btn-events" class="px-3.5 py-2 rounded-lg bg-indigo-600 text-white flex items-center gap-2 transition shadow-sm">
+                <i class="fa-solid fa-bullseye text-xs"></i>
+                <span>Ожидаемые события</span>
+                <span id="tabCountEvents" class="bg-indigo-700/60 text-white text-[10px] px-1.5 py-0.2 rounded font-mono">...</span>
             </button>
-            <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-solid fa-trophy text-xs text-amber-500"></i> Рейтинг экспертов
+            <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="px-3.5 py-2 rounded-lg bg-transparent text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2 transition">
+                <i class="fa-solid fa-trophy text-xs text-amber-400"></i>
+                <span>Рейтинг экспертов</span>
+                <span id="tabCountSpeakers" class="bg-slate-800 text-slate-400 text-[10px] px-1.5 py-0.2 rounded font-mono">...</span>
             </button>
-            <button onclick="switchTab('sources')" id="tab-btn-sources" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-brands fa-youtube text-xs text-red-500"></i> Отслеживаемые каналы
+            <button onclick="switchTab('sources')" id="tab-btn-sources" class="px-3.5 py-2 rounded-lg bg-transparent text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2 transition">
+                <i class="fa-brands fa-youtube text-xs text-rose-400"></i>
+                <span>Отслеживаемые каналы</span>
             </button>
-            <button onclick="switchTab('radar')" id="tab-btn-radar" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-solid fa-compass text-xs text-blue-500"></i> Поиск новых тем
+            <button onclick="switchTab('radar')" id="tab-btn-radar" class="px-3.5 py-2 rounded-lg bg-transparent text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2 transition">
+                <i class="fa-solid fa-compass text-xs text-cyan-400"></i>
+                <span>Поиск новых тем и персон</span>
             </button>
-            <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
-                <i class="fa-solid fa-plus text-xs"></i> Анализ публикации
+            <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="px-3.5 py-2 rounded-lg bg-transparent text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2 transition">
+                <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-400"></i>
+                <span>Анализ публикации</span>
             </button>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+    <main class="max-w-7xl mx-auto px-6 py-7 flex-1 w-full">
 
         <!-- TAB 1: EVENTS & CHANCES -->
         <section id="tab-events" class="space-y-6">
             
             <!-- Поле добавления собственного события / темы для прогноза -->
-            <div class="google-card p-5">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm border border-blue-200">
-                        <i class="fa-solid fa-plus"></i>
+            <div class="workstation-card p-5 bg-white border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm border border-indigo-100">
+                            <i class="fa-solid fa-plus"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Добавить событие или тему для отслеживания</h3>
+                            <p class="text-xs text-slate-500">Сформулируйте тезис для сбора прогнозов экспертов и математического расчета вероятности</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">Добавить событие или тему для прогноза</h3>
-                        <p class="text-xs text-gray-500">Укажите формулировку события, чтобы отслеживать мнения экспертов и рассчитывать вероятность</p>
-                    </div>
+                    <span class="text-[11px] font-mono text-slate-400 hidden sm:inline">Рабочая станция аналитика</span>
                 </div>
                 <form onsubmit="handleCreateCustomEvent(event)" class="flex flex-col sm:flex-row gap-2.5">
-                    <input type="text" id="customEventTitle" placeholder="Например: 'Биткоин превысит $200,000 в 2026 году' или 'ФРС снизит ключевую ставку до конца года'" class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required>
-                    <select id="customEventDomain" class="bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-700 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="customEventTitle" placeholder="Например: 'Биткоин превысит $150,000 в 2026 году' или 'ФРС сохранит ключевую ставку без изменений'" class="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" required>
+                    <select id="customEventDomain" class="bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500">
                         <option value="crypto">Криптовалюта</option>
                         <option value="tech">Технологии и ИИ</option>
                         <option value="macro">Экономика</option>
-                        <option value="general">Общая тема</option>
+                        <option value="general">Общая тематика</option>
                     </select>
-                    <button type="submit" id="createEventBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-plus text-[10px]"></i> Добавить событие
+                    <button type="submit" id="createEventBtn" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Добавить в мониторинг
                     </button>
                 </form>
             </div>
@@ -370,16 +444,16 @@
                 const btn = document.getElementById('tab-btn-' + t);
                 if (el) el.classList.add('hidden');
                 if (btn) {
-                    btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-                    btn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-transparent', 'text-slate-300');
                 }
             });
             const activeEl = document.getElementById('tab-' + tab);
             const activeBtn = document.getElementById('tab-btn-' + tab);
             if (activeEl) activeEl.classList.remove('hidden');
             if (activeBtn) {
-                activeBtn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
-                activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('bg-transparent', 'text-slate-300');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
             }
 
             if (tab === 'events') loadEvents();
@@ -387,6 +461,48 @@
             if (tab === 'sources') loadSources();
             if (tab === 'radar') loadRadar();
         }
+
+        function focusNewEventInput() {
+            switchTab('events');
+            const input = document.getElementById('customEventTitle');
+            if (input) {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => input.focus(), 250);
+            }
+        }
+
+        async function syncAllData() {
+            const btn = document.getElementById('syncBtn');
+            if (btn) btn.innerHTML = `<i class="fa-solid fa-rotate fa-spin text-indigo-400"></i> <span class="hidden sm:inline">Синхронизация...</span>`;
+            try {
+                await Promise.allSettled([
+                    loadEvents(),
+                    loadSpeakers(),
+                    loadSources(),
+                    loadLivePrices()
+                ]);
+            } finally {
+                if (btn) btn.innerHTML = `<i class="fa-solid fa-rotate text-slate-400"></i> <span class="hidden sm:inline">Синхронизация</span>`;
+            }
+        }
+
+        function toggleToolsMenu() {
+            const menu = document.getElementById('toolsDropdown');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        function closeToolsMenu() {
+            const menu = document.getElementById('toolsDropdown');
+            if (menu) menu.classList.add('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('toolsMenuBtn');
+            const menu = document.getElementById('toolsDropdown');
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
 
         async function seedCryptoTop10() {
             try {
@@ -445,14 +561,17 @@
             const url = domain ? `/api/events?domain=${domain}` : '/api/events';
             const res = await fetch(url);
             const events = await res.json();
+            const countBadge = document.getElementById('tabCountEvents');
+            if (countBadge && Array.isArray(events)) countBadge.innerText = events.length;
+
             const container = document.getElementById('eventsList');
             container.innerHTML = '';
 
             if (events.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-2 text-center py-12 google-card">
-                        <p class="text-gray-500 text-sm mb-3">Событий пока нет.</p>
-                        <button onclick="seedCryptoTop10()" class="px-5 py-2 bg-blue-600 text-white rounded-full text-xs font-medium">Загрузить примеры</button>
+                    <div class="col-span-2 text-center py-12 workstation-card">
+                        <p class="text-slate-500 text-sm mb-3">В базе пока нет событий.</p>
+                        <button onclick="seedCryptoTop10()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition">Загрузить базовые примеры (Топ-10)</button>
                     </div>
                 `;
                 return;
@@ -507,7 +626,7 @@
                 }
 
                 const card = document.createElement('div');
-                card.className = "google-card p-5 flex flex-col justify-between";
+                card.className = "workstation-card p-5 flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center mb-2">
@@ -544,6 +663,8 @@
         async function loadSpeakers() {
             const res = await fetch('/api/speakers?sort_by=credibility');
             const speakers = await res.json();
+            const countBadge = document.getElementById('tabCountSpeakers');
+            if (countBadge && Array.isArray(speakers)) countBadge.innerText = speakers.length;
             const tbody = document.getElementById('speakersTableBody');
             tbody.innerHTML = '';
 
@@ -602,8 +723,8 @@
                 if (sources.length === 0) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="5" class="text-center py-8 text-gray-400 text-xs">
-                                Источников пока нет. Нажмите «Загрузить 10 авторов» вверху страницы.
+                            <td colspan="5" class="text-center py-8 text-slate-400 text-xs">
+                                Источников пока нет. Воспользуйтесь меню «Управление базой» в верхней панели.
                             </td>
                         </tr>
                     `;
@@ -934,6 +1055,7 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadEvents();
+            loadSpeakers();
             loadLivePrices();
         });
     </script>
