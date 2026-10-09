@@ -59,25 +59,47 @@ class CryptoPriceOracle:
             asset = "ETH"
         elif any(k in title_lower for k in ["solana", "солана", "sol"]):
             asset = "SOL"
+        elif any(k in title_lower for k in ["binance", "bnb"]):
+            asset = "BNB"
+        elif any(k in title_lower for k in ["ripple", "xrp"]):
+            asset = "XRP"
 
         if not asset:
             return None
 
+        # Detect direction: "упадет ниже", "рухнет", "опустится ниже", "падение ниже", "fall below", "drop below"
+        is_downward = any(w in title_lower for w in ["упадет", "рухнет", "опустится", "падение ниже", "снизится ниже", "fall below", "drop below", "crash"])
+
         # Look for dollar amount: $150,000 or $150k or 150 000
+        target = None
         match_k = re.search(r'\$?(\d+(?:\.\d+)?)\s*(?:k|к)\b', title_lower)
         if match_k:
-            return {"asset": asset, "target": float(match_k.group(1)) * 1000.0}
+            target = float(match_k.group(1)) * 1000.0
+        else:
+            match_full = re.search(r'\$?(\d{1,3}(?:[,\s]\d{3})+)', title_lower)
+            if match_full:
+                clean_num = match_full.group(1).replace(",", "").replace(" ", "")
+                target = float(clean_num)
+            else:
+                match_plain = re.search(r'\$?(\d{4,7})\b', title_lower)
+                if match_plain:
+                    target = float(match_plain.group(1))
 
-        match_full = re.search(r'\$?(\d{1,3}(?:[,\s]\d{3})+)', title_lower)
-        if match_full:
-            clean_num = match_full.group(1).replace(",", "").replace(" ", "")
-            return {"asset": asset, "target": float(clean_num)}
+        if not target:
+            return None
 
-        match_plain = re.search(r'\$?(\d{4,7})\b', title_lower)
-        if match_plain:
-            return {"asset": asset, "target": float(match_plain.group(1))}
+        # Detect year if specified: e.g. "до конца 2026 года", "к 2024 году"
+        target_year = None
+        match_year = re.search(r'\b(20[123][0-9])\b', title_lower)
+        if match_year:
+            target_year = int(match_year.group(1))
 
-        return None
+        return {
+            "asset": asset,
+            "target": target,
+            "direction": "down" if is_downward else "up",
+            "target_year": target_year
+        }
 
     @classmethod
     async def evaluate_active_crypto_events(cls, db: Session, auto_resolve: bool = False) -> List[Dict[str, Any]]:

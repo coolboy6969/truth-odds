@@ -38,12 +38,42 @@ def reject_candidate(candidate_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"success": True, "candidate_id": cand.id, "name": cand.name}
 
+@router.post("/candidates/approve-all")
+def approve_all_candidates(db: Session = Depends(get_db)):
+    pending = db.query(DiscoveredSpeakerCandidate).filter(DiscoveredSpeakerCandidate.status == "CANDIDATE").all()
+    count = 0
+    for cand in pending:
+        sp = SpeakerDiscoveryEngine.promote_candidate_to_speaker(db, cand.id)
+        if sp:
+            count += 1
+    return {"success": True, "approved_count": count}
+
+class CreateNarrativeRequest(BaseModel):
+    topic_summary: str
+    domain: str = "crypto"
+    keywords: Optional[List[str]] = None
+
 @router.get("/narratives")
 def get_narratives(db: Session = Depends(get_db)):
     clusters = db.query(NarrativeCluster).order_by(
         NarrativeCluster.statement_count.desc()
     ).all()
     return clusters
+
+@router.post("/narratives")
+def create_narrative(payload: CreateNarrativeRequest, db: Session = Depends(get_db)):
+    cluster = NarrativeCluster(
+        topic_summary=payload.topic_summary.strip(),
+        domain=payload.domain.lower(),
+        key_phrases={"tokens": payload.keywords or [], "speakers": []},
+        statement_count=1,
+        unique_speakers_count=1,
+        status="EMERGING"
+    )
+    db.add(cluster)
+    db.commit()
+    db.refresh(cluster)
+    return cluster
 
 @router.post("/narratives/{cluster_id}/promote")
 def promote_narrative(cluster_id: str, db: Session = Depends(get_db)):

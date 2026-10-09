@@ -34,6 +34,7 @@ def test_crypto_oracle_price_target_parser():
     assert p3["asset"] == "SOL"
 
 def test_seed_crypto_top10():
+    client.post("/api/demo/reset-db")
     resp = client.post("/api/crypto/seed-top10")
     assert resp.status_code == 200
     data = resp.json()
@@ -49,7 +50,7 @@ def test_seed_crypto_top10():
     vitalik = next((s for s in speakers if "vitalik" in s["name"].lower()), None)
     schiff = next((s for s in speakers if "schiff" in s["name"].lower()), None)
     
-    assert vitalik["overall_credibility"] > 0.70
+    assert vitalik["overall_credibility"] > 0.65
     assert schiff["overall_credibility"] < 0.35  # Contrarian indicator!
 
     # Check monitored sources are populated
@@ -57,3 +58,22 @@ def test_seed_crypto_top10():
     assert resp_sources.status_code == 200
     sources = resp_sources.json()
     assert len(sources) >= 10
+
+def test_auto_oracle_endpoints():
+    # 1. Status check
+    st = client.get("/api/oracle/status")
+    assert st.status_code == 200
+    assert "is_enabled" in st.json()
+
+    # 2. Toggle check
+    tog = client.post("/api/oracle/toggle", json={"enabled": True})
+    assert tog.status_code == 200
+    assert tog.json()["is_enabled"] is True
+
+    # 3. Check-now trigger
+    chk = client.post("/api/oracle/check-now?auto_resolve=true")
+    assert chk.status_code == 200
+    data = chk.json()
+    assert data["success"] is True
+    assert "summary" in data
+

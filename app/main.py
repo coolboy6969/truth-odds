@@ -1,19 +1,30 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database.session import init_db
-from app.api import speakers, events, statements, demo, crypto_seed, sources, discovery
+from app.api import speakers, events, statements, demo, crypto_seed, sources, discovery, oracle
+from app.oracles.auto_oracle import AutoOracleService
 
 # Initialize database tables
 init_db()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Launch auto oracle background monitor
+    await AutoOracleService.start_background_worker()
+    yield
+    # Shutdown: Stop worker cleanly
+    await AutoOracleService.stop_background_worker()
+
 app = FastAPI(
     title=settings.APP_NAME,
     description="Платформа вероятностной оценки событий по заявлениям экспертов с учетом их исторической правдивости и Brier Score.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -36,6 +47,7 @@ app.include_router(demo.router)
 app.include_router(crypto_seed.router)
 app.include_router(sources.router)
 app.include_router(discovery.router)
+app.include_router(oracle.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):
