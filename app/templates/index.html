@@ -3,167 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TruthOdds — Рейтинг Правдивости & Оценка Вероятности Событий</title>
+    <title>TruthOdds — Проверка прогнозов и оценка шансов событий</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                        },
-                        darkbg: '#0f172a',
-                        cardbg: '#1e293b',
-                        borderbg: '#334155'
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        .glow-blue { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3); }
+        body {
+            background-color: #f8f9fa;
+            color: #202124;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        .google-card {
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            border-radius: 16px;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .google-card:hover {
+            box-shadow: 0 1px 6px rgba(32,33,36,0.15);
+            border-color: #c0c4c9;
+        }
+        .google-pill {
+            border-radius: 9999px;
+            transition: all 0.15s ease;
+        }
+        .chrome-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dadce0;
+        }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- Header -->
-    <header class="border-b border-borderbg bg-cardbg/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+<body class="min-h-screen flex flex-col">
+
+    <!-- Chrome-Style Header -->
+    <header class="chrome-bar sticky top-0 z-50 px-6 py-3">
         <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Logo & Title -->
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    <i class="fa-solid fa-chart-line"></i>
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-chart-pie text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        TruthOdds <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Forecaster Engine</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Вероятность событий на основе взвешенной правдивости спикеров</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl font-medium tracking-tight text-gray-900">TruthOdds</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200">Прогнозы & Факты</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Проверяем точность авторов и рассчитываем реальный шанс событий</p>
                 </div>
             </div>
 
+            <!-- Ticker & Action Buttons -->
             <div class="flex items-center gap-3">
-                <div id="cryptoTicker" class="hidden sm:flex items-center gap-3 text-xs bg-slate-900/90 border border-borderbg px-3 py-1.5 rounded-lg font-mono">
-                    <span class="text-amber-400 font-bold">BTC: <span id="ticker-btc">$...</span></span>
-                    <span class="text-indigo-400 font-bold">ETH: <span id="ticker-eth">$...</span></span>
-                    <span class="text-purple-400 font-bold">SOL: <span id="ticker-sol">$...</span></span>
+                <!-- Live Crypto Price Capsule (Chrome Omnibox style) -->
+                <div id="cryptoTicker" class="hidden md:flex items-center gap-4 text-xs bg-gray-100 hover:bg-gray-200/80 px-4 py-2 rounded-full border border-gray-200 transition">
+                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
+                        <i class="fa-brands fa-bitcoin text-amber-500"></i> BTC: <b id="ticker-btc" class="text-gray-900">$...</b>
+                    </span>
+                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
+                        <i class="fa-brands fa-ethereum text-indigo-500"></i> ETH: <b id="ticker-eth" class="text-gray-900">$...</b>
+                    </span>
+                    <span class="text-gray-600 font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-purple-500"></i> SOL: <b id="ticker-sol" class="text-gray-900">$...</b>
+                    </span>
                 </div>
-                <button onclick="seedCryptoTop10()" class="text-xs px-3 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white font-semibold shadow-md flex items-center gap-1.5 transition">
-                    <i class="fa-brands fa-bitcoin"></i> Топ-10 Крипто
+
+                <button onclick="seedCryptoTop10()" class="text-xs font-medium px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-users"></i> Загрузить 10 авторов
                 </button>
-                <a href="/docs" target="_blank" class="text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg font-medium flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-code"></i> API Docs
+                <a href="/docs" target="_blank" class="text-xs font-medium px-3.5 py-2 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-code"></i> API
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <div class="max-w-7xl mx-auto px-6 pt-6">
-        <div class="flex border-b border-borderbg space-x-8 text-sm font-medium">
-            <button onclick="switchTab('events')" id="tab-btn-events" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2">
-                <i class="fa-solid fa-bullseye"></i> Оценка событий
+    <!-- Google-Style Rounded Pill Navigation Tabs -->
+    <div class="bg-white border-b border-gray-200 px-6 py-2.5">
+        <div class="max-w-7xl mx-auto flex gap-2 overflow-x-auto text-sm font-medium">
+            <button onclick="switchTab('events')" id="tab-btn-events" class="google-pill px-4 py-2 bg-blue-600 text-white flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-bullseye text-xs"></i> События и шансы
             </button>
-            <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-trophy"></i> Рейтинг экспертов (Leaderboard)
+            <button onclick="switchTab('speakers')" id="tab-btn-speakers" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-xs text-amber-500"></i> Рейтинг авторов
             </button>
-            <button onclick="switchTab('sources')" id="tab-btn-sources" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-satellite-dish"></i> Мониторинг каналов (Watchlist)
+            <button onclick="switchTab('sources')" id="tab-btn-sources" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
+                <i class="fa-brands fa-youtube text-xs text-red-500"></i> Каналы на слежке
             </button>
-            <button onclick="switchTab('radar')" id="tab-btn-radar" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-compass text-indigo-400"></i> Радар поиска (Discovery)
+            <button onclick="switchTab('radar')" id="tab-btn-radar" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-compass text-xs text-blue-500"></i> Поиск новых тем
             </button>
-            <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-plus-circle"></i> Анализ YouTube / Цитаты
+            <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="google-pill px-4 py-2 bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-plus text-xs"></i> Проверить видео или пост
             </button>
         </div>
     </div>
 
-    <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
 
-        <!-- TAB 1: EVENTS -->
+        <!-- TAB 1: EVENTS & CHANCES -->
         <section id="tab-events" class="space-y-6">
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white">Текущие события и их вероятность</h2>
-                    <p class="text-xs text-slate-400">Вероятность рассчитана байесовским объединением прогнозов с весом каждого автора</p>
+                    <h2 class="text-lg font-medium text-gray-900">Будущие события и шансы</h2>
+                    <p class="text-xs text-gray-500">Шанс рассчитывается с учетом того, насколько точно авторы угадывали в прошлом</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="checkCryptoOracle(false)" class="text-xs px-3 py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-bolt"></i> Оракул цен (Проверить цели)
+                    <button onclick="checkCryptoOracle(false)" class="text-xs font-medium px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-arrows-rotate text-emerald-600"></i> Сверить текущие цены
                     </button>
-                    <select id="domainFilter" onchange="loadEvents()" class="bg-cardbg border border-borderbg rounded-lg text-xs px-3 py-2 text-slate-300">
-                        <option value="">Все категории</option>
-                        <option value="crypto">Криптовалюты</option>
-                        <option value="tech">Технологии / AI</option>
-                        <option value="macro">Макроэкономика</option>
+                    <select id="domainFilter" onchange="loadEvents()" class="bg-white border border-gray-300 rounded-full text-xs px-3.5 py-2 text-gray-700 focus:outline-none focus:border-blue-500">
+                        <option value="">Все темы</option>
+                        <option value="crypto">Криптовалюта</option>
+                        <option value="tech">Технологии и ИИ</option>
+                        <option value="macro">Экономика</option>
                     </select>
                 </div>
             </div>
 
-            <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Loaded dynamically -->
-                <div class="text-slate-500 text-sm">Загрузка событий...</div>
+            <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Dynamically loaded cards -->
+                <div class="text-gray-500 text-sm">Загружаем список событий...</div>
             </div>
         </section>
 
         <!-- TAB 2: SPEAKERS LEADERBOARD -->
         <section id="tab-speakers" class="space-y-6 hidden">
             <div>
-                <h2 class="text-xl font-bold text-white">Рейтинг правдивости экспертов</h2>
-                <p class="text-xs text-slate-400">Оценка на основе исторической точности прошлых высказываний (Brier Score и калибровка)</p>
+                <h2 class="text-lg font-medium text-gray-900">Кто из авторов чаще оказывается прав</h2>
+                <p class="text-xs text-gray-500">Рейтинг строится только по реальным фактам: сказал — проверили — сбылось или нет</p>
             </div>
 
-            <div class="bg-cardbg border border-borderbg rounded-xl overflow-hidden shadow-xl">
+            <div class="google-card overflow-hidden">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider border-b border-borderbg">
+                    <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-4">Спикер</th>
-                            <th class="px-6 py-4">Рейтинг доверия</th>
-                            <th class="px-6 py-4">Brier Score</th>
-                            <th class="px-6 py-4">Прогнозов</th>
-                            <th class="px-6 py-4">Точность (Hit Rate)</th>
-                            <th class="px-6 py-4">Специализация</th>
+                            <th class="px-6 py-3.5 font-medium">Автор / Блогер</th>
+                            <th class="px-6 py-3.5 font-medium">Уровень доверия</th>
+                            <th class="px-6 py-3.5 font-medium">Процент попаданий</th>
+                            <th class="px-6 py-3.5 font-medium">Проверено прогнозов</th>
+                            <th class="px-6 py-3.5 font-medium">Ошибки (меньше = лучше)</th>
                         </tr>
                     </thead>
-                    <tbody id="speakersTableBody" class="divide-y divide-borderbg text-slate-300">
+                    <tbody id="speakersTableBody" class="divide-y divide-gray-100 text-gray-700">
                         <!-- Loaded dynamically -->
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- TAB 3: MONITORED SOURCES (WATCHLIST) -->
+        <!-- TAB 3: MONITORED CHANNELS -->
         <section id="tab-sources" class="space-y-6 hidden">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-xl font-bold text-white">Отслеживаемые каналы и источники</h2>
-                    <p class="text-xs text-slate-400">Автоматический мониторинг через YouTube RSS без ограничений API</p>
+                    <h2 class="text-lg font-medium text-gray-900">Отслеживаемые каналы</h2>
+                    <p class="text-xs text-gray-500">Система автоматически проверяет новые видео с этих каналов</p>
                 </div>
-                <button onclick="loadSources()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderbg flex items-center gap-1">
-                    <i class="fa-solid fa-rotate"></i> Обновить список
+                <button onclick="loadSources()" class="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-rotate-right"></i> Обновить
                 </button>
             </div>
 
-            <div class="bg-cardbg border border-borderbg rounded-xl overflow-hidden shadow-xl">
+            <div class="google-card overflow-hidden">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider border-b border-borderbg">
+                    <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-4">Канал / Платформа</th>
-                            <th class="px-6 py-4">Эксперт</th>
-                            <th class="px-6 py-4">Рейтинг автора</th>
-                            <th class="px-6 py-4">ID Канала</th>
-                            <th class="px-6 py-4">Последнее сканирование</th>
-                            <th class="px-6 py-4 text-right">Действие</th>
+                            <th class="px-6 py-3.5 font-medium">Канал</th>
+                            <th class="px-6 py-3.5 font-medium">Автор</th>
+                            <th class="px-6 py-3.5 font-medium">Точность автора</th>
+                            <th class="px-6 py-3.5 font-medium">Последняя проверка</th>
+                            <th class="px-6 py-3.5 text-right font-medium">Действие</th>
                         </tr>
                     </thead>
-                    <tbody id="sourcesTableBody" class="divide-y divide-borderbg text-slate-300">
+                    <tbody id="sourcesTableBody" class="divide-y divide-gray-100 text-gray-700">
                         <!-- Loaded dynamically -->
                     </tbody>
                 </table>
@@ -171,151 +186,150 @@
         </section>
 
         <!-- TAB 4: DISCOVERY RADAR -->
-        <section id="tab-radar" class="space-y-8 hidden">
+        <section id="tab-radar" class="space-y-6 hidden">
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-compass text-indigo-400"></i> Автономный радар поиска
-                    </h2>
-                    <p class="text-xs text-slate-400">Автоматический поиск новых экспертов через анализ интервью и кластеризация зарождающихся событий</p>
+                    <h2 class="text-lg font-medium text-gray-900">Поиск новых авторов и тем</h2>
+                    <p class="text-xs text-gray-500">Система находит новых гостей из интервью и темы, которые сейчас все обсуждают</p>
                 </div>
-                <button onclick="seedRadarDemo()" class="text-xs px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 transition shadow">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Загрузить демо-данные радара
+                <button onclick="seedRadarDemo()" class="text-xs font-medium px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Показать пример поиска
                 </button>
             </div>
 
-            <!-- Two Columns: Candidates & Narratives -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Two Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-                <!-- 1. Candidate Speakers -->
-                <div class="bg-cardbg border border-borderbg rounded-xl p-5 shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <i class="fa-solid fa-user-plus text-emerald-400"></i> Обнаруженные эксперты
-                            </h3>
-                            <span id="candidatesCountBadge" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">0 кандидатов</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mb-4">
-                            Люди, упоминаемые как гости в подкастах и интервью, с высокой плотностью проверяемых прогнозов.
-                        </p>
+                <!-- 1. Candidates -->
+                <div class="google-card p-5">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-medium text-gray-900 flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus text-blue-600"></i> Замеченные новые эксперты
+                        </h3>
+                        <span id="candidatesCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">0 авторов</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">
+                        Персоны, которых часто зовут в подкасты и которые делают четкие прогнозы с датами
+                    </p>
 
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-900/60 text-slate-400 uppercase tracking-wider border-b border-borderbg">
-                                    <tr>
-                                        <th class="py-2.5 px-3">Персона</th>
-                                        <th class="py-2.5 px-3">Источник</th>
-                                        <th class="py-2.5 px-3">Упоминаний</th>
-                                        <th class="py-2.5 px-3">Плотность прогнозов</th>
-                                        <th class="py-2.5 px-3 text-right">Действие</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="candidatesTableBody" class="divide-y divide-borderbg text-slate-300">
-                                    <!-- Loaded dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                                <tr>
+                                    <th class="py-2.5 px-3 font-medium">Автор</th>
+                                    <th class="py-2.5 px-3 font-medium">Где замечен</th>
+                                    <th class="py-2.5 px-3 font-medium text-center">Упоминаний</th>
+                                    <th class="py-2.5 px-3 text-right font-medium">Добавить</th>
+                                </tr>
+                            </thead>
+                            <tbody id="candidatesTableBody" class="divide-y divide-gray-100 text-gray-700">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- 2. Emerging Narrative Clusters -->
-                <div class="bg-cardbg border border-borderbg rounded-xl p-5 shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <i class="fa-solid fa-fire text-amber-400"></i> Зарождающиеся нарративы
-                            </h3>
-                            <span id="narrativesCountBadge" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">0 кластеров</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mb-4">
-                            Темы и дебаты из соцсетей. При накоплении кворума (>=3 спикеров) автоматически продвигаются в официальные события.
-                        </p>
+                <!-- 2. Emerging Narratives -->
+                <div class="google-card p-5">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-medium text-gray-900 flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i> Горячие темы в соцсетях
+                        </h3>
+                        <span id="narrativesCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">0 тем</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">
+                        Когда 3 или более авторов спорят на одну тему, мы можем создать из нее событие
+                    </p>
 
-                        <div id="narrativesList" class="space-y-3">
-                            <!-- Loaded dynamically -->
-                        </div>
+                    <div id="narrativesList" class="space-y-3">
+                        <!-- Loaded dynamically -->
                     </div>
                 </div>
 
             </div>
 
-            <!-- 3. Stream Scanner (Manual Input for testing Radar) -->
-            <div class="bg-cardbg border border-borderbg rounded-xl p-6 shadow-xl">
-                <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-radar text-indigo-400"></i> Потоковый сканер соцсетей (Stream Scanner)
+            <!-- Stream Scanner -->
+            <div class="google-card p-5">
+                <h3 class="text-sm font-medium text-gray-900 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Быстрая проверка текста или поста
                 </h3>
-                <p class="text-xs text-slate-400 mb-4">
-                    Протестируйте алгоритм: вставьте текст поста из X/Telegram или фрагмент транскрипта. Система извлечет упоминания людей и определит нарративный кластер.
+                <p class="text-xs text-gray-500 mb-4">
+                    Вставьте фрагмент интервью или твит — система сама найдет автора и тему
                 </p>
 
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="streamScannerInput" placeholder="Например: 'Сегодня в интервью с Lyn Alden обсуждали, что Биткоин превысит $200k до 2026 года...'" class="flex-1 bg-slate-900 border border-borderbg rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <button onclick="handleScanStream()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 shadow">
-                        <i class="fa-solid fa-magnifying-glass"></i> Сканировать текст
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="streamScannerInput" placeholder="Например: 'В интервью с Lyn Alden обсуждали, что Биткоин достигнет $200k...'" class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-4 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500">
+                    <button onclick="handleScanStream()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+                        Найти в тексте
                     </button>
                 </div>
-                <div id="streamScanResult" class="mt-3 p-3 rounded-lg bg-slate-900 border border-borderbg text-xs hidden"></div>
+                <div id="streamScanResult" class="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 hidden"></div>
             </div>
         </section>
 
         <!-- TAB 5: INGESTION FORM -->
-        <section id="tab-ingest" class="max-w-2xl mx-auto space-y-6 hidden">
-            <div class="bg-cardbg border border-borderbg rounded-xl p-6 shadow-xl">
-                <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                    <i class="fa-brands fa-youtube text-red-500"></i> Анализ видео или цитаты
+        <section id="tab-ingest" class="max-w-xl mx-auto space-y-6 hidden">
+            <div class="google-card p-6 shadow-sm">
+                <h2 class="text-base font-medium text-gray-900 mb-1 flex items-center gap-2">
+                    <i class="fa-brands fa-youtube text-red-600"></i> Разобрать прогноз из видео или поста
                 </h2>
-                <p class="text-xs text-slate-400 mb-6">
-                    Вставьте ссылку на YouTube (транскрипт будет извлечен автоматически) или вставьте текст высказывания вручную. Система найдет прогноз и обновит вероятность события.
+                <p class="text-xs text-gray-500 mb-5">
+                    Вставьте ссылку на ролик YouTube или скопируйте текст цитаты. Алгоритм поймет, что обещает автор, с какой уверенностью и до какого срока.
                 </p>
 
                 <form onsubmit="handleIngest(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Имя спикера</label>
-                        <input type="text" id="ingestSpeaker" placeholder="Например: Илон Маск, Виталик Бутерин" class="w-full bg-slate-900 border border-borderbg rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" required>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Имя автора или блогера</label>
+                        <input type="text" id="ingestSpeaker" placeholder="Например: Илон Маск, Виталик Бутерин" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Ссылка на YouTube или текст заявления</label>
-                        <textarea id="ingestContent" rows="4" placeholder="Вставьте YouTube URL (https://youtube.com/watch?v=...) или текст цитаты: 'Биткоин гарантированно вырастет до 150к до конца года...'" class="w-full bg-slate-900 border border-borderbg rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" required></textarea>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка на YouTube или текст цитаты</label>
+                        <textarea id="ingestContent" rows="4" placeholder="Вставьте ссылку на YouTube (https://youtube.com/watch?v=...) или цитату: 'Биткоин гарантированно вырастет до 150к до конца года...'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500" required></textarea>
                     </div>
 
-                    <button type="submit" id="ingestSubmitBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Извлечь прогноз и обновить вероятность
+                    <button type="submit" id="ingestSubmitBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-sparkles"></i> Найти прогноз и посчитать шанс
                     </button>
                 </form>
 
-                <div id="ingestResult" class="mt-4 p-4 rounded-lg bg-slate-900/80 border border-borderbg text-xs hidden"></div>
+                <div id="ingestResult" class="mt-4 p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs hidden"></div>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal for Resolution -->
-    <div id="resolveModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-cardbg border border-borderbg rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-gavel text-amber-400"></i> Резолюция события (Oracle)
-            </h3>
-            <p id="resolveEventTitle" class="text-sm text-slate-300"></p>
-            <p class="text-xs text-slate-400">
-                Укажите, свершилось ли событие на самом деле. Рейтинги всех спикеров, высказавшихся по этому событию, будут мгновенно пересчитаны!
+    <!-- Simple Google-Style Modal for Outcome Resolution -->
+    <div id="resolveModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="google-card max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-start">
+                <h3 class="text-base font-medium text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-flag-checkered text-blue-600"></i> Подвести итог события
+                </h3>
+                <button onclick="closeResolveModal()" class="text-gray-400 hover:text-gray-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <p id="resolveEventTitle" class="text-sm font-medium text-gray-800 bg-gray-50 p-3 rounded-xl border border-gray-200"></p>
+            <p class="text-xs text-gray-500">
+                Укажите фактический результат. Рейтинги всех авторов, делавших прогноз по этому событию, сразу обновятся!
             </p>
 
             <input type="hidden" id="resolveEventId">
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Обоснование / Пруф (опционально)</label>
-                <input type="text" id="resolveNotes" placeholder="Ссылка на новость или факт" class="w-full bg-slate-900 border border-borderbg rounded-lg px-3 py-2 text-xs text-white">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка на доказательство или новость (необязательно)</label>
+                <input type="text" id="resolveNotes" placeholder="Например: Ссылка на CoinMarketCap или новость" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-gray-900">
             </div>
 
-            <div class="flex gap-3 pt-2">
-                <button onclick="submitResolution(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-check"></i> Сбылось (TRUE)
+            <div class="flex gap-2.5 pt-2">
+                <button onclick="submitResolution(true)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-check"></i> Сбылось (Да)
                 </button>
-                <button onclick="submitResolution(false)" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-xmark"></i> Не сбылось (FALSE)
+                <button onclick="submitResolution(false)" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-xmark"></i> Не сбылось (Нет)
                 </button>
-                <button onclick="closeResolveModal()" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs transition">
+                <button onclick="closeResolveModal()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-medium transition">
                     Отмена
                 </button>
             </div>
@@ -330,16 +344,16 @@
                 const btn = document.getElementById('tab-btn-' + t);
                 if (el) el.classList.add('hidden');
                 if (btn) {
-                    btn.classList.remove('border-indigo-500', 'text-indigo-400');
-                    btn.classList.add('border-transparent', 'text-slate-400');
+                    btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
                 }
             });
             const activeEl = document.getElementById('tab-' + tab);
             const activeBtn = document.getElementById('tab-btn-' + tab);
             if (activeEl) activeEl.classList.remove('hidden');
             if (activeBtn) {
-                activeBtn.classList.remove('border-transparent', 'text-slate-400');
-                activeBtn.classList.add('border-indigo-500', 'text-indigo-400');
+                activeBtn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
             }
 
             if (tab === 'events') loadEvents();
@@ -352,24 +366,12 @@
             try {
                 const res = await fetch('/api/crypto/seed-top10', { method: 'POST' });
                 const data = await res.json();
-                alert('Топ-10 Крипто-экспертов и каналов успешно загружены!');
+                alert('10 авторов и их прошлые прогнозы успешно загружены!');
                 loadEvents();
                 loadSpeakers();
                 loadSources();
             } catch (e) {
-                alert('Ошибка загрузки Топ-10: ' + e);
-            }
-        }
-
-        async function seedDemo() {
-            try {
-                const res = await fetch('/api/demo/seed', { method: 'POST' });
-                const data = await res.json();
-                alert('Демо-данные успешно загружены!');
-                loadEvents();
-                loadSpeakers();
-            } catch (e) {
-                alert('Ошибка загрузки демо-данных: ' + e);
+                alert('Ошибка: ' + e);
             }
         }
 
@@ -383,9 +385,9 @@
 
             if (events.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-2 text-center py-12 bg-cardbg rounded-xl border border-borderbg">
-                        <p class="text-slate-400 text-sm mb-3">Событий пока нет.</p>
-                        <button onclick="seedDemo()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium">Загрузить демо-события</button>
+                    <div class="col-span-2 text-center py-12 google-card">
+                        <p class="text-gray-500 text-sm mb-3">Событий пока нет.</p>
+                        <button onclick="seedCryptoTop10()" class="px-5 py-2 bg-blue-600 text-white rounded-full text-xs font-medium">Загрузить примеры</button>
                     </div>
                 `;
                 return;
@@ -394,36 +396,45 @@
             events.forEach(ev => {
                 const probPct = Math.round(ev.current_probability * 100);
                 const isResolved = ev.status.startsWith('RESOLVED');
-                const outcomeColor = probPct >= 70 ? 'text-emerald-400' : (probPct >= 40 ? 'text-amber-400' : 'text-rose-400');
-                const barColor = probPct >= 70 ? 'bg-emerald-500' : (probPct >= 40 ? 'bg-amber-500' : 'bg-rose-500');
+                
+                // Color codes
+                let probColorClass = "text-emerald-700 bg-emerald-50 border-emerald-200";
+                let barColor = "bg-emerald-600";
+                if (probPct < 40) {
+                    probColorClass = "text-rose-700 bg-rose-50 border-rose-200";
+                    barColor = "bg-rose-600";
+                } else if (probPct < 70) {
+                    probColorClass = "text-amber-700 bg-amber-50 border-amber-200";
+                    barColor = "bg-amber-500";
+                }
 
-                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">АКТИВНО</span>`;
+                let statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">Идет подсчет</span>`;
                 if (ev.status === 'RESOLVED_TRUE') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">СБЫЛОСЬ (TRUE)</span>`;
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Сбылось (Да)</span>`;
                 } else if (ev.status === 'RESOLVED_FALSE') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">НЕ СБЫЛОСЬ (FALSE)</span>`;
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">Не сбылось (Нет)</span>`;
                 }
 
                 let statementsHtml = '';
                 if (ev.statements && ev.statements.length > 0) {
                     statementsHtml = `
-                        <div class="mt-4 pt-3 border-t border-borderbg space-y-2">
-                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Мнения экспертов:</div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 space-y-2">
+                            <div class="text-[11px] font-medium text-gray-500 uppercase">Что сказали авторы:</div>
                             ${ev.statements.map(st => `
-                                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-borderbg/60 text-xs">
+                                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 text-xs">
                                     <div class="flex justify-between items-center mb-1">
-                                        <div class="flex items-center gap-1.5 font-medium text-slate-200">
-                                            <i class="fa-solid fa-user-tie text-indigo-400 text-[10px]"></i>
+                                        <div class="flex items-center gap-1.5 font-medium text-gray-900">
+                                            <i class="fa-solid fa-user-check text-blue-600 text-[11px]"></i>
                                             <span>${st.speaker_name}</span>
-                                            <span class="text-[10px] px-1.5 py-0.2 rounded bg-indigo-900/50 text-indigo-300 font-mono" title="Рейтинг правдивости">
-                                                Доверие: ${Math.round(st.speaker_weight_applied * 100)}%
+                                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-gray-600 border border-gray-200">
+                                                Точность: ${Math.round(st.speaker_weight_applied * 100)}%
                                             </span>
                                         </div>
-                                        <span class="text-[11px] font-bold ${st.speaker_confidence >= 0.5 ? 'text-emerald-400' : 'text-rose-400'}">
-                                            ${Math.round(st.speaker_confidence * 100)}% оценка
+                                        <span class="text-[11px] font-bold ${st.speaker_confidence >= 0.5 ? 'text-emerald-700' : 'text-rose-700'}">
+                                            Оценка: ${Math.round(st.speaker_confidence * 100)}%
                                         </span>
                                     </div>
-                                    <p class="text-slate-400 italic text-[11px]">«${st.raw_quote}»</p>
+                                    <p class="text-gray-600 italic text-[11px]">«${st.raw_quote}»</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -431,21 +442,21 @@
                 }
 
                 const card = document.createElement('div');
-                card.className = "bg-cardbg border border-borderbg rounded-xl p-5 shadow-lg flex flex-col justify-between";
+                card.className = "google-card p-5 flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start gap-2 mb-2">
-                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase font-mono">${ev.domain}</span>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">${ev.domain}</span>
                             ${statusBadge}
                         </div>
-                        <h3 class="text-base font-bold text-white mb-3">${ev.title}</h3>
+                        <h3 class="text-base font-medium text-gray-900 mb-3 leading-snug">${ev.title}</h3>
 
-                        <div class="mb-3">
-                            <div class="flex justify-between items-end mb-1">
-                                <span class="text-xs text-slate-400">Итоговая вероятность:</span>
-                                <span class="text-2xl font-black font-mono ${outcomeColor}">${probPct}%</span>
+                        <div class="mb-2">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-xs text-gray-500">Шанс, что сбудется:</span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border ${probColorClass}">${probPct}%</span>
                             </div>
-                            <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-borderbg/40">
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                                 <div class="${barColor} h-full transition-all duration-500" style="width: ${probPct}%"></div>
                             </div>
                         </div>
@@ -454,9 +465,9 @@
                     </div>
 
                     ${!isResolved ? `
-                        <div class="mt-4 pt-3 border-t border-borderbg flex justify-end">
-                            <button onclick="openResolveModal('${ev.id}', '${ev.title.replace(/'/g, "\\'")}')" class="text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-gavel"></i> Разрешить событие (Oracle)
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+                            <button onclick="openResolveModal('${ev.id}', '${ev.title.replace(/'/g, "\\'")}')" class="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-flag-checkered text-blue-600"></i> Подвести итог
                             </button>
                         </div>
                     ` : ''}
@@ -474,59 +485,267 @@
             speakers.forEach((sp, idx) => {
                 const credPct = Math.round(sp.overall_credibility * 100);
                 let rankBadge = '';
-                if (credPct >= 75) {
-                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Superforecaster</span>`;
+                if (credPct >= 70) {
+                    rankBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-800 font-medium border border-emerald-200">⭐️ Высокая точность</span>`;
                 } else if (credPct >= 50) {
-                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/30">Надежный</span>`;
+                    rankBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-blue-50 text-blue-800 font-medium border border-blue-200">👍 Надежный</span>`;
                 } else {
-                    rankBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30">Обратный индикатор</span>`;
-                }
-
-                // Domain breakdown badges
-                let domainBadges = '-';
-                if (sp.domain_scores && Object.keys(sp.domain_scores).length > 0) {
-                    domainBadges = Object.entries(sp.domain_scores).map(([d, sc]) => `
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-borderbg mr-1 text-slate-300">
-                            ${d}: ${Math.round(sc.credibility * 100)}% (${sc.sample_size})
-                        </span>
-                    `).join('');
+                    rankBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-rose-50 text-rose-800 font-medium border border-rose-200">⚠️ Часто ошибается</span>`;
                 }
 
                 const hitRatePct = sp.resolved_predictions > 0 
                     ? Math.round((sp.correct_predictions / sp.resolved_predictions) * 100) + '%' 
-                    : 'Н/Д';
+                    : 'Новый';
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition";
+                tr.className = "hover:bg-gray-50 transition";
                 tr.innerHTML = `
-                    <td class="px-6 py-4 flex items-center gap-3 font-medium text-white">
-                        <span class="text-xs text-slate-500 font-mono w-4">${idx + 1}</span>
+                    <td class="px-6 py-4 flex items-center gap-3 font-medium text-gray-900">
+                        <span class="text-xs text-gray-400 font-mono w-4">${idx + 1}</span>
                         <div>
                             <div>${sp.name}</div>
-                            <div class="text-xs text-slate-400">${sp.handle_or_channel || ''}</div>
+                            <div class="text-xs text-gray-400">${sp.handle_or_channel || ''}</div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-2">
-                            <span class="text-base font-bold font-mono ${credPct >= 50 ? 'text-emerald-400' : 'text-rose-400'}">${credPct}%</span>
+                            <span class="text-sm font-bold ${credPct >= 50 ? 'text-emerald-700' : 'text-rose-700'}">${credPct}%</span>
                             ${rankBadge}
                         </div>
                     </td>
-                    <td class="px-6 py-4 font-mono text-xs ${sp.overall_brier_score <= 0.15 ? 'text-emerald-400' : (sp.overall_brier_score <= 0.25 ? 'text-indigo-400' : 'text-rose-400')}">
-                        ${sp.overall_brier_score.toFixed(3)}
-                    </td>
-                    <td class="px-6 py-4 font-mono text-xs">
-                        ${sp.resolved_predictions} <span class="text-slate-500">/ ${sp.total_predictions} всего</span>
-                    </td>
-                    <td class="px-6 py-4 font-mono text-xs text-slate-300">
+                    <td class="px-6 py-4 text-xs font-medium text-gray-900">
                         ${hitRatePct}
                     </td>
-                    <td class="px-6 py-4">
-                        ${domainBadges}
+                    <td class="px-6 py-4 text-xs text-gray-600">
+                        <b>${sp.correct_predictions}</b> угадано из <b>${sp.resolved_predictions}</b>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-gray-500 font-mono">
+                        ${sp.overall_brier_score.toFixed(3)}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        async function loadSources() {
+            try {
+                const res = await fetch('/api/sources');
+                const sources = await res.json();
+                const tbody = document.getElementById('sourcesTableBody');
+                tbody.innerHTML = '';
+
+                if (sources.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-400 text-xs">
+                                Источников пока нет. Нажмите «Загрузить 10 авторов» вверху страницы.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                sources.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition";
+                    const lastScan = s.last_scanned_at ? new Date(s.last_scanned_at).toLocaleString() : 'Еще не проверялся';
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
+                            <i class="fa-brands fa-youtube text-red-600 text-base"></i>
+                            <span>${s.channel_title}</span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-700 text-xs">
+                            ${s.speaker_name}
+                        </td>
+                        <td class="px-6 py-4 text-xs">
+                            <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium">
+                                Доверие: ${Math.round(s.speaker_credibility * 100)}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-gray-500">
+                            ${lastScan}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="scanSource('${s.id}')" class="text-xs font-medium px-3 py-1 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 transition inline-flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-right text-blue-600"></i> Проверить свежие видео
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Failed to load sources:", err);
+            }
+        }
+
+        async function scanSource(sourceId) {
+            try {
+                const res = await fetch(`/api/sources/${sourceId}/scan`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Канал ${data.channel} успешно проверен! Найдено видео: ${data.videos_scanned}`);
+                    loadEvents();
+                    loadSources();
+                } else {
+                    alert(`Статус: ${data.message || data.error}`);
+                }
+            } catch (err) {
+                alert('Ошибка: ' + err);
+            }
+        }
+
+        async function seedRadarDemo() {
+            try {
+                const res = await fetch('/api/discovery/seed-radar-demo', { method: 'POST' });
+                const data = await res.json();
+                alert('Примеры тем и найденных экспертов успешно загружены!');
+                loadRadar();
+            } catch (err) {
+                alert('Ошибка: ' + err);
+            }
+        }
+
+        async function loadRadar() {
+            try {
+                // 1. Candidates
+                const resCand = await fetch('/api/discovery/candidates');
+                const candidates = await resCand.json();
+                const tbody = document.getElementById('candidatesTableBody');
+                document.getElementById('candidatesCountBadge').innerText = `${candidates.length} авторов`;
+                tbody.innerHTML = '';
+
+                if (candidates.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-400">Пока никого не найдено. Нажмите «Показать пример поиска».</td></tr>`;
+                } else {
+                    candidates.forEach(c => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-gray-50 transition";
+                        const isApproved = c.status === 'APPROVED';
+
+                        tr.innerHTML = `
+                            <td class="py-2.5 px-3 font-medium text-gray-900">
+                                <div>${c.name}</div>
+                                <div class="text-[10px] text-gray-500 truncate max-w-xs">${c.context_quote || ''}</div>
+                            </td>
+                            <td class="py-2.5 px-3 text-gray-600 text-xs">${c.discovered_via_channel}</td>
+                            <td class="py-2.5 px-3 font-medium text-center text-blue-700">${c.mention_count}</td>
+                            <td class="py-2.5 px-3 text-right">
+                                ${isApproved 
+                                    ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">Добавлен</span>`
+                                    : `<button onclick="approveCandidate('${c.id}')" class="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition">Добавить в базу</button>`
+                                }
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // 2. Narratives
+                const resNarr = await fetch('/api/discovery/narratives');
+                const narratives = await resNarr.json();
+                const container = document.getElementById('narrativesList');
+                document.getElementById('narrativesCountBadge').innerText = `${narratives.length} тем`;
+                container.innerHTML = '';
+
+                if (narratives.length === 0) {
+                    container.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs">Нет новых тем.</div>`;
+                } else {
+                    narratives.forEach(n => {
+                        const isMature = n.status === 'MATURE';
+                        const isPromoted = n.status === 'PROMOTED';
+                        const card = document.createElement('div');
+                        card.className = `p-3.5 rounded-xl border ${isMature ? 'bg-amber-50/50 border-amber-200' : (isPromoted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-gray-50 border-gray-200')} flex flex-col justify-between`;
+                        
+                        let badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">Спорят: ${n.unique_speakers_count} автора</span>`;
+                        if (isMature) {
+                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">Готово к запуску (${n.unique_speakers_count} авторов)</span>`;
+                        } else if (isPromoted) {
+                            badge = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Уже добавлено в события</span>`;
+                        }
+
+                        const speakersList = n.key_phrases?.speakers ? n.key_phrases.speakers.join(', ') : 'Несколько авторов';
+
+                        card.innerHTML = `
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <span class="text-[10px] uppercase text-gray-500 font-medium">${n.domain}</span>
+                                    ${badge}
+                                </div>
+                                <h4 class="text-xs font-medium text-gray-900 mb-1.5 leading-snug">${n.topic_summary}</h4>
+                                <div class="text-[11px] text-gray-500 mb-2"><b>Спикеры:</b> ${speakersList}</div>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-200/60">
+                                <span class="text-[11px] text-gray-500">Высказываний: ${n.statement_count}</span>
+                                ${!isPromoted ? `
+                                    <button onclick="promoteNarrative('${n.id}')" class="text-[10px] font-medium px-3 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-xs">
+                                        <i class="fa-solid fa-plus text-[9px]"></i> Создать событие
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+
+            } catch (err) {
+                console.error("Failed to load radar data:", err);
+            }
+        }
+
+        async function approveCandidate(candidateId) {
+            try {
+                const res = await fetch(`/api/discovery/candidates/${candidateId}/approve`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Автор ${data.name} добавлен в рейтинг!`);
+                    loadRadar();
+                    loadSpeakers();
+                }
+            } catch (err) {
+                alert('Ошибка: ' + err);
+            }
+        }
+
+        async function promoteNarrative(clusterId) {
+            try {
+                const res = await fetch(`/api/discovery/narratives/${clusterId}/promote`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Тема переведена в список активных событий!`);
+                    loadRadar();
+                    loadEvents();
+                }
+            } catch (err) {
+                alert('Ошибка: ' + err);
+            }
+        }
+
+        async function handleScanStream() {
+            const input = document.getElementById('streamScannerInput').value;
+            const resBox = document.getElementById('streamScanResult');
+            if (!input.trim()) return;
+
+            resBox.classList.remove('hidden');
+            resBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Анализируем текст...`;
+
+            try {
+                const res = await fetch('/api/discovery/scan-stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: input, channel_or_source: 'Потоковый сканер' })
+                });
+                const data = await res.json();
+                resBox.className = "mt-3 p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900";
+                resBox.innerHTML = `
+                    <div class="font-bold mb-1"><i class="fa-solid fa-check text-emerald-600"></i> Результат анализа:</div>
+                    <div>• <b>Найденные авторы:</b> ${data.discovered_speakers.length > 0 ? data.discovered_speakers.join(', ') : 'Новых персон не обнаружено'}</div>
+                    <div>• <b>Тема:</b> ${data.cluster_topic}</div>
+                `;
+                loadRadar();
+            } catch (err) {
+                resBox.className = "mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800";
+                resBox.innerHTML = `Ошибка: ${err}`;
+            }
         }
 
         async function handleIngest(e) {
@@ -537,7 +756,7 @@
             const content = document.getElementById('ingestContent').value;
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Обработка текста...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Разбираем...`;
             resultBox.classList.add('hidden');
 
             try {
@@ -554,28 +773,28 @@
                 const data = await res.json();
                 resultBox.classList.remove('hidden');
                 if (data.success) {
-                    resultBox.className = "mt-4 p-4 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-300";
+                    resultBox.className = "mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900";
                     resultBox.innerHTML = `
-                        <p class="font-bold mb-1">Успешно извлечено прогнозов: ${data.count}</p>
+                        <p class="font-bold mb-1">Успешно распознано прогнозов: ${data.count}</p>
                         ${data.recorded.map(r => `
-                            <div class="mt-2 pl-2 border-l border-emerald-500/50">
+                            <div class="mt-2 pl-2 border-l-2 border-emerald-500">
                                 <div><b>Событие:</b> ${r.event}</div>
-                                <div><b>Оценка спикера:</b> ${Math.round(r.confidence * 100)}% (Учтенный вес спикера: ${Math.round(r.applied_weight * 100)}%)</div>
+                                <div><b>Оценка автора:</b> ${Math.round(r.confidence * 100)}% (Учтенный вес автора: ${Math.round(r.applied_weight * 100)}%)</div>
                             </div>
                         `).join('')}
                     `;
                     document.getElementById('ingestContent').value = '';
                 } else {
-                    resultBox.className = "mt-4 p-4 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300";
-                    resultBox.innerHTML = `<b>Ошибка:</b> ${data.error || 'Не удалось извлечь прогноз'}`;
+                    resultBox.className = "mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800";
+                    resultBox.innerHTML = `<b>Не удалось разобрать:</b> ${data.error || 'Прогноз не найден'}`;
                 }
             } catch (err) {
                 resultBox.classList.remove('hidden');
-                resultBox.className = "mt-4 p-4 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300";
-                resultBox.innerHTML = `<b>Ошибка сети:</b> ${err}`;
+                resultBox.className = "mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800";
+                resultBox.innerHTML = `Ошибка: ${err}`;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Извлечь прогноз и обновить вероятность`;
+                btn.innerHTML = `<i class="fa-solid fa-sparkles"></i> Найти прогноз и посчитать шанс`;
             }
         }
 
@@ -602,7 +821,7 @@
                     body: JSON.stringify({ outcome: outcome, resolution_notes: notes })
                 });
                 if (res.ok) {
-                    alert('Событие успешно разрешено! Рейтинги спикеров обновлены.');
+                    alert('Итог зафиксирован! Рейтинг авторов обновлен.');
                     closeResolveModal();
                     loadEvents();
                 } else {
@@ -611,76 +830,6 @@
                 }
             } catch (e) {
                 alert('Ошибка: ' + e);
-            }
-        }
-
-        async function loadSources() {
-            try {
-                const res = await fetch('/api/sources');
-                const sources = await res.json();
-                const tbody = document.getElementById('sourcesTableBody');
-                tbody.innerHTML = '';
-
-                if (sources.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center py-8 text-slate-400 text-xs">
-                                Источники еще не добавлены. Нажмите «Топ-10 Крипто» в шапке для автоматической загрузки проверенных каналов.
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                sources.forEach(s => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/40 transition";
-                    const lastScan = s.last_scanned_at ? new Date(s.last_scanned_at).toLocaleString() : 'Никогда';
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
-                            <i class="fa-brands fa-youtube text-red-500 text-base"></i>
-                            <span>${s.channel_title}</span>
-                        </td>
-                        <td class="px-6 py-4 text-slate-300">
-                            ${s.speaker_name}
-                        </td>
-                        <td class="px-6 py-4 font-mono text-xs">
-                            <span class="px-2 py-0.5 rounded bg-indigo-900/40 text-indigo-300 border border-indigo-500/30">
-                                Доверие: ${Math.round(s.speaker_credibility * 100)}%
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 font-mono text-xs text-slate-400">
-                            ${s.channel_identifier}
-                        </td>
-                        <td class="px-6 py-4 text-xs text-slate-400">
-                            ${lastScan}
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="scanSource('${s.id}')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white transition flex items-center gap-1 ml-auto">
-                                <i class="fa-solid fa-satellite-dish"></i> Сканировать
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (err) {
-                console.error("Failed to load sources:", err);
-            }
-        }
-
-        async function scanSource(sourceId) {
-            try {
-                const res = await fetch(`/api/sources/${sourceId}/scan`, { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Канал ${data.channel} отсканирован! Обработано видео: ${data.videos_scanned}`);
-                    loadEvents();
-                    loadSources();
-                } else {
-                    alert(`Статус: ${data.message || data.error}`);
-                }
-            } catch (err) {
-                alert('Ошибка сканирования: ' + err);
             }
         }
 
@@ -703,177 +852,17 @@
                 const res = await fetch(`/api/sources/oracle/check?auto_resolve=${autoResolve}`, { method: 'POST' });
                 const evals = await res.json();
                 if (evals.length === 0) {
-                    alert('Нет активных событий по криптовалютам с ценовыми целями.');
+                    alert('Нет активных финансовых событий с целями.');
                     return;
                 }
-                let msg = 'Результаты проверки Оракула цен:\n\n';
+                let msg = 'Проверка текущих цен:\n\n';
                 evals.forEach(e => {
-                    msg += `• ${e.event_title}\n  Текущая цена: $${e.current_price.toLocaleString()} | Цель: $${e.target_price.toLocaleString()} (${e.progress_pct}% выполнения)\n  Цель достигнута: ${e.target_reached ? 'ДА' : 'НЕТ'}\n\n`;
+                    msg += `• ${e.event_title}\n  Текущая цена: $${e.current_price.toLocaleString()} из $${e.target_price.toLocaleString()} (${e.progress_pct}% выполнено)\n  Цель достигнута: ${e.target_reached ? 'ДА' : 'ЕЩЕ НЕТ'}\n\n`;
                 });
                 alert(msg);
                 loadEvents();
             } catch (err) {
-                alert('Ошибка оракула: ' + err);
-            }
-        }
-
-        async function seedRadarDemo() {
-            try {
-                const res = await fetch('/api/discovery/seed-radar-demo', { method: 'POST' });
-                const data = await res.json();
-                alert('Демо-данные Радара успешно загружены!');
-                loadRadar();
-            } catch (err) {
                 alert('Ошибка: ' + err);
-            }
-        }
-
-        async function loadRadar() {
-            try {
-                // 1. Load candidates
-                const resCand = await fetch('/api/discovery/candidates');
-                const candidates = await resCand.json();
-                const tbody = document.getElementById('candidatesTableBody');
-                document.getElementById('candidatesCountBadge').innerText = `${candidates.length} кандидатов`;
-                tbody.innerHTML = '';
-
-                if (candidates.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500">Кандидатов пока нет. Нажмите «Загрузить демо-данные радара».</td></tr>`;
-                } else {
-                    candidates.forEach(c => {
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-800/40 transition";
-                        const densityPct = Math.round(c.claim_density_score * 100);
-                        const isApproved = c.status === 'APPROVED';
-
-                        tr.innerHTML = `
-                            <td class="py-2.5 px-3 font-medium text-white">
-                                <div>${c.name}</div>
-                                <div class="text-[10px] text-slate-400 truncate max-w-xs">${c.context_quote || ''}</div>
-                            </td>
-                            <td class="py-2.5 px-3 text-slate-300 text-[11px]">${c.discovered_via_channel}</td>
-                            <td class="py-2.5 px-3 font-mono font-bold text-center text-indigo-400">${c.mention_count}</td>
-                            <td class="py-2.5 px-3 font-mono">
-                                <span class="px-1.5 py-0.5 rounded ${densityPct >= 70 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-300'} text-[10px]">
-                                    ${densityPct}%
-                                </span>
-                            </td>
-                            <td class="py-2.5 px-3 text-right">
-                                ${isApproved 
-                                    ? `<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-300">Одобрен</span>`
-                                    : `<button onclick="approveCandidate('${c.id}')" class="text-[10px] px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition">Одобрить</button>`
-                                }
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                // 2. Load narratives
-                const resNarr = await fetch('/api/discovery/narratives');
-                const narratives = await resNarr.json();
-                const container = document.getElementById('narrativesList');
-                document.getElementById('narrativesCountBadge').innerText = `${narratives.length} кластеров`;
-                container.innerHTML = '';
-
-                if (narratives.length === 0) {
-                    container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Зарождающихся тем пока нет.</div>`;
-                } else {
-                    narratives.forEach(n => {
-                        const isMature = n.status === 'MATURE';
-                        const isPromoted = n.status === 'PROMOTED';
-                        const card = document.createElement('div');
-                        card.className = `p-3 rounded-lg border ${isMature ? 'bg-amber-950/20 border-amber-500/40' : (isPromoted ? 'bg-emerald-950/20 border-emerald-500/40' : 'bg-slate-900 border-borderbg')} flex flex-col justify-between`;
-                        
-                        let badge = `<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Формируется (${n.unique_speakers_count} спикера)</span>`;
-                        if (isMature) {
-                            badge = `<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">Кворум набран (Зрелый нарратив)</span>`;
-                        } else if (isPromoted) {
-                            badge = `<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Продвинут в активные события</span>`;
-                        }
-
-                        const speakersList = n.key_phrases?.speakers ? n.key_phrases.speakers.join(', ') : 'Несколько авторов';
-
-                        card.innerHTML = `
-                            <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[10px] uppercase font-mono text-slate-400">${n.domain}</span>
-                                    ${badge}
-                                </div>
-                                <h4 class="text-xs font-bold text-white mb-1.5">${n.topic_summary}</h4>
-                                <div class="text-[10px] text-slate-400 mb-2"><b>Спикеры в дебатах:</b> ${speakersList}</div>
-                            </div>
-                            <div class="flex justify-between items-center pt-2 border-t border-borderbg/60">
-                                <span class="text-[10px] text-slate-400 font-mono">Высказываний: ${n.statement_count}</span>
-                                ${!isPromoted ? `
-                                    <button onclick="promoteNarrative('${n.id}')" class="text-[10px] px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition flex items-center gap-1">
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Создать событие
-                                    </button>
-                                ` : ''}
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
-                }
-
-            } catch (err) {
-                console.error("Failed to load radar data:", err);
-            }
-        }
-
-        async function approveCandidate(candidateId) {
-            try {
-                const res = await fetch(`/api/discovery/candidates/${candidateId}/approve`, { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Эксперт ${data.name} успешно добавлен в систему!`);
-                    loadRadar();
-                    loadSpeakers();
-                }
-            } catch (err) {
-                alert('Ошибка одобрения: ' + err);
-            }
-        }
-
-        async function promoteNarrative(clusterId) {
-            try {
-                const res = await fetch(`/api/discovery/narratives/${clusterId}/promote`, { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Нарратив переведен в официальное активное событие!`);
-                    loadRadar();
-                    loadEvents();
-                }
-            } catch (err) {
-                alert('Ошибка: ' + err);
-            }
-        }
-
-        async function handleScanStream() {
-            const input = document.getElementById('streamScannerInput').value;
-            const resBox = document.getElementById('streamScanResult');
-            if (!input.trim()) return;
-
-            resBox.classList.remove('hidden');
-            resBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Сканирование текста на персоналии и нарративы...`;
-
-            try {
-                const res = await fetch('/api/discovery/scan-stream', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: input, channel_or_source: 'Social Stream Scanner' })
-                });
-                const data = await res.json();
-                resBox.className = "mt-3 p-3 rounded-lg bg-indigo-950/40 border border-indigo-500/40 text-xs text-indigo-200";
-                resBox.innerHTML = `
-                    <div class="font-bold text-white mb-1"><i class="fa-solid fa-circle-check text-emerald-400"></i> Сканирование завершено:</div>
-                    <div>• <b>Обнаруженные эксперты:</b> ${data.discovered_speakers.length > 0 ? data.discovered_speakers.join(', ') : 'Новых персон не обнаружено'}</div>
-                    <div>• <b>Кластер темы:</b> ${data.cluster_topic} (Статус: ${data.cluster_status}, спикеров: ${data.unique_speakers_debating})</div>
-                `;
-                loadRadar();
-            } catch (err) {
-                resBox.className = "mt-3 p-3 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300";
-                resBox.innerHTML = `Ошибка: ${err}`;
             }
         }
 
