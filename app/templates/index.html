@@ -67,9 +67,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Monochrome gray icons & emojis across the UI */
+        /* Monochrome gray icons & emojis across the UI, except Bitcoin, YouTube & Planet/Globe */
         i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray {
             filter: grayscale(100%);
+        }
+        i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas {
+            filter: none !important;
         }
     </style>
 </head>
@@ -145,48 +148,32 @@
                         </span>
                         <span id="navCountSpeakers" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">0</span>
                     </button>
-
-                    <div class="my-1.5 border-t border-gemini-border/80"></div>
-
-                    <button onclick="switchTab('settings')" id="nav-settings" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-sliders w-4 text-center text-slate-500"></i>
-                            <span>Настройки</span>
-                        </span>
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Система</span>
-                    </button>
-                    <button onclick="switchTab('account')" id="nav-account" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-user-shield w-4 text-center text-slate-500"></i>
-                            <span>Аккаунт</span>
-                        </span>
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Профиль</span>
-                    </button>
                 </nav>
             </div>
 
-            <!-- Bottom Part: Reset Database & Local Status -->
-            <div class="p-3 border-t border-gemini-border bg-gemini-sidebar/50 flex flex-col gap-2">
-                <button onclick="openResetModal()" class="w-full text-left px-2.5 py-1.5 rounded-xl hover:bg-rose-50 text-rose-600 text-xs flex items-center gap-2 transition">
+            <!-- Bottom Part: Settings, Account & Reset Database -->
+            <div class="p-3 border-t border-gemini-border bg-gemini-sidebar/50 flex flex-col gap-1 text-xs font-medium text-gemini-grayText">
+                <button onclick="switchTab('settings')" id="nav-settings" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-sliders w-4 text-center text-slate-500"></i>
+                        <span>Настройки</span>
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Система</span>
+                </button>
+                <button onclick="switchTab('account')" id="nav-account" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-user-shield w-4 text-center text-slate-500"></i>
+                        <span>Аккаунт</span>
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Профиль</span>
+                </button>
+
+                <div class="my-1 border-t border-gemini-border/80"></div>
+
+                <button onclick="openResetModal()" class="w-full text-left px-3 py-2 rounded-2xl hover:bg-rose-50 text-rose-600 text-xs flex items-center gap-3 transition">
                     <i class="fa-solid fa-trash-can text-rose-500 text-xs w-4 text-center"></i>
                     <span>Сбросить базу данных</span>
                 </button>
-
-                <!-- User & Mode Status Pill -->
-                <div class="mt-2 pt-2 border-t border-gemini-border flex items-center justify-between px-1 text-[11px] text-gemini-mutedText">
-                    <button onclick="switchTab('account')" class="flex items-center gap-1.5 hover:text-slate-900 transition text-left" title="Открыть вкладку Аккаунт">
-                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-                        <span id="sidebarOperatorLabel" class="font-medium text-slate-700 truncate max-w-[140px]">Локальный аналитик</span>
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button onclick="switchTab('settings')" title="Настройки системы" class="hover:text-slate-900 transition">
-                            <i class="fa-solid fa-gear text-xs"></i>
-                        </button>
-                        <a href="/docs" target="_blank" title="API документация" class="hover:text-slate-900 transition">
-                            <i class="fa-solid fa-code text-xs"></i>
-                        </a>
-                    </div>
-                </div>
             </div>
         </aside>
 
@@ -202,7 +189,7 @@
                     <h2 id="viewTitle" class="text-sm font-semibold text-slate-800">События и вероятности</h2>
                 </div>
 
-                <!-- Right Tickers, Auto-Oracle & Profile -->
+                <!-- Right Tickers & Auto-Oracle -->
                 <div class="flex items-center gap-2.5 md:gap-3">
                     
                     <!-- Auto Oracle Status Badge & Action -->
@@ -215,7 +202,7 @@
                     <!-- Live Crypto Price Ticker Pills -->
                     <div id="headerLiveTickers" class="hidden lg:flex items-center gap-2 text-xs font-medium">
                         <div class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 font-mono text-[11px]">
-                            <i class="fa-brands fa-bitcoin text-slate-600"></i>
+                            <i class="fa-brands fa-bitcoin text-amber-500"></i>
                             <span>BTC:</span>
                             <b id="head-btc">$...</b>
                         </div>
@@ -229,17 +216,6 @@
                             <span>SOL:</span>
                             <b id="head-sol">$...</b>
                         </div>
-                    </div>
-
-                    <!-- Quick Header Settings & Account Buttons -->
-                    <div class="flex items-center gap-1.5 pl-1 border-l border-slate-200">
-                        <button onclick="switchTab('settings')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Настройки платформы">
-                            <i class="fa-solid fa-sliders text-xs"></i>
-                        </button>
-                        <button onclick="switchTab('account')" class="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition" title="Профиль и заставка аккаунта">
-                            <i class="fa-solid fa-user-shield text-[10px]"></i>
-                            <span class="hidden sm:inline" id="headerAccountBtnText">Аккаунт</span>
-                        </button>
                     </div>
                 </div>
             </header>
@@ -320,7 +296,7 @@
                                 <button onclick="setEventDomainFilter('crypto')" id="domainTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Криптовалюты</span></button>
                                 <button onclick="setEventDomainFilter('macro')" id="domainTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макроэкономика</span></button>
                                 <button onclick="setEventDomainFilter('tech')" id="domainTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
-                                <button onclick="setEventDomainFilter('general')" id="domainTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-slate-500 text-[10px]"></i> <span>Общее</span></button>
+                                <button onclick="setEventDomainFilter('general')" id="domainTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-blue-500 text-[10px]"></i> <span>Общее</span></button>
                             </div>
                         </div>
 
@@ -369,7 +345,7 @@
                             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <button onclick="setSpeakerDomainFilter('')" id="spTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все аналитики</button>
-                                    <button onclick="setSpeakerDomainFilter('crypto')" id="spTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-slate-500 text-[10px]"></i> <span>Крипто</span></button>
+                                    <button onclick="setSpeakerDomainFilter('crypto')" id="spTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Крипто</span></button>
                                     <button onclick="setSpeakerDomainFilter('macro')" id="spTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-slate-500 text-[10px]"></i> <span>Макро</span></button>
                                     <button onclick="setSpeakerDomainFilter('tech')" id="spTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-slate-500 text-[10px]"></i> <span>Технологии & AI</span></button>
                                 </div>
@@ -444,7 +420,7 @@
                                     </button>
                                 </div>
                                 <button onclick="runRealWorldAnalystSearch()" id="realWorldSearchBtn" class="px-5 py-3 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm flex-shrink-0">
-                                    <i class="fa-solid fa-globe"></i>
+                                    <i class="fa-solid fa-globe text-white"></i>
                                     <span>Найти в сети + соцсети</span>
                                 </button>
                             </div>
@@ -478,7 +454,7 @@
                             <!-- Live Scan Progress Notification -->
                             <div id="radarLiveScanProgress" class="hidden p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center gap-2.5 animate-pulse">
                                 <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-sm"></i>
-                                <span class="font-medium">Ищем аналитика, подтягиваем соцсети (X, YouTube, Telegram) и извлекаем прогнозы...</span>
+                                <span class="font-medium">Ищем аналитика, подтягиваем соцсети (X, YouTube, Web) и извлекаем прогнозы...</span>
                             </div>
                         </div>
 
@@ -567,10 +543,10 @@
                             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <button onclick="setNarrativeDomainFilter('')" id="narTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все темы</button>
-                                    <button onclick="setNarrativeDomainFilter('crypto')" id="narTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-slate-500 text-[10px]"></i> <span>Крипто</span></button>
+                                    <button onclick="setNarrativeDomainFilter('crypto')" id="narTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Крипто</span></button>
                                     <button onclick="setNarrativeDomainFilter('macro')" id="narTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-slate-500 text-[10px]"></i> <span>Макро</span></button>
                                     <button onclick="setNarrativeDomainFilter('tech')" id="narTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-slate-500 text-[10px]"></i> <span>Технологии & AI</span></button>
-                                    <button onclick="setNarrativeDomainFilter('general')" id="narTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-slate-500 text-[10px]"></i> <span>Общее</span></button>
+                                    <button onclick="setNarrativeDomainFilter('general')" id="narTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-blue-500 text-[10px]"></i> <span>Общее</span></button>
                                 </div>
 
                                 <div class="flex items-center gap-2">
@@ -1360,22 +1336,21 @@
             });
         }
 
-        // Render Social Account Pills for Speakers & Candidates (X, YouTube, Telegram, Web)
+        // Render Social Account Pills for Speakers & Candidates (X, YouTube, Web)
         function renderSocialAccountBadges(socials, compact = false) {
-            if (!socials || socials.length === 0) {
+            const filteredSocials = (socials || []).filter(s => (s.platform || '').toLowerCase() !== 'telegram');
+            if (filteredSocials.length === 0) {
                 return `<span class="text-[10px] text-slate-400 italic">Соцсети не найдены</span>`;
             }
             const pad = compact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[10px]';
-            return socials.map(s => {
+            return filteredSocials.map(s => {
                 const plat = (s.platform || '').toLowerCase();
                 if (plat === 'youtube') {
-                    return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold inline-flex items-center gap-1 transition"><i class="fa-brands fa-youtube"></i> <span>${s.title || s.identifier || 'YouTube'}</span></a>`;
+                    return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold inline-flex items-center gap-1 transition"><i class="fa-brands fa-youtube text-red-600"></i> <span>${s.title || s.identifier || 'YouTube'}</span></a>`;
                 } else if (plat === 'x' || plat === 'twitter') {
                     return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-slate-900 hover:bg-black text-white font-semibold inline-flex items-center gap-1 transition shadow-2xs"><i class="fa-brands fa-x-twitter text-white"></i> <span>${s.title || s.identifier || 'X'}</span></a>`;
-                } else if (plat === 'telegram') {
-                    return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 font-semibold inline-flex items-center gap-1 transition"><i class="fa-brands fa-telegram"></i> <span>${s.title || s.identifier || 'Telegram'}</span></a>`;
                 } else {
-                    return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold inline-flex items-center gap-1 transition"><i class="fa-solid fa-globe"></i> <span>${s.title || s.identifier || 'Web'}</span></a>`;
+                    return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="${pad} rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold inline-flex items-center gap-1 transition"><i class="fa-solid fa-globe text-blue-500"></i> <span>${s.title || s.identifier || 'Web'}</span></a>`;
                 }
             }).join(' ');
         }
@@ -1674,10 +1649,10 @@
         }
 
         const domainMeta = {
-            crypto: { label: 'Криптовалюты', icon: 'fa-bitcoin-sign', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+            crypto: { label: 'Криптовалюты', icon: 'fa-bitcoin-sign text-amber-500', color: 'bg-amber-50 text-amber-700 border-amber-200' },
             macro: { label: 'Макроэкономика', icon: 'fa-arrow-trend-up', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
             tech: { label: 'Технологии & AI', icon: 'fa-robot', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-            general: { label: 'Общее', icon: 'fa-globe', color: 'bg-slate-100 text-slate-700 border-slate-200' }
+            general: { label: 'Общее', icon: 'fa-globe text-blue-500', color: 'bg-slate-100 text-slate-700 border-slate-200' }
         };
 
         function setEventDomainFilter(domain) {
@@ -2079,17 +2054,17 @@
                             </div>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
-                            <div class="flex items-center justify-between gap-2">
+                        <div class="pt-3 border-t border-slate-100 flex flex-col gap-3">
+                            <div class="flex flex-col gap-1.5">
                                 <span class="text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider">Все сети аналитика:</span>
-                                <button onclick="openSpeakerAccuracyModal('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[11px] font-semibold transition flex items-center gap-1.5">
-                                    <i class="fa-regular fa-calendar-check text-slate-600"></i>
-                                    <span>Проверить точность за год</span>
-                                </button>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${socialBadges}
+                                </div>
                             </div>
-                            <div class="flex flex-wrap gap-1.5">
-                                ${socialBadges}
-                            </div>
+                            <button onclick="openSpeakerAccuracyModal('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="w-full py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs">
+                                <i class="fa-regular fa-calendar-check text-slate-600"></i>
+                                <span>Проверить точность за год</span>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -3870,7 +3845,7 @@
             visibleCandidatesCount = Math.max(visibleCandidatesCount, batch);
             visibleNarrativesCount = Math.max(visibleNarrativesCount, batch);
 
-            // 5. Monochrome icon filter
+            // 5. Monochrome icon filter (keeping Bitcoin, YouTube, and Planet/Globe colored)
             let monoStyle = document.getElementById('dynamicMonochromeOverride');
             if (!monoStyle) {
                 monoStyle = document.createElement('style');
@@ -3878,7 +3853,7 @@
                 document.head.appendChild(monoStyle);
             }
             monoStyle.textContent = appSettings.monochromeIcons
-                ? 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: grayscale(100%) !important; }'
+                ? 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: grayscale(100%) !important; } i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas { filter: none !important; }'
                 : 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: none !important; }';
 
             // 6. Floating bottom prompt capsule visibility

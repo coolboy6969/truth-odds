@@ -386,13 +386,6 @@ def _enrich_speaker_socials(
                 "url": url,
                 "title": src.channel_title
             })
-        elif src.platform == "telegram":
-            socials.append({
-                "platform": "telegram",
-                "identifier": src.channel_identifier,
-                "url": f"https://t.me/{src.channel_identifier.lstrip('@')}",
-                "title": src.channel_title or "Telegram"
-            })
         elif src.platform in ("twitter", "x"):
             handle = src.channel_identifier
             clean = handle.lstrip("@")
@@ -424,15 +417,6 @@ def _enrich_speaker_socials(
                     "url": f"https://x.com/{clean}",
                     "title": f"X: @{clean}"
                 })
-        elif "t.me" in hc:
-            clean = hc.split("/")[-1]
-            if not any(s["platform"] == "telegram" for s in socials):
-                socials.append({
-                    "platform": "telegram",
-                    "identifier": f"@{clean}",
-                    "url": f"https://t.me/{clean}",
-                    "title": f"Telegram: @{clean}"
-                })
         elif "youtube.com" in hc or "youtu.be" in hc:
             clean = hc.split("/")[-1]
             if not any(s["platform"] == "youtube" for s in socials):
@@ -442,7 +426,7 @@ def _enrich_speaker_socials(
                     "url": hc if hc.startswith("http") else f"https://{hc}",
                     "title": f"YouTube: {clean}"
                 })
-        elif not any(s["platform"] in ("x", "twitter") for s in socials) and not hc.startswith("Discovered via"):
+        elif "t.me" not in hc and not any(s["platform"] in ("x", "twitter") for s in socials) and not hc.startswith("Discovered via"):
             clean = hc.lstrip("@")
             socials.append({
                 "platform": "x",

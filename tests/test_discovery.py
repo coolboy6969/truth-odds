@@ -219,7 +219,8 @@ def test_social_lookup_and_manual_candidate_with_socials():
     platforms = {s["platform"] for s in lookup_data["social_accounts"]}
     assert "x" in platforms
     assert "youtube" in platforms
-    assert "telegram" in platforms
+    assert "web" in platforms
+    assert "telegram" not in platforms
 
     # 2. Manually add a candidate and auto-discover all socials
     manual_resp = client.post("/api/discovery/candidates/manual", json={

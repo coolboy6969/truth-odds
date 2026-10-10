@@ -431,21 +431,13 @@ class SocialDiscoveryService:
         curated = cls.get_curated_entry(name)
         if curated and curated.get("socials"):
             for s in curated["socials"]:
-                socials.append(dict(s))
+                if s.get("platform") != "telegram":
+                    socials.append(dict(s))
 
         # Parse handle_or_channel if provided
         if handle_or_channel:
             hc = handle_or_channel.strip()
-            if "t.me/" in hc:
-                slug = hc.split("t.me/")[-1].split("?")[0].strip("/@")
-                if slug and not any(s["platform"] == "telegram" for s in socials):
-                    socials.append({
-                        "platform": "telegram",
-                        "identifier": f"@{slug}",
-                        "url": f"https://t.me/s/{slug}",
-                        "title": f"Telegram: @{slug}"
-                    })
-            elif "youtube.com" in hc or "youtu.be" in hc:
+            if "youtube.com" in hc or "youtu.be" in hc:
                 if not any(s["platform"] == "youtube" for s in socials):
                     socials.append({
                         "platform": "youtube",
@@ -512,15 +504,6 @@ class SocialDiscoveryService:
                 "identifier": "YouTube",
                 "url": f"https://www.youtube.com/results?search_query={encoded_name}",
                 "title": f"YouTube: {name.strip()}"
-            })
-
-        # Guarantee Telegram link
-        if not any(s["platform"] == "telegram" for s in socials):
-            socials.append({
-                "platform": "telegram",
-                "identifier": "Telegram",
-                "url": f"https://t.me/s/{clean_slug.lower()}" if clean_slug and len(clean_slug) >= 4 else f"https://news.google.com/search?q={encoded_name}+telegram",
-                "title": "Telegram"
             })
 
         # Guarantee Web / Media mentions link
