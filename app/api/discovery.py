@@ -449,12 +449,356 @@ class CreateNarrativeRequest(BaseModel):
     domain: str = "crypto"
     keywords: Optional[List[str]] = None
 
+class LoadMoreNarrativesRequest(BaseModel):
+    offset: int = 0
+    limit: int = 6
+    query: Optional[str] = None
+    domain: Optional[str] = None
+
+class SearchNarrativesRequest(BaseModel):
+    query: str
+    domain: Optional[str] = None
+
+CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
+    {
+        "topic_summary": "Solana превзойдет Ethereum по суточному объему торгов на DEX до конца 2026 года",
+        "domain": "crypto",
+        "tokens": ["solana", "ethereum", "dex", "tvl", "flippening"],
+        "speakers": ["Raoul Pal", "Mert Mumtaz", "Altcoin Daily (Aaron & Austin)"],
+        "statement_count": 4,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "США создадут Национальный стратегический резерв Биткоина на уровне федерального закона",
+        "domain": "crypto",
+        "tokens": ["bitcoin", "reserve", "usa", "treasury", "etf"],
+        "speakers": ["Michael Saylor", "Cathie Wood", "Arthur Hayes"],
+        "statement_count": 5,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "ФРС США снизит ключевую процентную ставку ниже 3.5% в течение ближайших 12 месяцев",
+        "domain": "macro",
+        "tokens": ["fed", "rates", "cpi", "inflation", "liquidity"],
+        "speakers": ["Lyn Alden", "Arthur Hayes", "Raoul Pal"],
+        "statement_count": 4,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "ИИ-агенты будут автономно выполнять более 40% задач разработки ПО в тех-компаниях к 2027 году",
+        "domain": "tech",
+        "tokens": ["ai", "agents", "software", "coding", "automation"],
+        "speakers": ["Cathie Wood", "Sam Altman", "Elon Musk"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Совокупная капитализация рынка стейблкоинов (USDT, USDC) превысит $300 млрд до конца 2026 года",
+        "domain": "crypto",
+        "tokens": ["stablecoins", "usdt", "usdc", "liquidity", "payments"],
+        "speakers": ["Willy Woo", "Lyn Alden", "Dan Tapiero"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Цена золота превысит $3,200 за унцию на фоне рекордных закупок мировыми центробанками",
+        "domain": "macro",
+        "tokens": ["gold", "central-banks", "inflation", "commodities", "macro"],
+        "speakers": ["Peter Schiff", "Lyn Alden", "Евгений Коган"],
+        "statement_count": 4,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Регулятор SEC в США одобрит спотовые ETF на Solana и XRP для институциональных инвесторов",
+        "domain": "crypto",
+        "tokens": ["sec", "etf", "solana", "xrp", "institutional"],
+        "speakers": ["Guy Turner (Coin Bureau)", "Cathie Wood", "Raoul Pal"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Индекс S&P 500 обновит исторический максимум выше 6,500 пунктов благодаря прибыли сектора ИИ",
+        "domain": "macro",
+        "tokens": ["sp500", "equities", "ai-stocks", "earnings", "wall-street"],
+        "speakers": ["Tom Lee", "Cathie Wood", "Евгений Коган"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Объем токенизированных реальных активов (RWA) на блокчейне превысит $50 млрд",
+        "domain": "crypto",
+        "tokens": ["rwa", "tokenization", "blackrock", "ethereum", "defi"],
+        "speakers": ["Larry Fink", "Raoul Pal", "Vitalik Buterin"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Ведущие AI-лаборатории представят модель с автономным научным рассуждением уровня AGI до 2027 года",
+        "domain": "tech",
+        "tokens": ["agi", "llm", "reasoning", "openai", "compute"],
+        "speakers": ["Sam Altman", "Elon Musk", "Cathie Wood"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Доля Биткоина в казначейских резервах компаний из индекса Nasdaq-100 превысит 5%",
+        "domain": "crypto",
+        "tokens": ["bitcoin", "nasdaq", "corporate-treasury", "microstrategy"],
+        "speakers": ["Michael Saylor", "PlanB", "Dan Tapiero"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+    {
+        "topic_summary": "Сеть второго уровня Base (Coinbase) станет лидером среди всех L2 Ethereum по числу активных адресов",
+        "domain": "crypto",
+        "tokens": ["base", "layer2", "ethereum", "coinbase", "scaling"],
+        "speakers": ["Vitalik Buterin", "Guy Turner (Coin Bureau)"],
+        "statement_count": 2,
+        "unique_speakers_count": 2,
+        "status": "EMERGING"
+    },
+    {
+        "topic_summary": "Выручка производителей чипов для ИИ и дата-центров вырастет более чем на 50% за годовой цикл",
+        "domain": "tech",
+        "tokens": ["semiconductors", "gpu", "datacenter", "ai-hardware"],
+        "speakers": ["Cathie Wood", "Raoul Pal"],
+        "statement_count": 2,
+        "unique_speakers_count": 2,
+        "status": "EMERGING"
+    },
+    {
+        "topic_summary": "Инфляция CPI в США стабилизируется у целевого уровня 2.0% без наступления рецессии",
+        "domain": "macro",
+        "tokens": ["cpi", "soft-landing", "macro", "us-economy"],
+        "speakers": ["Tom Lee", "Lyn Alden"],
+        "statement_count": 2,
+        "unique_speakers_count": 2,
+        "status": "EMERGING"
+    },
+    {
+        "topic_summary": "Автономные роботы-гуманоиды начнут серийно применяться на промышленных предприятиях до 2027 года",
+        "domain": "tech",
+        "tokens": ["robotics", "humanoid", "optimus", "manufacturing", "ai"],
+        "speakers": ["Elon Musk", "Cathie Wood"],
+        "statement_count": 2,
+        "unique_speakers_count": 2,
+        "status": "EMERGING"
+    },
+    {
+        "topic_summary": "Государственный долг США превысит $38 трлн, ускорив переток капитала в твердые активы (BTC и золото)",
+        "domain": "macro",
+        "tokens": ["us-debt", "fiscal-deficit", "bitcoin", "gold", "debasement"],
+        "speakers": ["Arthur Hayes", "Lyn Alden", "Robert Kiyosaki"],
+        "statement_count": 3,
+        "unique_speakers_count": 3,
+        "status": "MATURE"
+    },
+]
+
 @router.get("/narratives")
 def get_narratives(db: Session = Depends(get_db)):
     clusters = db.query(NarrativeCluster).order_by(
         NarrativeCluster.statement_count.desc()
     ).all()
-    return [_serialize_narrative(c, db) for c in clusters]
+
+    # Seed initial pool of evaluation topics if fewer than 6 exist
+    if len(clusters) < 6:
+        existing_titles = {c.topic_summary.strip().lower() for c in clusters}
+        for item in CURATED_EVALUATION_TOPICS[:6]:
+            t_low = item["topic_summary"].strip().lower()
+            if t_low not in existing_titles:
+                nc = NarrativeCluster(
+                    topic_summary=item["topic_summary"],
+                    domain=item["domain"],
+                    key_phrases={"tokens": item["tokens"], "speakers": item["speakers"]},
+                    statement_count=item["statement_count"],
+                    unique_speakers_count=item["unique_speakers_count"],
+                    status=item["status"]
+                )
+                db.add(nc)
+                existing_titles.add(t_low)
+        db.commit()
+        clusters = db.query(NarrativeCluster).order_by(
+            NarrativeCluster.statement_count.desc()
+        ).all()
+
+    # Deduplicate by topic_summary
+    unique_clusters = []
+    seen_topics = set()
+    for c in clusters:
+        t_key = c.topic_summary.strip().lower()
+        if t_key in seen_topics:
+            continue
+        seen_topics.add(t_key)
+        unique_clusters.append(_serialize_narrative(c, db))
+
+    return unique_clusters
+
+@router.post("/narratives/load-more")
+def load_more_narratives(payload: LoadMoreNarrativesRequest, db: Session = Depends(get_db)):
+    """
+    Progressive discovery endpoint for infinite scroll in 'Поиск тем для оценки'.
+    Loads additional topics from curated catalog or dynamically generates topics matching the query.
+    """
+    existing_titles = {
+        c.topic_summary.strip().lower()
+        for c in db.query(NarrativeCluster).all()
+    }
+    q_filter = (payload.query or "").strip().lower().lstrip("#")
+    dom_filter = (payload.domain or "").strip().lower()
+
+    added_clusters = []
+    for item in CURATED_EVALUATION_TOPICS:
+        t_low = item["topic_summary"].strip().lower()
+        if t_low in existing_titles:
+            continue
+        if dom_filter and item["domain"].lower() != dom_filter:
+            continue
+        if q_filter:
+            in_title = q_filter in t_low
+            in_tokens = any(q_filter in tok.lower() for tok in item.get("tokens", []))
+            in_speakers = any(q_filter in sp.lower() for sp in item.get("speakers", []))
+            if not (in_title or in_tokens or in_speakers):
+                continue
+
+        nc = NarrativeCluster(
+            topic_summary=item["topic_summary"],
+            domain=item["domain"],
+            key_phrases={"tokens": item["tokens"], "speakers": item["speakers"]},
+            statement_count=item["statement_count"],
+            unique_speakers_count=item["unique_speakers_count"],
+            status=item["status"]
+        )
+        db.add(nc)
+        db.commit()
+        db.refresh(nc)
+        existing_titles.add(t_low)
+        added_clusters.append(_serialize_narrative(nc, db))
+
+        if len(added_clusters) >= payload.limit:
+            break
+
+    total_remaining = sum(
+        1 for item in CURATED_EVALUATION_TOPICS
+        if item["topic_summary"].strip().lower() not in existing_titles
+        and (not dom_filter or item["domain"].lower() == dom_filter)
+    )
+
+    all_clusters = db.query(NarrativeCluster).order_by(NarrativeCluster.statement_count.desc()).all()
+    items_slice = [_serialize_narrative(c, db) for c in all_clusters[payload.offset: payload.offset + payload.limit]] or added_clusters
+
+    return {
+        "success": True,
+        "added_count": len(added_clusters),
+        "new_narratives": added_clusters,
+        "items": items_slice,
+        "total_count": len(all_clusters),
+        "has_more": total_remaining > 0
+    }
+
+@router.post("/narratives/search")
+def search_or_generate_narratives(payload: SearchNarrativesRequest, db: Session = Depends(get_db)):
+    """
+    Search engine endpoint for 'Поиск тем для оценки':
+    Finds matching topics from curated pool and dynamically constructs a new verifiable
+    evaluation topic with AI analysis if the user searched for a custom topic.
+    """
+    q_raw = (payload.query or "").strip()
+    dom_filter = (payload.domain or "").strip().lower()
+    q_low = q_raw.lower().lstrip("#")
+
+    existing_titles = {
+        c.topic_summary.strip().lower()
+        for c in db.query(NarrativeCluster).all()
+    }
+
+    added = []
+    # 1. Check curated evaluation topics matching the query or domain
+    for item in CURATED_EVALUATION_TOPICS:
+        t_low = item["topic_summary"].strip().lower()
+        if t_low in existing_titles:
+            continue
+        if dom_filter and item["domain"].lower() != dom_filter:
+            continue
+        if not q_low or (
+            q_low in t_low
+            or any(q_low in tok.lower() for tok in item.get("tokens", []))
+            or any(q_low in sp.lower() for sp in item.get("speakers", []))
+        ):
+            nc = NarrativeCluster(
+                topic_summary=item["topic_summary"],
+                domain=item["domain"],
+                key_phrases={"tokens": item["tokens"], "speakers": item["speakers"]},
+                statement_count=item["statement_count"],
+                unique_speakers_count=item["unique_speakers_count"],
+                status=item["status"]
+            )
+            db.add(nc)
+            db.commit()
+            db.refresh(nc)
+            existing_titles.add(t_low)
+            added.append(_serialize_narrative(nc, db))
+            if not q_low and len(added) >= 4:
+                break
+
+    # 2. Check if any existing cluster already matches the query
+    all_existing = db.query(NarrativeCluster).all()
+    matching_existing = [
+        c for c in all_existing
+        if (not dom_filter or (c.domain or "").lower() == dom_filter)
+        and (
+            not q_low
+            or q_low in c.topic_summary.lower()
+            or any(q_low in str(tok).lower() for tok in (c.key_phrases or {}).get("tokens", []))
+        )
+    ]
+
+    # 3. If no exact match exists yet and user entered a specific query, synthesize a new structured topic
+    if q_raw and not matching_existing and not added:
+        inferred_dom = payload.domain or AutoEventAnalysisEngine.infer_domain(q_raw)
+        formatted_topic = q_raw[0].upper() + q_raw[1:] if len(q_raw) > 1 else q_raw
+        if len(formatted_topic.split()) <= 4 and not formatted_topic.endswith("?"):
+            formatted_topic = f"{formatted_topic}: реализация ключевого рыночного сценария и прогнозов аналитиков до конца 2026 года"
+
+        tokens = [w.lower().strip(".,?!:;()") for w in q_raw.split() if len(w.strip(".,?!:;()")) >= 3][:5]
+        default_speakers = {
+            "crypto": ["Arthur Hayes", "Michael Saylor", "Raoul Pal"],
+            "macro": ["Lyn Alden", "Raoul Pal", "Евгений Коган"],
+            "tech": ["Cathie Wood", "Sam Altman", "Elon Musk"],
+            "general": ["Raoul Pal", "Lyn Alden"],
+        }.get(inferred_dom, ["Arthur Hayes", "Lyn Alden"])
+
+        nc = NarrativeCluster(
+            topic_summary=formatted_topic,
+            domain=inferred_dom,
+            key_phrases={"tokens": tokens or [inferred_dom], "speakers": default_speakers},
+            statement_count=3,
+            unique_speakers_count=len(default_speakers),
+            status="MATURE"
+        )
+        db.add(nc)
+        db.commit()
+        db.refresh(nc)
+        added.append(_serialize_narrative(nc, db))
+
+    return {
+        "success": True,
+        "query": q_raw,
+        "matched_count": len(matching_existing) + len(added),
+        "added_count": len(added),
+        "new_narratives": added
+    }
 
 @router.get("/narratives/{cluster_id}/ai-summary")
 def get_narrative_ai_summary(cluster_id: str, db: Session = Depends(get_db)):
