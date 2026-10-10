@@ -560,11 +560,7 @@
                         </div>
 
                         <!-- Infinite Scroll Sentinel & Load More Trigger -->
-                        <div id="radarInfiniteSentinel" class="py-4 flex flex-col items-center justify-center gap-2">
-                            <div id="radarLoadMoreSpinner" class="hidden items-center gap-2 text-xs text-blue-600 font-semibold">
-                                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                <span>Подгружаем ещё кандидатов и их соцсети...</span>
-                            </div>
+                        <div id="radarInfiniteSentinel" class="py-4 flex flex-col items-center justify-center">
                             <button id="radarLoadMoreBtn" onclick="loadMoreCandidatesOnScroll(true)" class="px-5 py-2.5 rounded-2xl bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-semibold border border-gemini-border shadow-2xs flex items-center gap-2 transition">
                                 <i class="fa-solid fa-angles-down text-blue-500"></i>
                                 <span id="radarLoadMoreBtnText">Листайте ниже или нажмите, чтобы подгрузить ещё кандидатов</span>
@@ -660,11 +656,7 @@
                         </div>
 
                         <!-- Infinite Scroll Sentinel & Load More Trigger for Topics -->
-                        <div id="narrativeInfiniteSentinel" class="py-4 flex flex-col items-center justify-center gap-2">
-                            <div id="narrativeLoadMoreSpinner" class="hidden items-center gap-2 text-xs text-slate-600 font-semibold">
-                                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                <span>Подгружаем ещё темы для оценки с ИИ-описанием...</span>
-                            </div>
+                        <div id="narrativeInfiniteSentinel" class="py-4 flex flex-col items-center justify-center">
                             <button id="narrativeLoadMoreBtn" onclick="loadMoreNarrativesOnScroll(true)" class="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-gemini-border shadow-2xs flex items-center gap-2 transition">
                                 <i class="fa-solid fa-angles-down text-slate-500"></i>
                                 <span id="narrativeLoadMoreBtnText">Листайте ниже или нажмите, чтобы подгрузить ещё темы для оценки</span>
@@ -2650,9 +2642,7 @@
             if (!radarHasMoreFromServer && !forceServerFetch) return;
 
             isRadarLoadingMore = true;
-            const spinner = document.getElementById('radarLoadMoreSpinner');
             const btnText = document.getElementById('radarLoadMoreBtnText');
-            if (spinner) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
             if (btnText) btnText.textContent = 'Ищем новых кандидатов и подтягиваем их соцсети...';
 
             try {
@@ -2687,7 +2677,6 @@
                 console.error("Load more candidates error:", e);
             } finally {
                 isRadarLoadingMore = false;
-                if (spinner) { spinner.classList.add('hidden'); spinner.classList.remove('flex'); }
                 if (btnText) {
                     btnText.textContent = radarHasMoreFromServer
                         ? 'Листайте ниже или нажмите, чтобы подгрузить ещё кандидатов'
@@ -3125,23 +3114,14 @@
 
             // 1. If we already have more items in local filtered list, reveal next batch
             if (!forceServerFetch && visibleNarrativesCount < filtered.length) {
-                isNarrativeLoadingMore = true;
-                const spinner = document.getElementById('narrativeLoadMoreSpinner');
-                if (spinner) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
-
-                await new Promise(r => setTimeout(r, 150));
                 visibleNarrativesCount += 8;
-                isNarrativeLoadingMore = false;
-                if (spinner) { spinner.classList.add('hidden'); spinner.classList.remove('flex'); }
                 renderNarratives();
                 return;
             }
 
             // 2. Otherwise fetch / synthesize more topics from the server feed
             isNarrativeLoadingMore = true;
-            const spinner = document.getElementById('narrativeLoadMoreSpinner');
             const btnText = document.getElementById('narrativeLoadMoreBtnText');
-            if (spinner) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
             if (btnText) btnText.textContent = 'Подгружаем новые темы для оценки в ленту...';
 
             const query = (document.getElementById('narrativeSearchInput')?.value || '').trim().replace(/^#/, '');
@@ -3177,7 +3157,6 @@
                 console.warn('Error loading more narratives:', e);
             } finally {
                 isNarrativeLoadingMore = false;
-                if (spinner) { spinner.classList.add('hidden'); spinner.classList.remove('flex'); }
                 renderNarratives();
             }
         }
