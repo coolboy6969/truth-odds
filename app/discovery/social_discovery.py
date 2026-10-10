@@ -28,13 +28,18 @@ class SocialDiscoveryService:
         "илон маск": "elon musk",
         "роберт кийосаки": "robert kiyosaki",
         "robert kiyosaki": "robert kiyosaki",
-        "александр герчик": "александр герчик",
-        "евгений коган": "евгений коган",
-        "василий олейник": "василий олейник",
-        "рафаэль манвелян": "рафаэль манвелян",
-        "анатолий радченко": "анатолий радченко",
-        "кирилл эванс": "кирилл эванс",
-        "михаил хазин": "михаил хазин",
+        "александр герчик": "alexander gerchik",
+        "евгений коган": "evgeny kogan",
+        "василий олейник": "vasily oleynik",
+        "рафаэль манвелян": "rafael manvelyan",
+        "анатолий радченко": "anatoly radchenko",
+        "кирилл эванс": "kirill evans",
+        "михаил хазин": "mikhail khazin",
+        "евгений надоршин": "evgeny nadorshin",
+        "александр лосев": "alexander losev",
+        "ярослав кабаков": "yaroslav kabakov",
+        "дмитрий солодин": "dmitry solodin",
+        "тимофей мартынов": "timofey martynov",
         "сэм альтман": "sam altman",
         "sam altman": "sam altman",
     }
@@ -281,7 +286,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Роберт Кийосаки",
+            "name": "Robert Kiyosaki",
             "domain": "macro",
             "channel": "Rich Dad Channel",
             "bio": "Инвестор, предприниматель, автор бестселлера «Богатый папа, бедный папа»",
@@ -296,7 +301,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Евгений Коган",
+            "name": "Evgeny Kogan",
             "domain": "macro",
             "channel": "Bitkogan",
             "bio": "Инвестиционный банкир, профессор ВШЭ, автор проекта Bitkogan",
@@ -311,13 +316,13 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Александр Герчик",
+            "name": "Alexander Gerchik",
             "domain": "macro",
             "channel": "Gerchik & Co",
             "bio": "Профессиональный биржевой трейдер Уолл-стрит с 25-летним опытом без убыточных месяцев",
             "quote": "Торгуйте уровни и накопление крупного игрока: институциональные объемы показывают удержание ключевых зон поддержки по основным индексам.",
             "socials": [
-                {"platform": "youtube", "identifier": "Александр Герчик", "url": "https://www.youtube.com/@AlexGerchik", "title": "YouTube: Александр Герчик"},
+                {"platform": "youtube", "identifier": "Alexander Gerchik", "url": "https://www.youtube.com/@AlexGerchik", "title": "YouTube: Alexander Gerchik"},
                 {"platform": "telegram", "identifier": "@gerchik_official", "url": "https://t.me/s/gerchik_official", "title": "Telegram: Герчик"},
                 {"platform": "x", "identifier": "@GerchikAlex", "url": "https://x.com/search?q=Alex+Gerchik", "title": "X: Alex Gerchik"}
             ],
@@ -326,7 +331,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Рафаэль Манвелян",
+            "name": "Rafael Manvelyan",
             "domain": "crypto",
             "channel": "Слезы Сатоши",
             "bio": "Криптоинвестор, автор одного из крупнейших русскоязычных аналитических каналов «Слезы Сатоши»",
@@ -341,7 +346,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Василий Олейник",
+            "name": "Vasily Oleynik",
             "domain": "macro",
             "channel": "Деньги не спят",
             "bio": "Инвестиционный эксперт, трейдер, соведущий канала «Деньги не спят»",
@@ -356,7 +361,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Кирилл Эванс",
+            "name": "Kirill Evans",
             "domain": "crypto",
             "channel": "Kirill Evans",
             "bio": "Криптовалютный аналитик, трейдер и основатель образовательного сообщества",
@@ -371,7 +376,7 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Анатолий Радченко",
+            "name": "Anatoly Radchenko",
             "domain": "crypto",
             "channel": "United Traders",
             "bio": "Управляющий партнер United Traders, алгоритмический трейдер и венчурный инвестор",
@@ -1151,52 +1156,52 @@ class SocialDiscoveryService:
             ]
         },
         {
-            "name": "Михаил Хазин",
+            "name": "Mikhail Khazin",
             "domain": "macro",
             "channel": "Фонд Михаила Хазина",
             "bio": "Экономист, публицист, автор теории кризиса современной бреттон-вудской финансовой модели",
             "quote": "Разделение мировой экономики на валютные зоны усилит спрос на физическое золото и расчеты в национальных валютах.",
             "socials": [
-                {"platform": "youtube", "identifier": "Михаил Хазин", "url": "https://www.youtube.com/results?search_query=Михаил+Хазин+экономика", "title": "YouTube: Михаил Хазин"},
+                {"platform": "youtube", "identifier": "Mikhail Khazin", "url": "https://www.youtube.com/results?search_query=Михаил+Хазин+экономика", "title": "YouTube: Mikhail Khazin"},
                 {"platform": "web", "identifier": "khazin.ru", "url": "https://khazin.ru", "title": "Web: khazin.ru"},
-                {"platform": "x", "identifier": "Михаил Хазин", "url": "https://x.com/search?q=Михаил+Хазин", "title": "X: Упоминания"}
+                {"platform": "x", "identifier": "Mikhail Khazin", "url": "https://x.com/search?q=Михаил+Хазин", "title": "X: Упоминания"}
             ],
             "predictions": [
                 {"event_hypothesis": "Доля расчетов в национальных валютах стран БРИКС превысит долю доллара во взаимной торговле", "speaker_confidence": 0.82, "domain": "macro"}
             ]
         },
         {
-            "name": "Евгений Надоршин",
+            "name": "Evgeny Nadorshin",
             "domain": "macro",
             "channel": "ПФ Капитал",
             "bio": "Главный экономист консалтинговой компании «ПФ Капитал», макроэкономический эксперт по рынку РФ и сырья",
             "quote": "Жесткая денежно-кредитная политика и высокая ключевая ставка сдерживают кредитный импульс, формируя предпосылки для будущего разворота.",
             "socials": [
-                {"platform": "youtube", "identifier": "Евгений Надоршин", "url": "https://www.youtube.com/results?search_query=Евгений+Надоршин+прогноз", "title": "YouTube: Интервью"},
+                {"platform": "youtube", "identifier": "Evgeny Nadorshin", "url": "https://www.youtube.com/results?search_query=Евгений+Надоршин+прогноз", "title": "YouTube: Интервью"},
                 {"platform": "web", "identifier": "РБК / Коммерсантъ", "url": "https://news.google.com/search?q=Евгений+Надоршин", "title": "Web: Публикации в СМИ"},
-                {"platform": "x", "identifier": "Евгений Надоршин", "url": "https://x.com/search?q=Евгений+Надоршин", "title": "X: Поиск"}
+                {"platform": "x", "identifier": "Evgeny Nadorshin", "url": "https://x.com/search?q=Евгений+Надоршин", "title": "X: Поиск"}
             ],
             "predictions": [
                 {"event_hypothesis": "Замедление кредитования приведет к постепенному снижению инфляционного давления во втором полугодии", "speaker_confidence": 0.79, "domain": "macro"}
             ]
         },
         {
-            "name": "Александр Лосев",
+            "name": "Alexander Losev",
             "domain": "macro",
             "channel": "Спутник — Управление Капиталом",
             "bio": "Генеральный директорУК «Спутник — Управление Капиталом», эксперт по глобальным финансовым и сырьевым рынкам",
             "quote": "Геополитическая премия в сырьевых активах и растущее энергопотребление ЦОД поддержат цены на энергоносители и промышленные металлы.",
             "socials": [
-                {"platform": "youtube", "identifier": "Александр Лосев", "url": "https://www.youtube.com/results?search_query=Александр+Лосев+экономика", "title": "YouTube: Выступления"},
+                {"platform": "youtube", "identifier": "Alexander Losev", "url": "https://www.youtube.com/results?search_query=Александр+Лосев+экономика", "title": "YouTube: Выступления"},
                 {"platform": "web", "identifier": "Финам / РБК", "url": "https://news.google.com/search?q=Александр+Лосев+Спутник", "title": "Web: Аналитика"},
-                {"platform": "x", "identifier": "Александр Лосев", "url": "https://x.com/search?q=Александр+Лосев", "title": "X: Поиск"}
+                {"platform": "x", "identifier": "Alexander Losev", "url": "https://x.com/search?q=Александр+Лосев", "title": "X: Поиск"}
             ],
             "predictions": [
                 {"event_hypothesis": "Спрос со стороны энергетики и дата-центров приведет к росту цен на медь и уран", "speaker_confidence": 0.81, "domain": "macro"}
             ]
         },
         {
-            "name": "Ярослав Кабаков",
+            "name": "Yaroslav Kabakov",
             "domain": "macro",
             "channel": "Финам Инвестиции",
             "bio": "Директор по стратегии инвестиционной компании «Финам», аналитик фондового рынка",
@@ -1204,29 +1209,29 @@ class SocialDiscoveryService:
             "socials": [
                 {"platform": "youtube", "identifier": "Финам Инвестиции", "url": "https://www.youtube.com/@finam_invest", "title": "YouTube: Финам"},
                 {"platform": "web", "identifier": "finam.ru", "url": "https://www.finam.ru", "title": "Web: Финам"},
-                {"platform": "x", "identifier": "Ярослав Кабаков", "url": "https://x.com/search?q=Ярослав+Кабаков", "title": "X: Поиск"}
+                {"platform": "x", "identifier": "Yaroslav Kabakov", "url": "https://x.com/search?q=Ярослав+Кабаков", "title": "X: Поиск"}
             ],
             "predictions": [
                 {"event_hypothesis": "Акции экспортеров и компаний с чистой денежной позицией опередят широкий индекс", "speaker_confidence": 0.78, "domain": "macro"}
             ]
         },
         {
-            "name": "Дмитрий Солодин",
+            "name": "Dmitry Solodin",
             "domain": "macro",
             "channel": "Solodin Live",
             "bio": "Инвестиционный управляющий и портфельный аналитик рынков США, Азии и цифровых активов",
             "quote": "Сектор полупроводников и облачной ИИ-инфраструктуры сохраняет лидерство по темпам роста выручки, но требует селективного отбора по оценкам.",
             "socials": [
-                {"platform": "youtube", "identifier": "Дмитрий Солодин", "url": "https://www.youtube.com/results?search_query=Дмитрий+Солодин", "title": "YouTube: Дмитрий Солодин"},
+                {"platform": "youtube", "identifier": "Dmitry Solodin", "url": "https://www.youtube.com/results?search_query=Дмитрий+Солодин", "title": "YouTube: Dmitry Solodin"},
                 {"platform": "web", "identifier": "finversia.ru", "url": "https://news.google.com/search?q=Дмитрий+Солодин+инвестиции", "title": "Web: Обзоры"},
-                {"platform": "x", "identifier": "Дмитрий Солодин", "url": "https://x.com/search?q=Дмитрий+Солодин", "title": "X: Поиск"}
+                {"platform": "x", "identifier": "Dmitry Solodin", "url": "https://x.com/search?q=Дмитрий+Солодин", "title": "X: Поиск"}
             ],
             "predictions": [
                 {"event_hypothesis": "Индекс технологического сектора NASDAQ продолжит обновлять максимумы за счет отчетов бигтеха", "speaker_confidence": 0.79, "domain": "tech"}
             ]
         },
         {
-            "name": "Тимофей Мартынов",
+            "name": "Timofey Martynov",
             "domain": "macro",
             "channel": "Smart-Lab и Мозговитый",
             "bio": "Основатель крупнейшего в РФ сообщества трейдеров и инвесторов Smart-Lab.ru",

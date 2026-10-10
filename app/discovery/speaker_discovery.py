@@ -144,6 +144,155 @@ def is_valid_analyst_name(name: Optional[str]) -> bool:
 
     return True
 
+
+KNOWN_RU_EN_FULL_NAMES = {
+    "роберт кийосаки": "Robert Kiyosaki",
+    "евгений коган": "Evgeny Kogan",
+    "александр герчик": "Alexander Gerchik",
+    "рафаэль манвелян": "Rafael Manvelyan",
+    "василий олейник": "Vasily Oleynik",
+    "кирилл эванс": "Kirill Evans",
+    "анатолий радченко": "Anatoly Radchenko",
+    "михаил хазин": "Mikhail Khazin",
+    "евгений надоршин": "Evgeny Nadorshin",
+    "александр лосев": "Alexander Losev",
+    "ярослав кабаков": "Yaroslav Kabakov",
+    "дмитрий солодин": "Dmitry Solodin",
+    "тимофей мартынов": "Timofey Martynov",
+    "артур хейс": "Arthur Hayes",
+    "майкл сэйлор": "Michael Saylor",
+    "майкл сейлор": "Michael Saylor",
+    "виталик бутерин": "Vitalik Buterin",
+    "кэти вуд": "Cathie Wood",
+    "питер шифф": "Peter Schiff",
+    "рауль пал": "Raoul Pal",
+    "питер брандт": "Peter Brandt",
+    "том ли": "Tom Lee",
+    "бенджамин коуэн": "Benjamin Cowen",
+    "вилли ву": "Willy Woo",
+    "лин олден": "Lyn Alden",
+    "дэн тапиеро": "Dan Tapiero",
+    "илон маск": "Elon Musk",
+    "сэм альтман": "Sam Altman",
+    "павел дуров": "Pavel Durov",
+    "билл акман": "Bill Ackman",
+    "рэй далио": "Ray Dalio",
+    "уоррен баффет": "Warren Buffett",
+    "джером пауэлл": "Jerome Powell",
+    "ларри финк": "Larry Fink",
+    "чарльз хоскинсон": "Charles Hoskinson",
+    "анатолий яковенко": "Anatoly Yakovenko",
+    "брайан армстронг": "Brian Armstrong",
+    "майк новограц": "Mike Novogratz",
+    "энтони помплиано": "Anthony Pompliano",
+}
+
+KNOWN_RU_EN_WORDS = {
+    "александр": "Alexander", "александра": "Alexander", "александром": "Alexander",
+    "евгений": "Evgeny", "евгения": "Evgeny", "евгением": "Evgeny",
+    "дмитрий": "Dmitry", "дмитрия": "Dmitry", "дмитрием": "Dmitry",
+    "василий": "Vasily", "василия": "Vasily", "василием": "Vasily",
+    "анатолий": "Anatoly", "анатолия": "Anatoly", "анатолием": "Anatoly",
+    "рафаэль": "Rafael", "рафаэля": "Rafael",
+    "кирилл": "Kirill", "кирилла": "Kirill",
+    "михаил": "Mikhail", "михаила": "Mikhail",
+    "ярослав": "Yaroslav", "ярослава": "Yaroslav",
+    "тимофей": "Timofey", "тимофея": "Timofey",
+    "алексей": "Alexey", "алексея": "Alexey",
+    "сергей": "Sergey", "сергея": "Sergey",
+    "андрей": "Andrey", "андрея": "Andrey",
+    "николай": "Nikolay", "николая": "Nikolay",
+    "юрий": "Yury", "юрия": "Yury",
+    "валерий": "Valery", "валерия": "Valery",
+    "виталий": "Vitaly", "виталия": "Vitaly",
+    "григорий": "Grigory", "григория": "Grigory",
+    "георгий": "Georgy", "георгия": "Georgy",
+    "максим": "Maxim", "максима": "Maxim",
+    "виктор": "Victor", "виктора": "Victor",
+    "павел": "Pavel", "павла": "Pavel",
+    "илья": "Ilya", "ильи": "Ilya",
+    "пётр": "Peter", "петр": "Peter", "петра": "Peter",
+    "фёдор": "Fedor", "федор": "Fedor", "федора": "Fedor",
+    "роберт": "Robert", "роберта": "Robert",
+    "майкл": "Michael", "майкла": "Michael",
+    "питер": "Peter", "питера": "Peter",
+    "артур": "Arthur", "артура": "Arthur",
+    "илон": "Elon", "илона": "Elon",
+    "сэм": "Sam", "сэма": "Sam",
+    "кэти": "Cathie",
+    "эванс": "Evans",
+    "кийосаки": "Kiyosaki",
+    "коган": "Kogan", "когана": "Kogan",
+    "герчик": "Gerchik", "герчика": "Gerchik",
+    "манвелян": "Manvelyan", "манвеляна": "Manvelyan",
+    "олейник": "Oleynik", "олейника": "Oleynik",
+    "радченко": "Radchenko",
+    "хазин": "Khazin", "хазина": "Khazin",
+    "надоршин": "Nadorshin", "надоршина": "Nadorshin",
+    "лосев": "Losev", "лосева": "Losev",
+    "кабаков": "Kabakov", "кабакова": "Kabakov",
+    "солодин": "Solodin", "солодина": "Solodin",
+    "мартынов": "Martynov", "мартынова": "Martynov",
+}
+
+CYRILLIC_TO_LATIN_MAP = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+}
+
+
+def transliterate_russian_name_to_english(name: Optional[str]) -> str:
+    """
+    Transcribes/transliterates any Russian (Cyrillic) candidate or analyst name into English.
+    Uses canonical spelling for known personalities and natural English transliteration for new names.
+    """
+    if not name:
+        return ""
+    clean = " ".join(name.strip().split())
+    low_full = clean.lower()
+    if low_full in KNOWN_RU_EN_FULL_NAMES:
+        return KNOWN_RU_EN_FULL_NAMES[low_full]
+
+    if not re.search(r'[А-Яа-яЁё]', clean):
+        return " ".join(w[0].upper() + w[1:] if w else w for w in clean.split())
+
+    out_words = []
+    for raw_w in clean.split():
+        w_low = raw_w.lower()
+        if w_low in KNOWN_RU_EN_WORDS:
+            out_words.append(KNOWN_RU_EN_WORDS[w_low])
+            continue
+        if not re.search(r'[а-яё]', w_low):
+            out_words.append(raw_w.capitalize())
+            continue
+
+        # Handle natural Russian name endings (-ий / -ый -> -y, -ей -> -ey, -ия -> -ia)
+        suffix = ""
+        stem = w_low
+        if len(w_low) > 3 and (w_low.endswith("ий") or w_low.endswith("ый")):
+            stem = w_low[:-2]
+            suffix = "y"
+        elif len(w_low) > 3 and w_low.endswith("ей"):
+            stem = w_low[:-2]
+            suffix = "ey"
+        elif len(w_low) > 3 and w_low.endswith("ия"):
+            stem = w_low[:-2]
+            suffix = "ia"
+
+        stem = stem.replace("кс", "x")
+        trans_chars = [CYRILLIC_TO_LATIN_MAP.get(ch, ch) for ch in stem]
+        latin_word = "".join(trans_chars) + suffix
+        out_words.append(latin_word.capitalize() if latin_word else raw_w)
+
+    result_name = " ".join(out_words)
+    if result_name.lower() in KNOWN_RU_EN_FULL_NAMES:
+        return KNOWN_RU_EN_FULL_NAMES[result_name.lower()]
+    return result_name
+
+
 class SpeakerDiscoveryEngine:
     """
     Discovers new opinion leaders and forecasting personalities by analyzing
@@ -169,7 +318,7 @@ class SpeakerDiscoveryEngine:
                 name = m.group(1).strip()
                 name_cleaned = re.sub(r'\s+(?:on|in|for|who|at|by|says|predicts|на|в|для|кто|заявил)$', '', name, flags=re.IGNORECASE).strip()
                 if is_valid_analyst_name(name_cleaned):
-                    formatted_name = " ".join(w.capitalize() for w in name_cleaned.split())
+                    formatted_name = transliterate_russian_name_to_english(name_cleaned)
                     found_names.add(formatted_name)
         return list(found_names)
 
@@ -186,7 +335,7 @@ class SpeakerDiscoveryEngine:
         if not is_valid_analyst_name(name):
             return None
 
-        name_clean = " ".join(w.capitalize() for w in name.strip().split())
+        name_clean = transliterate_russian_name_to_english(name)
 
         # Check existing candidate by name
         candidate = db.query(DiscoveredSpeakerCandidate).filter(
@@ -208,6 +357,7 @@ class SpeakerDiscoveryEngine:
                 return None
 
         if candidate:
+            candidate.name = name_clean
             candidate.mention_count += 1
             if contains_claim:
                 candidate.claim_density_score = min(1.0, candidate.claim_density_score + 0.15)

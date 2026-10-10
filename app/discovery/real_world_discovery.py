@@ -13,7 +13,12 @@ from app.extractor.llm_extractor import LLMPredictionExtractor
 from app.engine.auto_analysis import AutoEventAnalysisEngine
 from app.engine.scoring import ForecasterScorer
 from app.oracles.auto_oracle import AutoOracleService
-from app.discovery.speaker_discovery import is_valid_analyst_name, STOP_WORDS, normalize_analyst_url
+from app.discovery.speaker_discovery import (
+    is_valid_analyst_name,
+    STOP_WORDS,
+    normalize_analyst_url,
+    transliterate_russian_name_to_english,
+)
 
 
 class RealWorldAnalystDiscoveryService:
@@ -59,14 +64,13 @@ class RealWorldAnalystDiscoveryService:
         if not is_valid_analyst_name(cleaned):
             return None
 
-        words = cleaned.split()
-        return " ".join(w.capitalize() for w in words)
+        return transliterate_russian_name_to_english(cleaned)
 
     @classmethod
     def extract_speaker_from_text(cls, text: str, default_hint: Optional[str] = None) -> Optional[str]:
         if default_hint:
             cleaned_hint = cls.clean_extracted_name(default_hint)
-            if cleaned_hint and cleaned_hint.lower() in text.lower():
+            if cleaned_hint and (cleaned_hint.lower() in text.lower() or default_hint.strip().lower() in text.lower()):
                 return cleaned_hint
 
         for pattern in cls.PATTERNS:

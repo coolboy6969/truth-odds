@@ -4,7 +4,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.entities import DiscoveredSpeakerCandidate, NarrativeCluster, Speaker, Event
-from app.discovery.speaker_discovery import SpeakerDiscoveryEngine, is_valid_analyst_name, normalize_analyst_url
+from app.discovery.speaker_discovery import (
+    SpeakerDiscoveryEngine,
+    is_valid_analyst_name,
+    normalize_analyst_url,
+    transliterate_russian_name_to_english,
+)
 from app.discovery.event_discovery import EventDiscoveryEngine
 from app.discovery.real_world_discovery import RealWorldAnalystDiscoveryService
 from app.discovery.social_discovery import SocialDiscoveryService
@@ -40,9 +45,10 @@ class LoadMoreCandidatesRequest(BaseModel):
     query: Optional[str] = None
 
 def _serialize_candidate(c: DiscoveredSpeakerCandidate) -> Dict[str, Any]:
-    curated = SocialDiscoveryService.get_curated_entry(c.name)
+    eng_name = transliterate_russian_name_to_english(c.name) or c.name
+    curated = SocialDiscoveryService.get_curated_entry(eng_name) or SocialDiscoveryService.get_curated_entry(c.name)
     socials = SocialDiscoveryService.discover_socials_for_person(
-        name=c.name,
+        name=eng_name,
         handle_or_channel=c.discovered_via_channel,
         context_text=c.context_quote
     )
@@ -51,10 +57,10 @@ def _serialize_candidate(c: DiscoveredSpeakerCandidate) -> Dict[str, Any]:
         preds = curated["predictions"]
     return {
         "id": c.id,
-        "name": c.name,
+        "name": eng_name,
         "discovered_via_channel": c.discovered_via_channel,
         "bio": curated["bio"] if curated else f"Обнаружен в источнике: {c.discovered_via_channel}",
-        "domain": curated["domain"] if curated else AutoEventAnalysisEngine.infer_domain(c.context_quote or c.name),
+        "domain": curated["domain"] if curated else AutoEventAnalysisEngine.infer_domain(c.context_quote or eng_name),
         "context_quote": c.context_quote or (curated["quote"] if curated else ""),
         "source_url": c.source_url,
         "extracted_predictions": preds,
@@ -255,9 +261,9 @@ async def create_manual_candidate(payload: ManualCandidateRequest, db: Session =
     quote_val = payload.context_quote or payload.initial_prediction
     should_approve = payload.auto_approve or payload.approve_immediately
 
-    # Format name cleanly
-    formatted_name = " ".join(w.capitalize() for w in raw_name.split())
-    curated = SocialDiscoveryService.get_curated_entry(formatted_name)
+    # Format and transcribe name cleanly to English
+    formatted_name = transliterate_russian_name_to_english(raw_name)
+    curated = SocialDiscoveryService.get_curated_entry(formatted_name) or SocialDiscoveryService.get_curated_entry(raw_name)
     if curated:
         formatted_name = curated["name"]
 
@@ -380,11 +386,21 @@ def get_candidates(db: Session = Depends(get_db)):
         DiscoveredSpeakerCandidate.mention_count.desc()
     ).all()
 
+    # Automatically transcribe any existing Russian candidate names in DB to English
+    db_changed = False
+    for c in candidates:
+        eng_name = transliterate_russian_name_to_english(c.name)
+        if eng_name and eng_name != c.name:
+            c.name = eng_name
+            db_changed = True
+    if db_changed:
+        db.commit()
+
     # Ensure initial rich pool of candidates if DB has fewer than 55
     valid_existing = [c for c in candidates if is_valid_analyst_name(c.name)]
     if len(valid_existing) < 55:
         existing_names = {c.name.strip().lower() for c in valid_existing}
-        speaker_names = {s.name.strip().lower() for s in db.query(Speaker).all()}
+        speaker_names = {transliterate_russian_name_to_english(s.name).strip().lower() for s in db.query(Speaker).all()}
         for item in SocialDiscoveryService.CURATED_ANALYSTS[:55]:
             c_low = item["name"].strip().lower()
             if c_low not in existing_names:
@@ -413,7 +429,7 @@ def get_candidates(db: Session = Depends(get_db)):
         if not is_valid_analyst_name(c.name):
             continue
 
-        name_key = c.name.strip().lower()
+        name_key = transliterate_russian_name_to_english(c.name).strip().lower()
         norm_url = normalize_analyst_url(c.source_url)
 
         # Deduplication check: if links repeat or names repeat, this is the exact same analyst
