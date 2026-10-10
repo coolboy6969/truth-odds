@@ -120,19 +120,19 @@
 
                 <!-- Navigation List -->
                 <nav class="flex flex-col gap-1 text-xs font-medium text-gemini-grayText">
+                    <button onclick="switchTab('manual-events')" id="nav-manual-events" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-pen-to-square w-4 text-center text-slate-500"></i>
+                            <span>События добавленные вручную</span>
+                        </span>
+                        <span id="navCountManualEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 font-semibold">0</span>
+                    </button>
                     <button onclick="switchTab('events')" id="nav-events" class="flex items-center justify-between px-3 py-2.5 rounded-2xl bg-gemini-active text-gemini-activeText font-semibold transition text-left">
                         <span class="flex items-center gap-3">
                             <i class="fa-solid fa-chart-pie w-4 text-center text-blue-600"></i>
                             <span>События и расчеты</span>
                         </span>
                         <span id="navCountEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 font-semibold">0</span>
-                    </button>
-                    <button onclick="switchTab('manual-events')" id="nav-manual-events" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-pen-to-square w-4 text-center text-slate-500"></i>
-                            <span>Добавленные вручную</span>
-                        </span>
-                        <span id="navCountManualEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 font-semibold">0</span>
                     </button>
                     <button onclick="switchTab('narratives')" id="nav-narratives" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
                         <span class="flex items-center gap-3">
@@ -2296,19 +2296,18 @@
                                     <b class="text-xs font-mono text-slate-700">${brier}</b>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="pt-3 border-t border-slate-100 flex flex-col gap-3">
-                            <div class="flex flex-col gap-1.5">
-                                <span class="text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider">Все сети аналитика:</span>
-                                <div class="flex flex-wrap gap-1.5">
-                                    ${socialBadges}
-                                </div>
-                            </div>
-                            <button onclick="openSpeakerAccuracyModal('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="w-full py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs">
+                            <button onclick="openSpeakerAccuracyModal('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="w-full mt-2.5 py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs">
                                 <i class="fa-regular fa-calendar-check text-slate-600"></i>
                                 <span>Проверить точность за год</span>
                             </button>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider">Все сети аналитика:</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${socialBadges}
+                            </div>
                         </div>
                     </div>
                 `;
