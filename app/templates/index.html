@@ -71,7 +71,7 @@
         i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray {
             filter: grayscale(100%);
         }
-        i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas {
+        i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas, #autoOracleIcon {
             filter: none !important;
         }
     </style>
@@ -200,10 +200,10 @@
                 <div class="flex items-center gap-2.5 md:gap-3">
                     
                     <!-- Auto Oracle Status Badge & Action -->
-                    <button onclick="triggerAutoOracleCheck()" id="autoOracleBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-semibold transition shadow-2xs" title="Автоматическая сверка котировок и дедлайнов. Нажмите для немедленной проверки">
-                        <span id="autoOracleDot" class="w-2 h-2 rounded-full bg-slate-700 animate-pulse"></span>
-                        <span id="autoOracleText">Автопроверка: Активна</span>
-                        <i id="autoOracleIcon" class="fa-solid fa-arrows-rotate text-[10px] ml-0.5"></i>
+                    <button onclick="triggerAutoOracleCheck()" id="autoOracleBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-semibold transition shadow-2xs" title="Автоматическая сверка котировок и дедлайнов. Нажмите для немедленной проверки">
+                        <span id="autoOracleDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="autoOracleText">Автопроверка: 30с</span>
+                        <i id="autoOracleIcon" class="fa-solid fa-arrows-rotate text-emerald-600 text-[10px] ml-0.5"></i>
                     </button>
 
                     <!-- Live Crypto Price Ticker Pills -->
@@ -4097,7 +4097,7 @@
                 document.head.appendChild(monoStyle);
             }
             monoStyle.textContent = appSettings.monochromeIcons
-                ? 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: grayscale(100%) !important; } i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas { filter: none !important; }'
+                ? 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: grayscale(100%) !important; } i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas, #autoOracleIcon { filter: none !important; }'
                 : 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: none !important; }';
 
             // 6. Floating bottom prompt capsule visibility
