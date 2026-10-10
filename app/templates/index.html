@@ -124,19 +124,19 @@
                         </span>
                         <span id="navCountEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/80 text-slate-700">0</span>
                     </button>
-                    <button onclick="switchTab('candidates')" id="nav-candidates" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-satellite-dish w-4 text-center text-slate-500"></i>
-                            <span>Радар кандидатов</span>
-                        </span>
-                        <span id="navCountCandidates" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold">0</span>
-                    </button>
                     <button onclick="switchTab('narratives')" id="nav-narratives" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
                         <span class="flex items-center gap-3">
                             <i class="fa-solid fa-comments w-4 text-center text-slate-500"></i>
                             <span>Поиск тем для оценки</span>
                         </span>
                         <span id="navCountNarratives" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold">0</span>
+                    </button>
+                    <button onclick="switchTab('candidates')" id="nav-candidates" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-satellite-dish w-4 text-center text-slate-500"></i>
+                            <span>Радар кандидатов</span>
+                        </span>
+                        <span id="navCountCandidates" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold">0</span>
                     </button>
                     <button onclick="switchTab('speakers')" id="nav-speakers" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
                         <span class="flex items-center gap-3">
@@ -431,10 +431,6 @@
                                         <i class="fa-solid fa-tower-broadcast text-blue-600"></i>
                                         <span>Скан медиа</span>
                                     </button>
-                                    <button onclick="approveAllPendingCandidates()" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5 transition" title="Одобрить всех ожидающих кандидатов">
-                                        <i class="fa-solid fa-check-double"></i>
-                                        <span>Принять всех</span>
-                                    </button>
                                 </div>
                             </div>
 
@@ -455,8 +451,15 @@
                             <!-- Keep hidden input for backward filter compatibility -->
                             <input type="hidden" id="candidateSearchInput" value="">
 
-                            <!-- Quick Filter Bar -->
-                            <div class="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-slate-100 text-[11px]">
+                            <!-- Quick Filter & Bulk Action Bar Directly Above Results -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100 text-[11px]">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button onclick="approveAllPendingCandidates()" id="btnApproveAllPending" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="Одобрить всех ожидающих кандидатов из списка">
+                                        <i class="fa-solid fa-check-double text-[10px]"></i>
+                                        <span>Принять всех ожидающих</span>
+                                        <span id="candPendingBtnBadge" class="px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono text-[10px]">0</span>
+                                    </button>
+                                </div>
                                 <div class="flex items-center gap-2">
                                     <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-slate-700 font-medium focus:outline-none">
                                         <option value="">Все статусы</option>
@@ -2470,7 +2473,7 @@
                 if (btnText) {
                     btnText.textContent = radarHasMoreFromServer
                         ? 'Листайте ниже или нажмите, чтобы подгрузить ещё кандидатов'
-                        : 'Показаны все найденные кандидаты (нажмите для повторного скана)';
+                        : 'Нажмите для повторного скана';
                 }
             }
         }
@@ -2561,6 +2564,8 @@
             document.getElementById('candStatTotal').textContent = total;
             document.getElementById('candStatPending').textContent = pending;
             document.getElementById('candStatApproved').textContent = approved;
+            const pendBadge = document.getElementById('candPendingBtnBadge');
+            if (pendBadge) pendBadge.textContent = pending;
 
             const filtered = getFilteredCandidatesList();
             const searchRaw = (document.getElementById('realWorldSearchQueryInput')?.value || '').trim();
@@ -2589,6 +2594,13 @@
             }
 
             const visibleSlice = filtered.slice(0, visibleCandidatesCount);
+            const btnText = document.getElementById('radarLoadMoreBtnText');
+            if (btnText && !isRadarLoadingMore) {
+                const hasMoreLocal = visibleSlice.length < filtered.length;
+                btnText.textContent = (hasMoreLocal || radarHasMoreFromServer)
+                    ? 'Листайте ниже или нажмите, чтобы подгрузить ещё кандидатов'
+                    : 'Нажмите для повторного скана';
+            }
 
             container.innerHTML = visibleSlice.map(cand => {
                 const isApproved = cand.status === 'APPROVED';
@@ -2596,36 +2608,6 @@
                 const initials = (cand.name || 'К').split(' ').map(w => w[0]).join('').slice(0, 2);
 
                 const socialBadges = renderSocialAccountBadges(cand.social_accounts || [], true);
-
-                const predictionsList = (cand.extracted_predictions || []);
-                let claimsHtml = '';
-                if (predictionsList.length > 0) {
-                    claimsHtml = `
-                        <div class="mt-2 flex flex-col gap-1.5 pt-2 border-t border-slate-100">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <i class="fa-solid fa-crosshairs text-blue-500"></i> Извлеченные прогнозы (${predictionsList.length}):
-                            </span>
-                            <div class="flex flex-col gap-1.5">
-                                ${predictionsList.slice(0, 3).map(p => `
-                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex items-start justify-between gap-2">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-1.5 text-[10px] mb-0.5">
-                                                <span class="px-1.5 py-0.5 rounded font-semibold ${p.domain === 'crypto' ? 'bg-amber-100 text-amber-800' : p.domain === 'macro' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${p.domain || 'general'}</span>
-                                                <span class="text-slate-400">•</span>
-                                                <span class="text-slate-500 font-medium truncate">${p.publisher || cand.discovered_via_channel || 'Медиа'}</span>
-                                            </div>
-                                            <div class="font-medium text-slate-800 line-clamp-2 leading-snug">«${p.event_hypothesis || p.raw_quote}»</div>
-                                        </div>
-                                        <div class="text-right flex-shrink-0 self-center">
-                                            <span class="text-[10px] text-slate-400 block">Уверенность:</span>
-                                            <span class="font-bold text-xs font-mono text-blue-600">${Math.round((p.speaker_confidence || 0.7) * 100)}%</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
 
                 let sourceLink = '';
                 if (cand.source_url) {
@@ -2724,8 +2706,6 @@
                                     «${cand.context_quote}»
                                 </p>
                             ` : ''}
-
-                            ${claimsHtml}
                         </div>
 
                         <div class="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
