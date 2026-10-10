@@ -14,7 +14,8 @@ class PredictionService:
 
     @classmethod
     def get_or_create_speaker(cls, db: Session, name: str, handle_or_channel: Optional[str] = None) -> Speaker:
-        name_clean = name.strip()
+        from app.discovery.speaker_discovery import transliterate_russian_name_to_english
+        name_clean = transliterate_russian_name_to_english(name.strip()) or name.strip()
         speaker = db.query(Speaker).filter(Speaker.name.ilike(name_clean)).first()
         if not speaker:
             speaker = Speaker(

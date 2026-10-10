@@ -72,7 +72,10 @@ def _serialize_candidate(c: DiscoveredSpeakerCandidate) -> Dict[str, Any]:
     }
 
 def _serialize_narrative(cluster: NarrativeCluster, db: Session) -> Dict[str, Any]:
-    tokens = (cluster.key_phrases or {}).get("tokens", [])
+    raw_kp = cluster.key_phrases or {}
+    tokens = raw_kp.get("tokens", [])
+    raw_speakers = raw_kp.get("speakers", [])
+    eng_speakers = [transliterate_russian_name_to_english(sp) or sp for sp in raw_speakers]
     linked_event = db.query(Event).filter(Event.title.ilike(cluster.topic_summary.strip())).first()
     prob = linked_event.current_probability if linked_event else 0.55
 
@@ -87,7 +90,7 @@ def _serialize_narrative(cluster: NarrativeCluster, db: Session) -> Dict[str, An
         "id": cluster.id,
         "topic_summary": cluster.topic_summary,
         "domain": cluster.domain,
-        "key_phrases": cluster.key_phrases or {"tokens": [], "speakers": []},
+        "key_phrases": {"tokens": tokens, "speakers": eng_speakers},
         "statement_count": cluster.statement_count,
         "unique_speakers_count": cluster.unique_speakers_count,
         "status": cluster.status,
@@ -386,15 +389,34 @@ def get_candidates(db: Session = Depends(get_db)):
         DiscoveredSpeakerCandidate.mention_count.desc()
     ).all()
 
-    # Automatically transcribe any existing Russian candidate names in DB to English
+    # Automatically transcribe any existing Russian candidate names in DB to English & merge duplicates
+    by_lower: Dict[str, DiscoveredSpeakerCandidate] = {}
+    for c in candidates:
+        eng_name = transliterate_russian_name_to_english(c.name)
+        if eng_name == c.name and c.name:
+            by_lower[c.name.strip().lower()] = c
+
     db_changed = False
     for c in candidates:
         eng_name = transliterate_russian_name_to_english(c.name)
         if eng_name and eng_name != c.name:
-            c.name = eng_name
-            db_changed = True
+            eng_key = eng_name.strip().lower()
+            target_cand = by_lower.get(eng_key)
+            if target_cand and target_cand.id != c.id:
+                target_cand.mention_count = max(target_cand.mention_count or 1, (target_cand.mention_count or 1) + (c.mention_count or 1))
+                if not target_cand.extracted_predictions and c.extracted_predictions:
+                    target_cand.extracted_predictions = c.extracted_predictions
+                db.delete(c)
+                db_changed = True
+            else:
+                c.name = eng_name
+                by_lower[eng_key] = c
+                db_changed = True
     if db_changed:
         db.commit()
+        candidates = db.query(DiscoveredSpeakerCandidate).order_by(
+            DiscoveredSpeakerCandidate.mention_count.desc()
+        ).all()
 
     # Ensure initial rich pool of candidates if DB has fewer than 55
     valid_existing = [c for c in candidates if is_valid_analyst_name(c.name)]
@@ -544,7 +566,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Цена золота превысит $3,200 за унцию на фоне рекордных закупок мировыми центробанками",
         "domain": "macro",
         "tokens": ["gold", "central-banks", "inflation", "commodities", "macro", "золото", "центробанки"],
-        "speakers": ["Peter Schiff", "Lyn Alden", "Евгений Коган"],
+        "speakers": ["Peter Schiff", "Lyn Alden", "Evgeny Kogan"],
         "statement_count": 5,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -562,7 +584,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Индекс S&P 500 обновит исторический максимум выше 6,500 пунктов благодаря прибыли сектора ИИ",
         "domain": "macro",
         "tokens": ["sp500", "equities", "ai-stocks", "earnings", "wall-street", "акции", "фондовый"],
-        "speakers": ["Tom Lee", "Cathie Wood", "Евгений Коган"],
+        "speakers": ["Tom Lee", "Cathie Wood", "Evgeny Kogan"],
         "statement_count": 4,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -652,7 +674,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Ethereum обновит исторический максимум выше $5,000 за счет институционального стейкинга и ETF",
         "domain": "crypto",
         "tokens": ["ethereum", "eth", "staking", "etf", "5000", "эфириум", "стейкинг"],
-        "speakers": ["Vitalik Buterin", "Raoul Pal", "Кирилл Эванс"],
+        "speakers": ["Vitalik Buterin", "Raoul Pal", "Kirill Evans"],
         "statement_count": 4,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -661,7 +683,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Доминация Биткоина (BTC.D) начнет фазу снижения ниже 52%, запустив широкий сезон альткоинов",
         "domain": "crypto",
         "tokens": ["btcd", "altseason", "dominance", "altcoins", "альтсезон", "доминация", "альткоины"],
-        "speakers": ["Benjamin Cowen", "Рафаэль Манвелян", "Guy Turner (Coin Bureau)"],
+        "speakers": ["Benjamin Cowen", "Rafael Manvelyan", "Guy Turner (Coin Bureau)"],
         "statement_count": 4,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -688,7 +710,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Общая заблокированная стоимость (TVL) в протоколах DeFi превысит $250 млрд",
         "domain": "crypto",
         "tokens": ["defi", "tvl", "yield", "lending", "dex", "дефи", "ликвидность"],
-        "speakers": ["Vitalik Buterin", "Анатолий Радченко", "Mert Mumtaz"],
+        "speakers": ["Vitalik Buterin", "Anatoly Radchenko", "Mert Mumtaz"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -697,7 +719,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Сеть TON и экосистема мини-приложений привлекут более 100 млн активных крипто-кошельков",
         "domain": "crypto",
         "tokens": ["ton", "web3", "wallets", "adoption", "кошельки", "массовое-принятие"],
-        "speakers": ["Рафаэль Манвелян", "Кирилл Эванс", "Анатолий Радченко"],
+        "speakers": ["Rafael Manvelyan", "Kirill Evans", "Anatoly Radchenko"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "EMERGING"
@@ -724,7 +746,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Доходность 10-летних казначейских облигаций США (US10Y) снизится ниже 3.75%",
         "domain": "macro",
         "tokens": ["bonds", "treasuries", "us10y", "yield", "облигации", "трежерис", "макро"],
-        "speakers": ["Lyn Alden", "Евгений Коган", "Tom Lee"],
+        "speakers": ["Lyn Alden", "Evgeny Kogan", "Tom Lee"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -742,7 +764,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Децентрализованные сети физических вычислений (DePIN) покажут трехкратный рост выручки за год",
         "domain": "crypto",
         "tokens": ["depin", "compute", "solana", "ai-crypto", "инфраструктура"],
-        "speakers": ["Mert Mumtaz", "Raoul Pal", "Анатолий Радченко"],
+        "speakers": ["Mert Mumtaz", "Raoul Pal", "Anatoly Radchenko"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "EMERGING"
@@ -769,7 +791,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Серебро преодолеет отметку $40 за унцию на фоне дефицита промышленного предложения для солнечной энергетики",
         "domain": "macro",
         "tokens": ["silver", "commodities", "solar", "inflation", "серебро", "сырье", "металлы"],
-        "speakers": ["Peter Schiff", "Robert Kiyosaki", "Евгений Коган"],
+        "speakers": ["Peter Schiff", "Robert Kiyosaki", "Evgeny Kogan"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "EMERGING"
@@ -787,7 +809,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Капитализация сектора технологических компаний Nasdaq-100 вырастет более чем на 20% за календарный год",
         "domain": "tech",
         "tokens": ["nasdaq", "tech-stocks", "growth", "ai", "технологии", "акции"],
-        "speakers": ["Tom Lee", "Cathie Wood", "Василий Олейник"],
+        "speakers": ["Tom Lee", "Cathie Wood", "Vasily Oleynik"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -805,7 +827,7 @@ CURATED_EVALUATION_TOPICS: List[Dict[str, Any]] = [
         "topic_summary": "Глобальный индекс деловой активности в промышленности (Global Manufacturing PMI) закрепится выше 51 пункта",
         "domain": "macro",
         "tokens": ["pmi", "business-cycle", "macro", "manufacturing", "цикл", "экономика"],
-        "speakers": ["Raoul Pal", "Lyn Alden", "Александр Герчик"],
+        "speakers": ["Raoul Pal", "Lyn Alden", "Alexander Gerchik"],
         "statement_count": 3,
         "unique_speakers_count": 3,
         "status": "MATURE"
@@ -842,7 +864,7 @@ def _synthesize_feed_topics(
 
     default_speakers_map = {
         "crypto": ["Arthur Hayes", "Michael Saylor", "Raoul Pal", "Willy Woo"],
-        "macro": ["Lyn Alden", "Raoul Pal", "Tom Lee", "Евгений Коган"],
+        "macro": ["Lyn Alden", "Raoul Pal", "Tom Lee", "Evgeny Kogan"],
         "tech": ["Cathie Wood", "Sam Altman", "Balaji Srinivasan"],
         "general": ["Raoul Pal", "Lyn Alden", "Tom Lee"],
     }

@@ -185,6 +185,12 @@ KNOWN_RU_EN_FULL_NAMES = {
     "брайан армстронг": "Brian Armstrong",
     "майк новограц": "Mike Novogratz",
     "энтони помплиано": "Anthony Pompliano",
+    "альберт эйнштейн": "Albert Einstein",
+    "albert eynshteyn": "Albert Einstein",
+    "дональд трамп": "Donald Trump",
+    "уоррен баффетт": "Warren Buffett",
+    "джастин сан": "Justin Sun",
+    "ричард тенг": "Richard Teng",
 }
 
 KNOWN_RU_EN_WORDS = {
@@ -217,6 +223,8 @@ KNOWN_RU_EN_WORDS = {
     "майкл": "Michael", "майкла": "Michael",
     "питер": "Peter", "питера": "Peter",
     "артур": "Arthur", "артура": "Arthur",
+    "альберт": "Albert", "альберта": "Albert",
+    "эйнштейн": "Einstein", "эйнштейна": "Einstein",
     "илон": "Elon", "илона": "Elon",
     "сэм": "Sam", "сэма": "Sam",
     "кэти": "Cathie",

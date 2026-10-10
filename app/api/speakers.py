@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 import hashlib
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database.session import get_db
@@ -437,14 +438,16 @@ def _enrich_speaker_socials(
 
     # 3. Discover additional social networks via SocialDiscoveryService
     from app.discovery.social_discovery import SocialDiscoveryService
-    discovered = SocialDiscoveryService.discover_socials_for_person(sp.name, sp.handle_or_channel, sp.bio)
+    from app.discovery.speaker_discovery import transliterate_russian_name_to_english
+    eng_name = transliterate_russian_name_to_english(sp.name) or sp.name
+    discovered = SocialDiscoveryService.discover_socials_for_person(eng_name, sp.handle_or_channel, sp.bio)
     for acc in discovered:
         if not any(s["platform"] == acc["platform"] for s in socials):
             socials.append(acc)
 
     # 4. Guarantee X presence if no X account is yet linked
     if not any(s["platform"] in ("x", "twitter") for s in socials):
-        clean_name = sp.name.replace(" ", "").replace("(", "").replace(")", "").replace("&", "")
+        clean_name = eng_name.replace(" ", "").replace("(", "").replace(")", "").replace("&", "")
         socials.append({
             "platform": "x",
             "identifier": f"@{clean_name}",
@@ -454,7 +457,7 @@ def _enrich_speaker_socials(
 
     sp_stmts = statements_by_speaker.get(sp.id) if statements_by_speaker is not None else None
     period_acc = _calculate_speaker_period_accuracy(
-        name=sp.name,
+        name=eng_name,
         speaker_obj=sp,
         db=db,
         period=period,
@@ -464,7 +467,7 @@ def _enrich_speaker_socials(
 
     return {
         "id": sp.id,
-        "name": sp.name,
+        "name": eng_name,
         "handle_or_channel": sp.handle_or_channel,
         "bio": sp.bio,
         "avatar_url": sp.avatar_url,
@@ -486,7 +489,37 @@ def get_speakers(
     limit: int = 200,
     db: Session = Depends(get_db)
 ):
-    from app.discovery.speaker_discovery import is_valid_analyst_name
+    from app.discovery.speaker_discovery import is_valid_analyst_name, transliterate_russian_name_to_english
+
+    # Migrate any Russian speaker names in DB to English and merge duplicate rows if needed
+    raw_all = db.query(Speaker).all()
+    by_lower_name: Dict[str, Speaker] = {}
+    for s in raw_all:
+        if not re.search(r'[А-Яа-яЁё]', s.name or "") and transliterate_russian_name_to_english(s.name) == s.name:
+            by_lower_name[s.name.strip().lower()] = s
+
+    db_changed = False
+    for s in raw_all:
+        eng_name = transliterate_russian_name_to_english(s.name)
+        if eng_name and eng_name != s.name:
+            eng_key = eng_name.strip().lower()
+            target_sp = by_lower_name.get(eng_key)
+            if target_sp and target_sp.id != s.id:
+                # Reassign statements and monitored sources to the existing English speaker row
+                for st in db.query(Statement).filter(Statement.speaker_id == s.id).all():
+                    st.speaker_id = target_sp.id
+                for src in db.query(MonitoredSource).filter(MonitoredSource.speaker_id == s.id).all():
+                    src.speaker_id = target_sp.id
+                target_sp.total_predictions = max(target_sp.total_predictions or 0, (target_sp.total_predictions or 0) + (s.total_predictions or 0))
+                db.delete(s)
+                db_changed = True
+            else:
+                s.name = eng_name
+                by_lower_name[eng_key] = s
+                db_changed = True
+    if db_changed:
+        db.commit()
+
     query = db.query(Speaker)
     if sort_by == "credibility":
         query = query.order_by(Speaker.overall_credibility.desc())
@@ -547,10 +580,11 @@ def get_speaker_accuracy_by_name(
     period: str = Query("1y", description="Period: 30d, 90d, 6m, 1y, all"),
     db: Session = Depends(get_db)
 ):
-    clean = name.strip()
+    from app.discovery.speaker_discovery import transliterate_russian_name_to_english
+    clean = transliterate_russian_name_to_english(name.strip()) or name.strip()
     speaker = db.query(Speaker).filter(Speaker.name.ilike(clean)).first()
     from app.discovery.social_discovery import SocialDiscoveryService
-    curated = SocialDiscoveryService.get_curated_entry(clean)
+    curated = SocialDiscoveryService.get_curated_entry(clean) or SocialDiscoveryService.get_curated_entry(name.strip())
     socials = SocialDiscoveryService.discover_socials_for_person(
         name=clean,
         handle_or_channel=speaker.handle_or_channel if speaker else (curated["channel"] if curated else None),
@@ -559,7 +593,7 @@ def get_speaker_accuracy_by_name(
     acc = _calculate_speaker_period_accuracy(name=clean, speaker_obj=speaker, db=db, period=period)
     return {
         "id": speaker.id if speaker else None,
-        "name": speaker.name if speaker else clean,
+        "name": transliterate_russian_name_to_english(speaker.name) if speaker else clean,
         "bio": speaker.bio if speaker else (curated["bio"] if curated else "Независимый аналитик и эксперт"),
         "social_accounts": socials,
         "period_accuracy": acc,
@@ -581,7 +615,7 @@ def get_speaker_accuracy(
     enriched = _enrich_speaker_socials(speaker, db, period=period)
     return {
         "id": speaker.id,
-        "name": speaker.name,
+        "name": enriched["name"],
         "bio": speaker.bio,
         "social_accounts": enriched["social_accounts"],
         "period_accuracy": enriched["period_accuracy"],
@@ -596,16 +630,19 @@ def get_speaker(speaker_id: str, period: str = Query("1y"), db: Session = Depend
 
 @router.post("", response_model=SpeakerResponse)
 def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
-    from app.discovery.speaker_discovery import is_valid_analyst_name
+    from app.discovery.speaker_discovery import is_valid_analyst_name, transliterate_russian_name_to_english
     from app.discovery.social_discovery import SocialDiscoveryService
-    if not is_valid_analyst_name(payload.name):
+    eng_name = transliterate_russian_name_to_english(payload.name.strip())
+    if not is_valid_analyst_name(eng_name):
         raise HTTPException(status_code=400, detail="Недопустимое имя аналитика. Имя должно состоять из реальных имени и фамилии.")
 
-    existing = db.query(Speaker).filter(Speaker.name.ilike(payload.name.strip())).first()
+    existing = db.query(Speaker).filter(Speaker.name.ilike(eng_name)).first()
     if existing:
         return _enrich_speaker_socials(existing, db)
 
-    curated = SocialDiscoveryService.get_curated_entry(payload.name.strip())
+    curated = SocialDiscoveryService.get_curated_entry(eng_name) or SocialDiscoveryService.get_curated_entry(payload.name.strip())
+    if curated:
+        eng_name = curated["name"]
     auto_bio = payload.bio or (curated["bio"] if curated else "Независимый аналитик и прогнозист")
     auto_handle = payload.handle_or_channel
     if not auto_handle and curated and curated.get("socials"):
@@ -613,7 +650,7 @@ def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
         auto_handle = x_acc.get("identifier")
 
     sp = Speaker(
-        name=payload.name.strip(),
+        name=eng_name,
         handle_or_channel=auto_handle,
         bio=auto_bio,
         avatar_url=payload.avatar_url,
