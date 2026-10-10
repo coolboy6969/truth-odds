@@ -81,6 +81,7 @@ class EventResponse(EventBase):
     resolved_at: Optional[datetime] = None
     created_at: datetime
     statements: List[StatementResponse] = []
+    ai_analysis: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
 

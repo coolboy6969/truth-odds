@@ -151,7 +151,14 @@ def _enrich_speaker_socials(sp: Speaker, db: Session) -> dict:
             if not any(s["platform"] == acc["platform"] for s in socials):
                 socials.append(acc)
 
-    # 4. Guarantee X presence if no X account is yet linked
+    # 4. Discover additional social networks via SocialDiscoveryService
+    from app.discovery.social_discovery import SocialDiscoveryService
+    discovered = SocialDiscoveryService.discover_socials_for_person(sp.name, sp.handle_or_channel, sp.bio)
+    for acc in discovered:
+        if not any(s["platform"] == acc["platform"] for s in socials):
+            socials.append(acc)
+
+    # 5. Guarantee X presence if no X account is yet linked
     if not any(s["platform"] in ("x", "twitter") for s in socials):
         clean_name = sp.name.replace(" ", "").replace("(", "").replace(")", "").replace("&", "")
         socials.append({
@@ -221,17 +228,25 @@ def get_speaker(speaker_id: str, db: Session = Depends(get_db)):
 @router.post("", response_model=SpeakerResponse)
 def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
     from app.discovery.speaker_discovery import is_valid_analyst_name
+    from app.discovery.social_discovery import SocialDiscoveryService
     if not is_valid_analyst_name(payload.name):
         raise HTTPException(status_code=400, detail="Недопустимое имя аналитика. Имя должно состоять из реальных имени и фамилии.")
 
     existing = db.query(Speaker).filter(Speaker.name.ilike(payload.name.strip())).first()
     if existing:
-        return existing
+        return _enrich_speaker_socials(existing, db)
+
+    curated = SocialDiscoveryService.get_curated_entry(payload.name.strip())
+    auto_bio = payload.bio or (curated["bio"] if curated else "Независимый аналитик и прогнозист")
+    auto_handle = payload.handle_or_channel
+    if not auto_handle and curated and curated.get("socials"):
+        x_acc = next((s for s in curated["socials"] if s["platform"] == "x"), curated["socials"][0])
+        auto_handle = x_acc.get("identifier")
 
     sp = Speaker(
         name=payload.name.strip(),
-        handle_or_channel=payload.handle_or_channel,
-        bio=payload.bio,
+        handle_or_channel=auto_handle,
+        bio=auto_bio,
         avatar_url=payload.avatar_url,
         overall_credibility=0.5,
         overall_brier_score=0.25,
@@ -240,7 +255,7 @@ def create_speaker(payload: SpeakerCreate, db: Session = Depends(get_db)):
     db.add(sp)
     db.commit()
     db.refresh(sp)
-    return sp
+    return _enrich_speaker_socials(sp, db)
 
 @router.delete("/{speaker_id}")
 def delete_speaker(speaker_id: str, db: Session = Depends(get_db)):

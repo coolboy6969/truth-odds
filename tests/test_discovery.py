@@ -209,3 +209,76 @@ def test_candidate_url_deduplication():
     finally:
         db.close()
 
+
+def test_social_lookup_and_manual_candidate_with_socials():
+    # 1. Lookup socials by name
+    lookup_resp = client.get("/api/discovery/social-lookup", params={"name": "Cathie Wood"})
+    assert lookup_resp.status_code == 200
+    lookup_data = lookup_resp.json()
+    assert len(lookup_data["social_accounts"]) >= 3
+    platforms = {s["platform"] for s in lookup_data["social_accounts"]}
+    assert "x" in platforms
+    assert "youtube" in platforms
+    assert "telegram" in platforms
+
+    # 2. Manually add a candidate and auto-discover all socials
+    manual_resp = client.post("/api/discovery/candidates/manual", json={
+        "name": "Willy Woo",
+        "handle_or_url": "@woonomic",
+        "approve_immediately": False
+    })
+    assert manual_resp.status_code == 200
+    manual_data = manual_resp.json()
+    assert manual_data["success"] is True
+    assert len(manual_data["social_accounts"]) >= 3
+    cand_id = manual_data["candidate"]["id"]
+
+    # 3. Refresh/fetch socials for candidate
+    fetch_resp = client.post(f"/api/discovery/candidates/{cand_id}/fetch-socials")
+    assert fetch_resp.status_code == 200
+    assert fetch_resp.json()["success"] is True
+    assert len(fetch_resp.json()["social_accounts"]) >= 3
+
+
+def test_radar_infinite_scroll_load_more():
+    resp = client.post("/api/discovery/radar/load-more", json={
+        "offset": 0,
+        "limit": 5,
+        "query": None
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert "items" in data
+    assert "total_count" in data
+    assert len(data["items"]) > 0
+    # Verify each candidate item includes social_accounts
+    assert "social_accounts" in data["items"][0]
+    assert len(data["items"][0]["social_accounts"]) >= 2
+
+
+def test_ai_topic_descriptions_on_narratives_and_events():
+    # 1. Create a narrative topic and verify AI description is attached
+    nar_resp = client.post("/api/discovery/narratives", json={
+        "topic_summary": "Достигнет ли Bitcoin отметки $150,000 на фоне институционального спроса в 2026 году?",
+        "domain": "crypto",
+        "keywords": ["bitcoin", "etf", "150k"]
+    })
+    assert nar_resp.status_code == 200
+    nar_data = nar_resp.json()
+    assert "ai_analysis" in nar_data
+    ai = nar_data["ai_analysis"]
+    assert ai["summary"]
+    assert len(ai["bull_factors"]) >= 2
+    assert len(ai["bear_factors"]) >= 2
+    assert ai["oracle_criteria"]
+    assert ai["ai_verdict"]
+
+    # 2. Check events also include ai_analysis
+    ev_list = client.get("/api/events").json()
+    assert len(ev_list) > 0
+    first_ev = ev_list[0]
+    assert "ai_analysis" in first_ev
+    assert first_ev["ai_analysis"]["summary"]
+
+

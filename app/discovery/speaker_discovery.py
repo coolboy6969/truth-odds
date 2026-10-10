@@ -187,11 +187,6 @@ class SpeakerDiscoveryEngine:
             return None
 
         name_clean = " ".join(w.capitalize() for w in name.strip().split())
-        
-        # Check if already a full speaker
-        existing_speaker = db.query(Speaker).filter(Speaker.name.ilike(name_clean)).first()
-        if existing_speaker:
-            return None
 
         # Check existing candidate by name
         candidate = db.query(DiscoveredSpeakerCandidate).filter(
@@ -205,6 +200,12 @@ class SpeakerDiscoveryEngine:
                 if c.source_url and normalize_analyst_url(c.source_url) == norm_url:
                     candidate = c
                     break
+
+        if not candidate:
+            # Check if already a full speaker before creating a brand-new candidate
+            existing_speaker = db.query(Speaker).filter(Speaker.name.ilike(name_clean)).first()
+            if existing_speaker:
+                return None
 
         if candidate:
             candidate.mention_count += 1
