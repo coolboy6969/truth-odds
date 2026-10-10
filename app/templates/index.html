@@ -612,7 +612,7 @@
                         <textarea id="promptInput" rows="1" onkeydown="handlePromptKeydown(event)" placeholder="Задайте тему или вопрос для автоматического расчета вероятности..." class="w-full bg-transparent text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none resize-none leading-relaxed custom-scrollbar max-h-32 px-1 py-1"></textarea>
                     </div>
 
-                    <!-- Bottom Toolbar Inside Floating Capsule (NO Base Rate, HAS Persona Search & Domain) -->
+                    <!-- Bottom Toolbar Inside Floating Capsule -->
                     <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                         <div class="flex flex-wrap items-center gap-2">
                             
@@ -624,14 +624,6 @@
                                 <option value="tech">🤖 Технологии и AI</option>
                                 <option value="general">🌐 Общее</option>
                             </select>
-
-                            <!-- Persona Search Autocomplete to attach expert into account -->
-                            <div class="relative">
-                                <input type="text" id="promptSpeakerSearch" placeholder="🔍 Привязать эксперта..." autocomplete="off" class="text-xs bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 text-slate-700 font-medium focus:outline-none focus:border-blue-500 w-36 sm:w-56 transition" oninput="handleSpeakerAutocomplete(this.value)" onfocus="handleSpeakerAutocomplete(this.value)">
-                                
-                                <!-- Autocomplete dropdown -->
-                                <div id="speakerAutocompleteDropdown" class="hidden absolute bottom-full mb-2 left-0 w-56 sm:w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-1.5 max-h-48 overflow-y-auto custom-scrollbar"></div>
-                            </div>
 
                         </div>
 
