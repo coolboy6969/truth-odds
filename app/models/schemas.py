@@ -43,6 +43,7 @@ class EventCreate(EventBase):
     speaker_name: Optional[str] = None
     speaker_confidence: Optional[float] = None
     auto_analyze: bool = True
+    is_manual: bool = True
 
 class EventResolveRequest(BaseModel):
     outcome: bool = Field(..., description="True if event occurred, False if not")
@@ -78,6 +79,7 @@ class EventResponse(EventBase):
     id: str
     current_probability: float
     status: str
+    is_manual: bool = False
     resolution_notes: Optional[str] = None
     resolved_at: Optional[datetime] = None
     created_at: datetime

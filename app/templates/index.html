@@ -127,6 +127,13 @@
                         </span>
                         <span id="navCountEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 font-semibold">0</span>
                     </button>
+                    <button onclick="switchTab('manual-events')" id="nav-manual-events" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-pen-to-square w-4 text-center text-slate-500"></i>
+                            <span>Добавленные вручную</span>
+                        </span>
+                        <span id="navCountManualEvents" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 font-semibold">0</span>
+                    </button>
                     <button onclick="switchTab('narratives')" id="nav-narratives" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
                         <span class="flex items-center gap-3">
                             <i class="fa-solid fa-comments w-4 text-center text-slate-500"></i>
@@ -302,6 +309,95 @@
 
                         <!-- Events List Container -->
                         <div id="eventsListContainer" class="flex flex-col gap-3">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================== TAB 1B: MANUAL EVENTS VIEW (СОБЫТИЯ, ДОБАВЛЕННЫЕ ВРУЧНУЮ) =================== -->
+                    <section id="view-manual-events" class="tab-content hidden flex flex-col gap-4">
+
+                        <!-- Manual Event Creation & Overview Header -->
+                        <div class="bg-white rounded-3xl p-5 border border-gemini-border flex flex-col gap-4 shadow-2xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-base border border-slate-200 flex-shrink-0">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-base font-bold text-slate-900">События, добавленные вручную</h3>
+                                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-semibold">
+                                                Пользовательские прогнозы
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-2.5 mt-0.5 text-[11px] text-slate-500">
+                                            <span>Всего добавлено: <b id="manualEventStatTotal" class="text-slate-900 font-mono">0</b></span>
+                                            <span>•</span>
+                                            <span>Активных: <b id="manualEventStatActive" class="text-slate-800 font-mono">0</b></span>
+                                            <span>•</span>
+                                            <span>Завершенных: <b id="manualEventStatResolved" class="text-slate-700 font-mono">0</b></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inline Form to Add a New Manual Event -->
+                            <div class="flex flex-col md:flex-row items-stretch gap-2 pt-2 border-t border-slate-100">
+                                <div class="relative flex-1">
+                                    <i class="fa-solid fa-plus text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                                    <input type="text" id="manualEventTitleInput" onkeydown="if(event.key==='Enter') submitManualEventForm()" placeholder="Введите формулировку события или вопрос для ручного добавления и ИИ-расчета..." class="w-full pl-9 pr-3 py-2.5 text-xs md:text-sm bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-500 focus:bg-white transition">
+                                </div>
+                                <select id="manualEventDomainSelect" class="text-xs bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-slate-700 font-semibold focus:outline-none">
+                                    <option value="crypto">Криптовалюты</option>
+                                    <option value="macro">Макроэкономика</option>
+                                    <option value="tech">Технологии & AI</option>
+                                    <option value="general">Общее</option>
+                                </select>
+                                <input type="text" id="manualEventSpeakerInput" onkeydown="if(event.key==='Enter') submitManualEventForm()" placeholder="Аналитик (опц.)" class="w-full md:w-40 px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-500">
+                                <button onclick="submitManualEventForm()" id="manualEventSubmitBtn" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs flex-shrink-0">
+                                    <i class="fa-solid fa-plus text-[10px]"></i>
+                                    <span>Добавить событие</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter & Search Toolbar for Manual Events -->
+                        <div class="bg-white rounded-2xl p-3 border border-gemini-border flex flex-col gap-2.5 shadow-2xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2.5">
+                                <div class="relative flex-1 min-w-[220px]">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                    <input type="text" id="manualEventSearchInput" oninput="renderManualEvents()" placeholder="Поиск среди событий, добавленных вручную..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none">
+                                </div>
+                                <input type="hidden" id="manualEventDomainFilter" value="">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <select id="manualEventStatusFilter" onchange="renderManualEvents()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none">
+                                        <option value="">Все статусы</option>
+                                        <option value="ACTIVE">Активные</option>
+                                        <option value="RESOLVED">Завершенные</option>
+                                    </select>
+                                    <select id="manualEventSortSelect" onchange="renderManualEvents()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-800 font-semibold focus:outline-none">
+                                        <option value="date_desc">Сначала новые</option>
+                                        <option value="prob_desc">Вероятность ↓</option>
+                                        <option value="prob_asc">Вероятность ↑</option>
+                                        <option value="statements_desc">По числу экспертов</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Domain Tag Chips for Manual Events -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+                                <button onclick="setManualEventDomainFilter('')" id="manualDomainTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все темы</button>
+                                <button onclick="setManualEventDomainFilter('crypto')" id="manualDomainTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Криптовалюты</span></button>
+                                <button onclick="setManualEventDomainFilter('macro')" id="manualDomainTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макроэкономика</span></button>
+                                <button onclick="setManualEventDomainFilter('tech')" id="manualDomainTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                                <button onclick="setManualEventDomainFilter('general')" id="manualDomainTagBtn-general" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-globe text-blue-500 text-[10px]"></i> <span>Общее</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Manual Events List Container -->
+                        <div id="manualEventsListContainer" class="flex flex-col gap-3">
                             <!-- Populated dynamically via JS -->
                         </div>
 
@@ -1272,7 +1368,7 @@
         let priceTickerTimer = null;
 
         // Candidate Radar Search Engine & Infinite Scroll State
-        let visibleCandidatesCount = 6;
+        let visibleCandidatesCount = 24;
         let isRadarLoadingMore = false;
         let radarHasMoreFromServer = true;
         let radarObserver = null;
@@ -1303,11 +1399,15 @@
 
         function updateNavCounts() {
             const evEl = document.getElementById('navCountEvents');
+            const manEvEl = document.getElementById('navCountManualEvents');
             const spEl = document.getElementById('navCountSpeakers');
             const caEl = document.getElementById('navCountCandidates');
             const naEl = document.getElementById('navCountNarratives');
             const candCount = rawCandidates.filter(c => c.status === 'CANDIDATE').length || rawCandidates.length;
-            if (evEl) evEl.textContent = rawEvents.length;
+            const manualEventsCount = rawEvents.filter(e => Boolean(e.is_manual)).length;
+            const autoEventsCount = rawEvents.filter(e => !e.is_manual).length;
+            if (evEl) evEl.textContent = autoEventsCount;
+            if (manEvEl) manEvEl.textContent = manualEventsCount;
             if (spEl) spEl.textContent = rawSpeakers.length;
             if (caEl) caEl.textContent = candCount;
             if (naEl) naEl.textContent = rawNarratives.length;
@@ -1435,7 +1535,7 @@
         // Switch Navigation Tabs
         function switchTab(tabId) {
             currentTab = tabId;
-            const tabs = ['events', 'speakers', 'candidates', 'narratives', 'settings', 'account', 'sources', 'parser'];
+            const tabs = ['events', 'manual-events', 'speakers', 'candidates', 'narratives', 'settings', 'account', 'sources', 'parser'];
             
             // Show Hero Banner ONLY on Events tab to keep other views clean & focused
             const hero = document.getElementById('heroSection');
@@ -1473,6 +1573,7 @@
             // Update Header Title
             const titles = {
                 events: 'События и вероятности',
+                'manual-events': 'События, добавленные вручную',
                 speakers: 'Принятые аналитики',
                 candidates: 'Поисковый радар кандидатов',
                 narratives: 'Поиск тем для оценки',
@@ -1484,6 +1585,7 @@
             document.getElementById('viewTitle').textContent = titles[tabId] || 'TruthOdds';
 
             // Refresh tab data
+            if (tabId === 'events' || tabId === 'manual-events') loadEvents();
             if (tabId === 'speakers') loadSpeakers();
             if (tabId === 'candidates') loadCandidates();
             if (tabId === 'narratives') loadNarratives();
@@ -1636,6 +1738,7 @@
                 rawEvents = await res.json();
                 updateNavCounts();
                 renderEvents();
+                renderManualEvents();
             } catch (err) {
                 console.error("Events loading failed:", err);
             }
@@ -1668,8 +1771,115 @@
             });
         }
 
+        function setManualEventDomainFilter(domain) {
+            const sel = document.getElementById('manualEventDomainFilter');
+            if (sel) sel.value = domain;
+            ['all', 'crypto', 'macro', 'tech', 'general'].forEach(d => {
+                const btn = document.getElementById(`manualDomainTagBtn-${d}`);
+                if (!btn) return;
+                const isActive = (d === 'all' && !domain) || (d === domain);
+                if (isActive) {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs flex items-center gap-1';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1';
+                }
+            });
+            renderManualEvents();
+        }
+
         function applyEventFilters() {
             renderEvents();
+        }
+
+        function renderEventCardHtml(ev, isManualView = false) {
+            const probPercent = Math.round(ev.current_probability * 100);
+            const isResolved = ev.status.startsWith('RESOLVED');
+            const isTrue = ev.status === 'RESOLVED_TRUE';
+            
+            let statusBadge = `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Активно</span>`;
+            if (isResolved) {
+                statusBadge = isTrue 
+                    ? `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check text-[9px]"></i> Сбылось</span>`
+                    : `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-xmark text-[9px]"></i> Не сбылось</span>`;
+            }
+
+            const dm = domainMeta[ev.domain?.toLowerCase()] || { label: ev.domain || 'Общее', icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+            const filterFnName = isManualView ? 'setManualEventDomainFilter' : 'setEventDomainFilter';
+            const domainTagBadge = `
+                <button onclick="event.stopPropagation(); ${filterFnName}('${(ev.domain || 'general').toLowerCase()}')" 
+                        class="px-2.5 py-0.5 rounded-full ${dm.color} border text-[10px] font-semibold flex items-center gap-1 hover:brightness-95 transition" 
+                        title="Фильтровать события по тегу «${dm.label}»">
+                    <i class="fa-solid ${dm.icon} text-[10px]"></i>
+                    <span>${dm.label}</span>
+                </button>
+            `;
+
+            const manualBadge = ev.is_manual ? `
+                <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square text-[9px]"></i> Вручную
+                </span>
+            ` : '';
+
+            const statementsCount = ev.statements?.length || 0;
+            const aiSummarySnippet = ev.ai_analysis?.summary || ev.description || '';
+            
+            let probColor = 'text-blue-600';
+            let barBg = 'bg-blue-600';
+            if (probPercent >= 70) { probColor = 'text-emerald-600'; barBg = 'bg-emerald-500'; }
+            else if (probPercent <= 30) { probColor = 'text-rose-600'; barBg = 'bg-rose-500'; }
+
+            return `
+                <div onclick="openEventDetailModal('${ev.id}')" class="bg-white rounded-2xl p-4 md:p-5 border border-gemini-border hover:border-blue-400/80 hover:shadow-md cursor-pointer transition-all flex flex-col gap-2.5 group active:scale-[0.995]">
+                    <div class="flex items-center justify-between text-[11px] text-gemini-mutedText">
+                        <div class="flex flex-wrap items-center gap-2">
+                            ${domainTagBadge}
+                            <span>•</span>
+                            ${statusBadge}
+                            ${manualBadge}
+                            <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> ИИ-описание
+                            </span>
+                        </div>
+                        <span class="font-mono text-[10px]">${new Date(ev.created_at).toLocaleDateString()}</span>
+                    </div>
+
+                    <h3 class="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug">
+                        ${ev.title}
+                    </h3>
+
+                    ${aiSummarySnippet ? `
+                        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                            <i class="fa-solid fa-robot text-indigo-500 mr-1"></i>${aiSummarySnippet}
+                        </p>
+                    ` : ''}
+
+                    <div class="flex items-center gap-3 pt-1">
+                        <div class="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="${barBg} h-full rounded-full transition-all duration-500" style="width: ${probPercent}%"></div>
+                        </div>
+                        <span class="text-base font-black font-mono ${probColor} min-w-[50px] text-right">
+                            ${probPercent}%
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                        <div class="flex items-center gap-2 text-gemini-mutedText text-[11px]">
+                            <i class="fa-solid fa-users text-slate-400"></i>
+                            <span><b>${statementsCount}</b> ${statementsCount === 1 ? 'эксперт' : (statementsCount > 1 && statementsCount < 5 ? 'эксперта' : 'экспертов')}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="event.stopPropagation(); deleteEvent('${ev.id}')" class="w-8 h-8 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить тему из прогнозов">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                            <div class="px-3.5 py-1.5 rounded-lg bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
+                                <span>ИИ-разбор и мнения</span>
+                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderEvents() {
@@ -1682,7 +1892,9 @@
             const statusFilter = document.getElementById('eventStatusFilter')?.value || '';
             const sortVal = document.getElementById('eventSortSelect')?.value || 'date_desc';
 
-            let filtered = rawEvents.filter(ev => {
+            const autoEvents = rawEvents.filter(ev => !ev.is_manual);
+
+            let filtered = autoEvents.filter(ev => {
                 if (cleanSearch) {
                     const evDomain = (ev.domain || 'general').toLowerCase();
                     const domainRus = (domainMeta[evDomain]?.label || '').toLowerCase();
@@ -1708,20 +1920,26 @@
             });
 
             if (filtered.length === 0) {
-                if (rawEvents.length === 0) {
+                if (autoEvents.length === 0) {
                     container.innerHTML = `
                         <div class="bg-white rounded-3xl p-8 border border-gemini-border text-center flex flex-col items-center justify-center gap-3">
                             <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
                                 <i class="fa-solid fa-chart-line"></i>
                             </div>
-                            <h3 class="text-base font-bold text-slate-800">База данных пуста</h3>
+                            <h3 class="text-base font-bold text-slate-800">Автоматических событий пока нет</h3>
                             <p class="text-xs text-gemini-grayText max-w-md leading-relaxed">
-                                Задайте вопрос в нижней строке ввода для мгновенного автоматического расчета вероятности, либо загрузите проверенных авторов.
+                                Выберите тему во вкладке «Поиск тем для оценки» или загрузите проверенный Топ-10 аналитиков. События, созданные вручную, находятся во вкладке «Добавленные вручную».
                             </p>
-                            <button onclick="seedCryptoTop10()" class="mt-2 px-4 py-2.5 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
-                                <i class="fa-solid fa-users"></i>
-                                <span>Загрузить проверенный Топ-10 аналитиков</span>
-                            </button>
+                            <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+                                <button onclick="seedCryptoTop10()" class="px-4 py-2.5 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-users"></i>
+                                    <span>Загрузить Топ-10 аналитиков</span>
+                                </button>
+                                <button onclick="switchTab('manual-events')" class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>Открыть добавленные вручную</span>
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -1734,88 +1952,125 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(ev => {
-                const probPercent = Math.round(ev.current_probability * 100);
-                const isResolved = ev.status.startsWith('RESOLVED');
-                const isTrue = ev.status === 'RESOLVED_TRUE';
-                
-                let statusBadge = `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Активно</span>`;
-                if (isResolved) {
-                    statusBadge = isTrue 
-                        ? `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check text-[9px]"></i> Сбылось</span>`
-                        : `<span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-xmark text-[9px]"></i> Не сбылось</span>`;
+            container.innerHTML = filtered.map(ev => renderEventCardHtml(ev, false)).join('');
+        }
+
+        function renderManualEvents() {
+            const container = document.getElementById('manualEventsListContainer');
+            if (!container) return;
+
+            const manualEvents = rawEvents.filter(ev => Boolean(ev.is_manual));
+            const activeCount = manualEvents.filter(ev => ev.status === 'ACTIVE').length;
+            const resolvedCount = manualEvents.filter(ev => ev.status.startsWith('RESOLVED')).length;
+
+            const totalEl = document.getElementById('manualEventStatTotal');
+            const activeEl = document.getElementById('manualEventStatActive');
+            const resolvedEl = document.getElementById('manualEventStatResolved');
+            if (totalEl) totalEl.textContent = manualEvents.length;
+            if (activeEl) activeEl.textContent = activeCount;
+            if (resolvedEl) resolvedEl.textContent = resolvedCount;
+
+            const search = (document.getElementById('manualEventSearchInput')?.value || '').toLowerCase().trim();
+            const cleanSearch = search.replace(/^#/, '');
+            const domainFilter = document.getElementById('manualEventDomainFilter')?.value || '';
+            const statusFilter = document.getElementById('manualEventStatusFilter')?.value || '';
+            const sortVal = document.getElementById('manualEventSortSelect')?.value || 'date_desc';
+
+            let filtered = manualEvents.filter(ev => {
+                if (cleanSearch) {
+                    const evDomain = (ev.domain || 'general').toLowerCase();
+                    const domainRus = (domainMeta[evDomain]?.label || '').toLowerCase();
+                    const matchesTitle = ev.title.toLowerCase().includes(cleanSearch);
+                    const matchesDesc = (ev.description || '').toLowerCase().includes(cleanSearch);
+                    const matchesDomain = evDomain.includes(cleanSearch) || domainRus.includes(cleanSearch);
+                    if (!matchesTitle && !matchesDesc && !matchesDomain) return false;
                 }
+                if (domainFilter && ev.domain.toLowerCase() !== domainFilter.toLowerCase()) return false;
+                if (statusFilter === 'ACTIVE' && ev.status !== 'ACTIVE') return false;
+                if (statusFilter === 'RESOLVED' && !ev.status.startsWith('RESOLVED')) return false;
+                return true;
+            });
 
-                const dm = domainMeta[ev.domain?.toLowerCase()] || { label: ev.domain || 'Общее', icon: 'fa-tag', color: 'bg-slate-100 text-slate-700 border-slate-200' };
-                const domainTagBadge = `
-                    <button onclick="event.stopPropagation(); setEventDomainFilter('${(ev.domain || 'general').toLowerCase()}')" 
-                            class="px-2.5 py-0.5 rounded-full ${dm.color} border text-[10px] font-semibold flex items-center gap-1 hover:brightness-95 transition" 
-                            title="Фильтровать события по тегу «${dm.label}»">
-                        <i class="fa-solid ${dm.icon} text-[10px]"></i>
-                        <span>${dm.label}</span>
-                    </button>
-                `;
+            filtered.sort((a, b) => {
+                if (sortVal === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+                if (sortVal === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+                if (sortVal === 'prob_desc') return b.current_probability - a.current_probability;
+                if (sortVal === 'prob_asc') return a.current_probability - b.current_probability;
+                if (sortVal === 'statements_desc') return (b.statements?.length || 0) - (a.statements?.length || 0);
+                return 0;
+            });
 
-                const statementsCount = ev.statements?.length || 0;
-                const aiSummarySnippet = ev.ai_analysis?.summary || ev.description || '';
-                
-                let probColor = 'text-blue-600';
-                let barBg = 'bg-blue-600';
-                if (probPercent >= 70) { probColor = 'text-emerald-600'; barBg = 'bg-emerald-500'; }
-                else if (probPercent <= 30) { probColor = 'text-rose-600'; barBg = 'bg-rose-500'; }
-
-                return `
-                    <div onclick="openEventDetailModal('${ev.id}')" class="bg-white rounded-2xl p-4 md:p-5 border border-gemini-border hover:border-blue-400/80 hover:shadow-md cursor-pointer transition-all flex flex-col gap-2.5 group active:scale-[0.995]">
-                        <div class="flex items-center justify-between text-[11px] text-gemini-mutedText">
-                            <div class="flex items-center gap-2">
-                                ${domainTagBadge}
-                                <span>•</span>
-                                ${statusBadge}
-                                <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> ИИ-описание
-                                </span>
-                            </div>
-                            <span class="font-mono text-[10px]">${new Date(ev.created_at).toLocaleDateString()}</span>
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-3xl p-8 border border-gemini-border text-center flex flex-col items-center justify-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-pen-to-square"></i>
                         </div>
-
-                        <h3 class="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug">
-                            ${ev.title}
-                        </h3>
-
-                        ${aiSummarySnippet ? `
-                            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                                <i class="fa-solid fa-robot text-indigo-500 mr-1"></i>${aiSummarySnippet}
-                            </p>
-                        ` : ''}
-
-                        <div class="flex items-center gap-3 pt-1">
-                            <div class="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                                <div class="${barBg} h-full rounded-full transition-all duration-500" style="width: ${probPercent}%"></div>
-                            </div>
-                            <span class="text-base font-black font-mono ${probColor} min-w-[50px] text-right">
-                                ${probPercent}%
-                            </span>
-                        </div>
-
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                            <div class="flex items-center gap-2 text-gemini-mutedText text-[11px]">
-                                <i class="fa-solid fa-users text-slate-400"></i>
-                                <span><b>${statementsCount}</b> ${statementsCount === 1 ? 'эксперт' : (statementsCount > 1 && statementsCount < 5 ? 'эксперта' : 'экспертов')}</span>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <button onclick="event.stopPropagation(); deleteEvent('${ev.id}')" class="w-8 h-8 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить тему из прогнозов">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                                <div class="px-3.5 py-1.5 rounded-lg bg-gemini-sidebar group-hover:bg-blue-50 group-hover:text-blue-700 text-slate-800 text-xs font-semibold border border-gemini-border group-hover:border-blue-200 flex items-center gap-1.5 transition">
-                                    <span>ИИ-разбор и мнения</span>
-                                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-blue-600 transition"></i>
-                                </div>
-                            </div>
-                        </div>
+                        <h3 class="text-base font-bold text-slate-800">${manualEvents.length === 0 ? 'Нет событий, добавленных вручную' : 'По выбранным фильтрам совпадений нет'}</h3>
+                        <p class="text-xs text-gemini-grayText max-w-md leading-relaxed">
+                            Добавьте своё событие с помощью поля ввода выше или через нижнюю панель быстрого прогноза — система автоматически подберет аргументы и рассчитает вероятность.
+                        </p>
                     </div>
                 `;
-            }).join('');
+                return;
+            }
+
+            container.innerHTML = filtered.map(ev => renderEventCardHtml(ev, true)).join('');
+        }
+
+        async function submitManualEventForm() {
+            const titleInp = document.getElementById('manualEventTitleInput');
+            const domainSel = document.getElementById('manualEventDomainSelect');
+            const speakerInp = document.getElementById('manualEventSpeakerInput');
+            const btn = document.getElementById('manualEventSubmitBtn');
+
+            const title = (titleInp?.value || '').trim();
+            if (!title) {
+                if (titleInp) titleInp.focus();
+                showToast('Введите формулировку события или вопрос', 'info');
+                return;
+            }
+
+            const domain = domainSel?.value || 'crypto';
+            const speaker = (speakerInp?.value || '').trim();
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-xs"></i> <span>Расчет...</span>`;
+            }
+
+            try {
+                const res = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        domain: domain,
+                        speaker_name: speaker || null,
+                        auto_analyze: true,
+                        is_manual: true
+                    })
+                });
+
+                if (!res.ok) throw new Error('Failed to create manual event');
+                const created = await res.json();
+                const prob = Math.round((created.current_probability || 0.5) * 100);
+                showToast(`Событие добавлено вручную! Расчетная вероятность: ${prob}%`);
+
+                if (titleInp) titleInp.value = '';
+                if (speakerInp) speakerInp.value = '';
+
+                await loadEvents();
+                await loadSpeakers();
+                openEventDetailModal(created.id);
+            } catch (e) {
+                showToast('Ошибка при добавлении события вручную', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i> <span>Добавить событие</span>`;
+                }
+            }
         }
 
         // =================== TAB 2: ACCEPTED ANALYSTS ===================
@@ -2391,7 +2646,7 @@
             const filtered = getFilteredCandidatesList();
             // Step 1: If we have more already loaded in memory, reveal the next batch immediately
             if (!forceServerFetch && visibleCandidatesCount < filtered.length) {
-                visibleCandidatesCount += 6;
+                visibleCandidatesCount += 12;
                 renderCandidates();
                 return;
             }
@@ -2412,7 +2667,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         offset: rawCandidates.length,
-                        limit: 6,
+                        limit: 12,
                         query: query || null
                     })
                 });
@@ -2421,13 +2676,13 @@
 
                 radarHasMoreFromServer = Boolean(data.has_more);
                 if (data.added_count > 0 || (data.items && data.items.length > 0)) {
-                    visibleCandidatesCount += 6;
+                    visibleCandidatesCount += 12;
                     await loadCandidates(true);
                     if (forceServerFetch && data.added_count > 0) {
                         showToast(`Подгружено новых кандидатов: ${data.added_count}`);
                     }
                 } else {
-                    visibleCandidatesCount += 6;
+                    visibleCandidatesCount += 12;
                     renderCandidates();
                     if (forceServerFetch) {
                         showToast('Все доступные кандидаты из текущего пула уже загружены', 'info');
@@ -2454,7 +2709,7 @@
                 if (val && val.trim()) clearBtn.classList.remove('hidden');
                 else clearBtn.classList.add('hidden');
             }
-            visibleCandidatesCount = 8;
+            visibleCandidatesCount = 24;
             renderCandidates();
         }
 
@@ -2465,7 +2720,7 @@
             if (inp) inp.value = '';
             if (hiddenInp) hiddenInp.value = '';
             if (clearBtn) clearBtn.classList.add('hidden');
-            visibleCandidatesCount = 6;
+            visibleCandidatesCount = 24;
             renderCandidates();
         }
 
@@ -2474,8 +2729,8 @@
                 const res = await fetch('/api/discovery/candidates');
                 if (!res.ok) throw new Error('Failed to load candidates');
                 rawCandidates = await res.json();
-                if (!preserveCount && visibleCandidatesCount < 6) {
-                    visibleCandidatesCount = 6;
+                if (!preserveCount && visibleCandidatesCount < 24) {
+                    visibleCandidatesCount = 24;
                 }
                 updateNavCounts();
                 renderCandidates();
@@ -2485,7 +2740,7 @@
         }
 
         function applyCandidateFilters() {
-            visibleCandidatesCount = Math.max(visibleCandidatesCount, 8);
+            visibleCandidatesCount = Math.max(visibleCandidatesCount, 24);
             renderCandidates();
         }
 
@@ -3459,7 +3714,8 @@
                         title: title,
                         domain: domain,
                         speaker_name: speakerSearch || null,
-                        auto_analyze: true
+                        auto_analyze: true,
+                        is_manual: true
                     })
                 });
 
@@ -3468,7 +3724,7 @@
                 const prob = Math.round((created.current_probability || 0.5) * 100);
                 const stCount = created.statements?.length || 0;
 
-                showToast(`Автоматический прогноз рассчитан: ${prob}%! Учтено экспертов: ${stCount}.`);
+                showToast(`Событие добавлено вручную! Прогноз: ${prob}%, учтено экспертов: ${stCount}.`);
                 input.value = '';
                 if (document.getElementById('promptSpeakerSearch')) {
                     document.getElementById('promptSpeakerSearch').value = '';
@@ -3476,7 +3732,7 @@
                 
                 await loadEvents();
                 await loadSpeakers();
-                switchTab('events');
+                switchTab('manual-events');
                 openEventDetailModal(created.id);
             } catch (e) {
                 showToast('Ошибка при автоматическом расчете события', 'error');

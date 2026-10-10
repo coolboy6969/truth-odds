@@ -119,6 +119,17 @@ def clean_db_artifacts(db: Session):
             if norm_url:
                 seen_cand_urls[norm_url] = cand
 
+    # 5. Backfill is_manual for events created manually via the prompt/form
+    from app.models.entities import NarrativeCluster
+    promoted_ids = {
+        n.promoted_event_id for n in db.query(NarrativeCluster).all() if n.promoted_event_id
+    }
+    for ev in db.query(Event).all():
+        if not getattr(ev, "is_manual", 0) and ev.id not in promoted_ids:
+            stmts = ev.statements or []
+            if any((s.source_url or "").startswith("https://truthodds.local/") for s in stmts):
+                ev.is_manual = 1
+
     db.commit()
 
 def init_db():
@@ -127,7 +138,8 @@ def init_db():
     with engine.connect() as conn:
         for col_def in [
             "ALTER TABLE discovered_candidates ADD COLUMN source_url VARCHAR(1000)",
-            "ALTER TABLE discovered_candidates ADD COLUMN extracted_predictions JSON"
+            "ALTER TABLE discovered_candidates ADD COLUMN extracted_predictions JSON",
+            "ALTER TABLE events ADD COLUMN is_manual INTEGER DEFAULT 0"
         ]:
             try:
                 conn.execute(text(col_def))

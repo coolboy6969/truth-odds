@@ -47,6 +47,7 @@ def _serialize_event(ev: Event, db: Session) -> dict:
         "current_probability": ev.current_probability,
         "deadline": ev.deadline,
         "status": ev.status,
+        "is_manual": bool(getattr(ev, "is_manual", 0)),
         "resolution_notes": ev.resolution_notes,
         "resolved_at": ev.resolved_at,
         "created_at": ev.created_at,
@@ -58,6 +59,7 @@ def _serialize_event(ev: Event, db: Session) -> dict:
 def get_events(
     domain: Optional[str] = None,
     status: Optional[str] = None,
+    is_manual: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(Event)
@@ -65,6 +67,8 @@ def get_events(
         query = query.filter(Event.domain.ilike(domain))
     if status:
         query = query.filter(Event.status == status)
+    if is_manual is not None:
+        query = query.filter(Event.is_manual == (1 if is_manual else 0))
     
     events = query.order_by(Event.created_at.desc()).all()
     return [_serialize_event(ev, db) for ev in events]
@@ -85,7 +89,8 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
         base_rate=payload.base_rate,
         current_probability=payload.base_rate,
         deadline=payload.deadline,
-        status="ACTIVE"
+        status="ACTIVE",
+        is_manual=1 if payload.is_manual else 0
     )
     db.add(ev)
     db.commit()
@@ -98,6 +103,9 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
             speaker_name=payload.speaker_name,
             speaker_confidence=payload.speaker_confidence
         )
+        ev.is_manual = 1 if payload.is_manual else 0
+        db.commit()
+        db.refresh(ev)
         from app.oracles.auto_oracle import AutoOracleService
         AutoOracleService.check_all_active_events(db=db, auto_resolve=False)
 

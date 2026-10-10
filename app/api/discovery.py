@@ -36,7 +36,7 @@ class ManualCandidateRequest(BaseModel):
 
 class LoadMoreCandidatesRequest(BaseModel):
     offset: int = 0
-    limit: int = 6
+    limit: int = 12
     query: Optional[str] = None
 
 def _serialize_candidate(c: DiscoveredSpeakerCandidate) -> Dict[str, Any]:
@@ -198,13 +198,32 @@ async def load_more_radar_candidates(payload: LoadMoreCandidatesRequest, db: Ses
             break
 
     # 2. If user provided a specific search query or curated pool is exhausted, scan live media
-    if len(added_candidates) == 0 and q_filter:
-        await RealWorldAnalystDiscoveryService.search_real_world(
-            query=payload.query.strip(),
-            db=db,
-            limit=10,
-            auto_record=False
-        )
+    if len(added_candidates) < payload.limit:
+        try:
+            if q_filter:
+                scan_res = await RealWorldAnalystDiscoveryService.search_real_world(
+                    query=payload.query.strip(),
+                    db=db,
+                    limit=12,
+                    auto_record=False
+                )
+            else:
+                scan_res = await RealWorldAnalystDiscoveryService.scan_live_media(
+                    db=db,
+                    max_articles=25,
+                    auto_record=False
+                )
+            for c_info in (scan_res or {}).get("candidates", []):
+                c_name_low = (c_info.get("name") or "").strip().lower()
+                if c_name_low and c_name_low not in existing_names:
+                    db_cand = db.query(DiscoveredSpeakerCandidate).filter(
+                        DiscoveredSpeakerCandidate.id == c_info.get("id")
+                    ).first()
+                    if db_cand:
+                        existing_names.add(c_name_low)
+                        added_candidates.append(_serialize_candidate(db_cand))
+        except Exception:
+            pass
 
     total_remaining = sum(
         1 for item in SocialDiscoveryService.CURATED_ANALYSTS
@@ -219,7 +238,7 @@ async def load_more_radar_candidates(payload: LoadMoreCandidatesRequest, db: Ses
         "new_candidates": added_candidates,
         "items": items_slice,
         "total_count": len(all_cands),
-        "has_more": total_remaining > 0
+        "has_more": total_remaining > 0 or len(added_candidates) > 0
     }
 
 @router.post("/candidates/manual")
@@ -361,12 +380,12 @@ def get_candidates(db: Session = Depends(get_db)):
         DiscoveredSpeakerCandidate.mention_count.desc()
     ).all()
 
-    # Ensure initial rich pool of candidates if DB has very few
+    # Ensure initial rich pool of candidates if DB has fewer than 55
     valid_existing = [c for c in candidates if is_valid_analyst_name(c.name)]
-    if len(valid_existing) < 8:
+    if len(valid_existing) < 55:
         existing_names = {c.name.strip().lower() for c in valid_existing}
         speaker_names = {s.name.strip().lower() for s in db.query(Speaker).all()}
-        for item in SocialDiscoveryService.CURATED_ANALYSTS[:10]:
+        for item in SocialDiscoveryService.CURATED_ANALYSTS[:55]:
             c_low = item["name"].strip().lower()
             if c_low not in existing_names:
                 cand = DiscoveredSpeakerCandidate(

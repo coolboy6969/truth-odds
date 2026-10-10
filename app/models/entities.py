@@ -50,6 +50,7 @@ class Event(Base):
     
     # Status: ACTIVE, RESOLVED_TRUE, RESOLVED_FALSE, VOID
     status: Mapped[str] = mapped_column(String(50), default="ACTIVE", index=True)
+    is_manual: Mapped[int] = mapped_column(Integer, default=0)
     resolution_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     
