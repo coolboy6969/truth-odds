@@ -62,6 +62,9 @@ def get_events(
     is_manual: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
+    from app.oracles.auto_oracle import AutoOracleService
+    AutoOracleService.audit_and_fix_resolved_events(db)
+
     query = db.query(Event)
     if domain:
         query = query.filter(Event.domain.ilike(domain))
@@ -75,6 +78,9 @@ def get_events(
 
 @router.get("/{event_id}", response_model=EventResponse)
 def get_event(event_id: str, db: Session = Depends(get_db)):
+    from app.oracles.auto_oracle import AutoOracleService
+    AutoOracleService.audit_and_fix_resolved_events(db)
+
     ev = db.query(Event).filter(Event.id == event_id).first()
     if not ev:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -107,7 +113,8 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(ev)
         from app.oracles.auto_oracle import AutoOracleService
-        AutoOracleService.check_all_active_events(db=db, auto_resolve=False)
+        AutoOracleService.check_all_active_events(db=db, auto_resolve=True)
+        db.refresh(ev)
 
     return _serialize_event(ev, db)
 

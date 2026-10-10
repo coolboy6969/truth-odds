@@ -3771,11 +3771,10 @@
 
                 const resolveControls = document.getElementById('modalResolveControls');
                 const resolveStatus = document.getElementById('modalResolutionStatus');
+                resolveControls.classList.remove('hidden');
                 if (isResolved) {
-                    resolveControls.classList.add('hidden');
-                    resolveStatus.textContent = `Завершено (${ev.resolution_notes || 'Зафиксировано оракулом'})`;
+                    resolveStatus.textContent = `Завершено: ${isTrue ? 'ДА (Сбылось)' : 'НЕТ (Не сбылось)'} — ${ev.resolution_notes || 'Зафиксировано оракулом'}`;
                 } else {
-                    resolveControls.classList.remove('hidden');
                     resolveStatus.textContent = 'Ожидает наступления факта или сверки оракулом';
                 }
 

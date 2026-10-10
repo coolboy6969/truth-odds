@@ -115,6 +115,41 @@ class AutoEventAnalysisEngine:
         return "general"
 
     @classmethod
+    def is_bearish_or_negated_claim(cls, title: str) -> bool:
+        t_low = (title or "").lower()
+        return bool(
+            re.search(
+                r'\bне\s+(?:войдет|станет|попадет|будет|окажется|удержится|сможет|входит|достигнет|превысит|пробьет|вырастет|поднимется)\b',
+                t_low,
+            )
+            or any(
+                w in t_low
+                for w in ["упадет", "рухнет", "обвалится", "снизится ниже", "падение ниже", "крах", "пузырь", "вылетит из"]
+            )
+        )
+
+    @classmethod
+    def recalculate_event_probability(cls, db: Session, event: Event) -> Event:
+        from app.engine.scoring import ForecasterScorer
+        all_stmts = db.query(Statement).filter(Statement.event_id == event.id).all()
+        if not all_stmts:
+            event.current_probability = event.base_rate
+            db.commit()
+            return event
+        stmt_dicts = []
+        for s in all_stmts:
+            sp = db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
+            sp_weight = PredictionService.get_speaker_weight_for_domain(sp, event.domain) if sp else s.speaker_weight_applied
+            stmt_dicts.append({
+                "speaker_confidence": s.speaker_confidence,
+                "speaker_weight": sp_weight,
+            })
+        event.current_probability = ForecasterScorer.aggregate_event_probability(stmt_dicts, event.base_rate)
+        db.commit()
+        db.refresh(event)
+        return event
+
+    @classmethod
     def analyze_and_forecast_event(
         cls,
         db: Session,
@@ -149,8 +184,9 @@ class AutoEventAnalysisEngine:
                 base_rate=event.base_rate
             )
 
-        # 3. Automated expert matching: find matching domain figures
+        # 3. Automated expert matching: find matching domain figures (with polarity/negation awareness)
         title_lower = event.title.lower()
+        is_neg_or_bearish = cls.is_bearish_or_negated_claim(event.title)
         domain_experts = cls.KNOWN_EXPERT_STANCES.get(event.domain, [])
 
         statements_added = 0
@@ -168,13 +204,20 @@ class AutoEventAnalysisEngine:
                 ]
                 
                 if exp["name"] not in existing_names:
+                    base_conf = exp["confidence"]
+                    quote_text = exp["quote_template"]
+                    if is_neg_or_bearish and event.domain in ("crypto", "tech"):
+                        base_conf = round(1.0 - base_conf, 2)
+                        if base_conf < 0.5:
+                            quote_text = "Фундаментальная капитализация и институциональный спрос опровергают данный негативный сценарий."
+
                     PredictionService.record_statement(
                         db=db,
                         speaker_name=exp["name"],
                         speaker_handle=exp["handle"],
                         event_title=event.title,
-                        speaker_confidence=exp["confidence"],
-                        raw_quote=f"{exp['name']}: «{exp['quote_template']}»",
+                        speaker_confidence=base_conf,
+                        raw_quote=f"{exp['name']}: «{quote_text}»",
                         source_url="https://truthodds.local/expert_analysis",
                         source_platform="social",
                         event_domain=event.domain,
@@ -216,17 +259,17 @@ class AutoEventAnalysisEngine:
         dom = (domain or cls.infer_domain(t_clean)).lower()
         prob_pct = round(probability * 100)
 
-        # Extract any numerical targets or years
-        numbers = re.findall(r'\$?\d[\d,\.]*\s*(?:k|тыс|млн|млрд|трлн|%|프로)?', t_clean, re.IGNORECASE)
+        # Extract explicit dollar or percentage targets (ignoring years like 2025 or rankings like топ 10)
+        numbers = re.findall(r'\$\d[\d,\.]*\s*(?:k|тыс|млн|млрд|трлн)?|\d+(?:\.\d+)?%', t_clean, re.IGNORECASE)
         target_str = numbers[0] if numbers else None
 
         # Domain-specific contextual synthesis
         if dom == "crypto":
-            if any(w in t_low for w in ["bitcoin", "биткоин", "btc", "резерв"]):
+            if any(w in t_low for w in ["bitcoin", "биткоин", "биткойн", "btc", "резерв"]):
                 context = (
-                    f"Тема оценивает перспективу движения и институционального принятия Bitcoin "
+                    f"Тема оценивает перспективу движения, рыночного ранга и институционального принятия Bitcoin "
                     f"{f'(целевой ориентир: {target_str})' if target_str else ''}. "
-                    f"Ключевыми драйверами выступают притоки капитала в спотовые ETF, сокращение эмиссии после халвинга "
+                    f"Ключевыми драйверами выступают капитализация актива (~$1.8 трлн, Топ-10 мировых активов), притоки в спотовые ETF "
                     f"и динамика глобальной долларовой ликвидности M2."
                 )
                 bull_factors = [
