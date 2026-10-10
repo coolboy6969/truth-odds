@@ -1278,7 +1278,7 @@
         let radarObserver = null;
 
         // Narrative Topic Search Engine & Infinite Scroll State
-        let visibleNarrativesCount = 6;
+        let visibleNarrativesCount = 12;
         let isNarrativeLoadingMore = false;
         let narrativeHasMoreFromServer = true;
         let narrativeObserver = null;
@@ -2827,7 +2827,7 @@
                 if (!res.ok) throw new Error('Failed to load narratives');
                 rawNarratives = await res.json();
                 if (resetVisible) {
-                    visibleNarrativesCount = 6;
+                    visibleNarrativesCount = 12;
                     narrativeHasMoreFromServer = true;
                 }
                 updateNavCounts();
@@ -2839,21 +2839,34 @@
 
         function initNarrativeInfiniteScroll() {
             const sentinel = document.getElementById('narrativeInfiniteSentinel');
+            const scrollArea = document.getElementById('mainScrollArea');
             if (!sentinel || narrativeObserver) return;
 
-            narrativeObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && currentTab === 'narratives' && !isNarrativeLoadingMore) {
+            if ('IntersectionObserver' in window) {
+                narrativeObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && currentTab === 'narratives' && !isNarrativeLoadingMore) {
+                            loadMoreNarrativesOnScroll(false);
+                        }
+                    });
+                }, {
+                    root: scrollArea || null,
+                    rootMargin: '260px',
+                    threshold: 0.05
+                });
+
+                narrativeObserver.observe(sentinel);
+            }
+
+            if (scrollArea) {
+                scrollArea.addEventListener('scroll', () => {
+                    if (currentTab !== 'narratives' || isNarrativeLoadingMore) return;
+                    const distanceToBottom = scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight;
+                    if (distanceToBottom < 300) {
                         loadMoreNarrativesOnScroll(false);
                     }
-                });
-            }, {
-                root: document.getElementById('mainScrollContainer'),
-                rootMargin: '220px',
-                threshold: 0.05
-            });
-
-            narrativeObserver.observe(sentinel);
+                }, { passive: true });
+            }
         }
 
         async function loadMoreNarrativesOnScroll(forceServerFetch = false) {
@@ -2864,30 +2877,22 @@
             if (!forceServerFetch && visibleNarrativesCount < filtered.length) {
                 isNarrativeLoadingMore = true;
                 const spinner = document.getElementById('narrativeLoadMoreSpinner');
-                const btn = document.getElementById('narrativeLoadMoreBtn');
                 if (spinner) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
-                if (btn) btn.classList.add('hidden');
 
-                await new Promise(r => setTimeout(r, 180));
-                visibleNarrativesCount += 6;
+                await new Promise(r => setTimeout(r, 150));
+                visibleNarrativesCount += 8;
                 isNarrativeLoadingMore = false;
+                if (spinner) { spinner.classList.add('hidden'); spinner.classList.remove('flex'); }
                 renderNarratives();
                 return;
             }
 
-            // 2. Otherwise fetch more topics from the server catalog
-            if (!narrativeHasMoreFromServer && !forceServerFetch) {
-                renderNarratives();
-                return;
-            }
-
+            // 2. Otherwise fetch / synthesize more topics from the server feed
             isNarrativeLoadingMore = true;
             const spinner = document.getElementById('narrativeLoadMoreSpinner');
-            const btn = document.getElementById('narrativeLoadMoreBtn');
-            const statusText = document.getElementById('narrativeInfiniteStatusText');
+            const btnText = document.getElementById('narrativeLoadMoreBtnText');
             if (spinner) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
-            if (btn) btn.classList.add('hidden');
-            if (statusText) statusText.textContent = 'Загрузка новых верифицируемых тем для оценки...';
+            if (btnText) btnText.textContent = 'Подгружаем новые темы для оценки в ленту...';
 
             const query = (document.getElementById('narrativeSearchInput')?.value || '').trim().replace(/^#/, '');
             const domain = document.getElementById('narrativeDomainFilter')?.value || null;
@@ -2898,23 +2903,24 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         offset: rawNarratives.length,
-                        limit: 6,
+                        limit: 8,
                         query: query || null,
                         domain: domain || null
                     })
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    narrativeHasMoreFromServer = Boolean(data.has_more);
+                    narrativeHasMoreFromServer = Boolean(data.has_more ?? true);
                     if (data.added_count > 0 || (data.items && data.items.length > 0)) {
                         const freshRes = await fetch('/api/discovery/narratives');
                         if (freshRes.ok) {
                             rawNarratives = await freshRes.json();
                         }
-                        visibleNarrativesCount += 6;
+                        visibleNarrativesCount += 8;
                         updateNavCounts();
-                    } else {
-                        narrativeHasMoreFromServer = false;
+                        if (forceServerFetch && data.added_count > 0) {
+                            showToast(`В ленту добавлено новых тем: +${data.added_count}`);
+                        }
                     }
                 }
             } catch (e) {
@@ -2935,7 +2941,7 @@
                     clearBtn.classList.add('hidden');
                 }
             }
-            visibleNarrativesCount = 8;
+            visibleNarrativesCount = 12;
             renderNarratives();
         }
 
@@ -2944,7 +2950,7 @@
             if (inp) inp.value = '';
             const clearBtn = document.getElementById('clearNarrativeSearchBtn');
             if (clearBtn) clearBtn.classList.add('hidden');
-            visibleNarrativesCount = 6;
+            visibleNarrativesCount = 12;
             renderNarratives();
         }
 
@@ -2972,7 +2978,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        query: cleanQuery || null,
+                        query: cleanQuery || '',
                         domain: domain || null
                     })
                 });
@@ -2980,13 +2986,13 @@
                 const data = await res.json();
 
                 await loadNarratives(false);
-                visibleNarrativesCount = Math.max(visibleNarrativesCount, 10);
+                visibleNarrativesCount = Math.max(visibleNarrativesCount, 16);
                 renderNarratives();
 
                 if (data.added_count > 0) {
-                    showToast(`Найдено тем по запросу: ${data.matched_count} (добавлено новых: +${data.added_count})`);
+                    showToast(`Найдено тем по запросу: ${data.matched_count} (добавлено в ленту: +${data.added_count})`);
                 } else {
-                    showToast(`Найдено тем в базе по запросу: ${data.matched_count}`);
+                    showToast(`Найдено тем в ленте по запросу: ${data.matched_count}`);
                 }
             } catch (e) {
                 showToast('Ошибка при поиске тем для оценки', 'error');
@@ -3004,12 +3010,12 @@
                 if (!btn) return;
                 const isActive = (d === 'all' && !domain) || (d === domain);
                 if (isActive) {
-                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs';
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs flex items-center gap-1';
                 } else {
-                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200';
+                    btn.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1';
                 }
             });
-            visibleNarrativesCount = Math.max(visibleNarrativesCount, 8);
+            visibleNarrativesCount = Math.max(visibleNarrativesCount, 12);
             applyNarrativeFilters();
         }
 
@@ -3019,7 +3025,7 @@
                 input.value = tag.startsWith('#') ? tag : `#${tag}`;
                 const clearBtn = document.getElementById('clearNarrativeSearchBtn');
                 if (clearBtn) clearBtn.classList.remove('hidden');
-                visibleNarrativesCount = 10;
+                visibleNarrativesCount = 12;
                 applyNarrativeFilters();
             }
         }
@@ -3053,8 +3059,10 @@
             });
 
             filtered.sort((a, b) => {
-                if (sortBy === 'speakers') {
+                if (sortBy === 'speakers' || sortBy === 'speakers_desc') {
                     return (b.unique_speakers_count || 0) - (a.unique_speakers_count || 0);
+                } else if (sortBy === 'title_asc') {
+                    return (a.topic_summary || '').localeCompare(b.topic_summary || '');
                 } else if (sortBy === 'status') {
                     const rank = { 'MATURE': 3, 'EMERGING': 2, 'PROMOTED': 1 };
                     return (rank[b.status] || 0) - (rank[a.status] || 0);
@@ -3073,7 +3081,7 @@
             const visibleSlice = filtered.slice(0, visibleNarrativesCount);
 
             const countBadge = document.getElementById('narrativeCountBadge');
-            if (countBadge) countBadge.textContent = `${visibleSlice.length} из ${filtered.length} тем`;
+            if (countBadge) countBadge.textContent = `${visibleSlice.length} из ${filtered.length}`;
 
             const matureCount = rawNarratives.filter(n => n.status === 'MATURE').length;
             const promotedCount = rawNarratives.filter(n => n.status === 'PROMOTED').length;
@@ -3084,24 +3092,16 @@
 
             // Update infinite scroll footer button/sentinel state
             const loadMoreBtn = document.getElementById('narrativeLoadMoreBtn');
-            const endMessage = document.getElementById('narrativeEndMessage');
-            const loadMoreCountHint = document.getElementById('narrativeLoadMoreCountHint');
+            const btnText = document.getElementById('narrativeLoadMoreBtnText');
             const remainingLocal = Math.max(0, filtered.length - visibleSlice.length);
 
             if (loadMoreBtn) {
-                if (remainingLocal > 0 || narrativeHasMoreFromServer) {
-                    loadMoreBtn.classList.remove('hidden');
-                    loadMoreBtn.classList.add('inline-flex');
-                    if (loadMoreCountHint) {
-                        loadMoreCountHint.textContent = remainingLocal > 0
-                            ? `(еще ${remainingLocal} в списке + каталог тем)`
-                            : `(загрузить новые темы из каталога)`;
-                    }
-                    if (endMessage) endMessage.classList.add('hidden');
-                } else {
-                    loadMoreBtn.classList.add('hidden');
-                    loadMoreBtn.classList.remove('inline-flex');
-                    if (endMessage && filtered.length > 0) endMessage.classList.remove('hidden');
+                loadMoreBtn.classList.remove('hidden');
+                loadMoreBtn.classList.add('flex');
+                if (btnText && !isNarrativeLoadingMore) {
+                    btnText.textContent = remainingLocal > 0
+                        ? `Листайте ниже или нажмите, чтобы показать ещё темы (доступно в ленте: +${remainingLocal})`
+                        : 'Листайте ниже или нажмите, чтобы подгрузить ещё темы для оценки в ленту';
                 }
             }
 
