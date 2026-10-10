@@ -517,7 +517,7 @@
                                 </div>
                                 <button onclick="runRealWorldAnalystSearch()" id="realWorldSearchBtn" class="px-5 py-3 rounded-2xl bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm flex-shrink-0">
                                     <i class="fa-solid fa-globe text-white"></i>
-                                    <span>Найти в сети + соцсети</span>
+                                    <span>Найти в сети</span>
                                 </button>
                             </div>
                             <!-- Keep hidden input for backward filter compatibility -->
@@ -2798,7 +2798,7 @@
                             ${searchRaw ? `
                                 <button onclick="runRealWorldAnalystSearch('${searchRaw.replace(/'/g, "\\'")}')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition flex items-center gap-1.5 shadow-2xs">
                                     <i class="fa-solid fa-globe"></i>
-                                    <span>Искать «${searchRaw}» в сети + соцсети</span>
+                                    <span>Найти «${searchRaw}» в сети</span>
                                 </button>
                             ` : ''}
                             <button onclick="openAddCandidateModal()" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold transition flex items-center gap-1.5">
