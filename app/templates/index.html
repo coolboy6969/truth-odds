@@ -141,14 +141,6 @@
                         </span>
                         <span id="navCountSpeakers" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">0</span>
                     </button>
-                    <button onclick="switchTab('sources')" id="nav-sources" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <i class="fa-brands fa-youtube w-4 text-center text-red-500"></i>
-                        <span>YouTube каналы</span>
-                    </button>
-                    <button onclick="switchTab('parser')" id="nav-parser" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
-                        <i class="fa-solid fa-quote-right w-4 text-center text-slate-500"></i>
-                        <span>Разбор публикации</span>
-                    </button>
                 </nav>
             </div>
 
@@ -518,74 +510,6 @@
                                 </div>
                             </div>
 
-                        </div>
-
-                    </section>
-
-
-                    <!-- =================== TAB 5: SOURCES VIEW (YOUTUBE) =================== -->
-                    <section id="view-sources" class="tab-content hidden flex flex-col gap-5">
-                        
-                        <div class="bg-white rounded-2xl p-5 border border-gemini-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-                            <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-base">
-                                    <i class="fa-brands fa-youtube"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-800">Мониторинг YouTube-каналов</h3>
-                                    <p class="text-xs text-gemini-grayText mt-0.5">
-                                        Подключенные каналы отслеживаются на предмет новых видеоматериалов с прогнозами.
-                                    </p>
-                                </div>
-                            </div>
-                            <button onclick="loadSources()" class="px-3.5 py-2 rounded-lg bg-gemini-sidebar hover:bg-gemini-hover text-slate-700 text-xs font-semibold border border-gemini-border flex items-center gap-2 transition flex-shrink-0">
-                                <i class="fa-solid fa-arrows-rotate text-red-600"></i>
-                                <span>Проверить каналы</span>
-                            </button>
-                        </div>
-
-                        <!-- Sources Container -->
-                        <div id="sourcesListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Populated dynamically -->
-                        </div>
-
-                    </section>
-
-
-                    <!-- =================== TAB 6: PARSER VIEW =================== -->
-                    <section id="view-parser" class="tab-content hidden flex flex-col gap-5">
-                        
-                        <div class="bg-white rounded-2xl p-6 border border-gemini-border flex flex-col gap-4 shadow-2xs">
-                            <div class="flex items-start gap-3.5">
-                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-base">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-800">Интеллектуальный разбор публикации</h3>
-                                    <p class="text-xs text-gemini-grayText mt-1">
-                                        Вставьте текст твита, расшифровку видео или ссылку на YouTube. Алгоритм извлечет эксперта, предмет спора, числовую уверенность и обновит вероятность события.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-3 mt-2">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Имя эксперта (необязательно, если указано в тексте):</label>
-                                    <input type="text" id="parseSpeakerInput" placeholder="Например: Michael Saylor" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Текст публикации или цитата с прогнозом:</label>
-                                    <textarea id="parseTextInput" rows="4" placeholder="Например: Michael Saylor: «Я абсолютно уверен на 90%, что Биткоин достигнет $150,000 к концу 2026 года благодаря халвингу»" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
-                                </div>
-
-                                <div class="flex justify-end gap-2 pt-2">
-                                    <button onclick="submitParseText()" id="parseSubmitBtn" class="px-5 py-2.5 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                        <span>Разобрать и учесть прогноз</span>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
 
                     </section>
