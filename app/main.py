@@ -49,6 +49,21 @@ app.include_router(sources.router)
 app.include_router(discovery.router)
 app.include_router(oracle.router)
 
+from fastapi.responses import HTMLResponse, Response
+
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <rect x="3" y="3" width="58" height="58" rx="13" stroke="#3b82f6" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M14 44V34M26 44V26M38 44V30M50 44V18" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M14 31L26 22L38 25L50 14" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="50" cy="14" r="4" fill="#10b981"/>
+</svg>"""
+
+@app.get("/favicon.svg", include_in_schema=False)
+@app.get("/favicon.ico", include_in_schema=False)
+async def serve_favicon():
+    return Response(content=FAVICON_SVG, media_type="image/svg+xml")
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")

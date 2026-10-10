@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruthOdds — Оценка вероятностей и калибровка аналитиков</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +76,17 @@
         i.fa-bitcoin, i.fa-bitcoin-sign, i.fa-youtube, i.fa-globe, i.fa-earth-americas, #autoOracleIcon {
             filter: none !important;
         }
+        #sidebar {
+            transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease, border-color 0.22s ease;
+        }
+        #sidebar.sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            border-right-width: 0 !important;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="h-full flex flex-col antialiased overflow-hidden selection:bg-blue-100 selection:text-blue-900">
@@ -90,23 +103,27 @@
     <div class="flex-1 flex overflow-hidden">
 
         <!-- =================== LEFT SIDEBAR (GEMINI MINIMAL) =================== -->
-        <aside id="sidebar" class="w-64 bg-gemini-sidebar border-r border-gemini-border flex flex-col justify-between transition-all duration-200 z-30 flex-shrink-0">
+        <aside id="sidebar" class="w-64 bg-gemini-sidebar border-r border-gemini-border flex flex-col justify-between z-30 flex-shrink-0 overflow-hidden">
             
             <!-- Top Part: Logo & New Forecast Button -->
-            <div class="p-4 flex flex-col gap-4">
+            <div class="p-4 flex flex-col gap-4 w-64">
                 <!-- Branding Header -->
                 <div class="flex items-center justify-between px-1">
-                    <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('events')">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-rose-500 flex items-center justify-center text-white shadow-sm">
-                            <i class="fa-solid fa-sparkles text-xs"></i>
+                    <div class="flex items-center gap-2.5 cursor-pointer group" onclick="switchTab('events')">
+                        <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center justify-center shadow-xs flex-shrink-0 group-hover:border-blue-500/60 transition">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 17V13M10 17V9M15 17V11M20 17V6" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M5 11.5L10 7.5L15 9L20 4.5" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="20" cy="4.5" r="1.75" fill="#10b981"/>
+                            </svg>
                         </div>
                         <div>
-                            <span class="text-sm font-bold tracking-tight text-slate-800">TruthOdds</span>
+                            <span class="text-sm font-bold tracking-tight text-slate-900">TruthOdds</span>
                             <span class="block text-[10px] text-gemini-mutedText font-medium">Аналитический центр</span>
                         </div>
                     </div>
-                    <button onclick="toggleSidebar()" class="lg:hidden text-gemini-grayText hover:text-slate-900 p-1.5 rounded-lg hover:bg-gemini-hover transition">
-                        <i class="fa-solid fa-xmark text-sm"></i>
+                    <button onclick="toggleSidebar()" class="text-gemini-grayText hover:text-slate-900 p-1.5 rounded-lg hover:bg-gemini-hover transition" title="Свернуть боковое меню">
+                        <i class="fa-solid fa-angles-left text-xs"></i>
                     </button>
                 </div>
 
@@ -156,7 +173,7 @@
             </div>
 
             <!-- Bottom Part: Settings, Account & Reset Database -->
-            <div class="p-3 border-t border-gemini-border bg-gemini-sidebar/50 flex flex-col gap-1 text-xs font-medium text-gemini-grayText">
+            <div class="p-3 border-t border-gemini-border bg-gemini-sidebar/50 flex flex-col gap-1 text-xs font-medium text-gemini-grayText w-64">
                 <button onclick="switchTab('settings')" id="nav-settings" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
                     <span class="flex items-center gap-3">
                         <i class="fa-solid fa-sliders w-4 text-center text-slate-500"></i>
@@ -1515,10 +1532,19 @@
             }, 4000);
         }
 
-        // Toggle Sidebar for Mobile
+        // Toggle Sidebar Collapse/Expand
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
-            sb.classList.toggle('-translate-x-full');
+            const bottomCapsule = document.getElementById('bottomPromptCapsule');
+            if (!sb) return;
+            const isCollapsed = sb.classList.toggle('sidebar-collapsed');
+            if (bottomCapsule) {
+                if (isCollapsed) {
+                    bottomCapsule.classList.remove('lg:left-64');
+                } else {
+                    bottomCapsule.classList.add('lg:left-64');
+                }
+            }
         }
 
         // Switch Navigation Tabs
