@@ -67,6 +67,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        /* Monochrome gray icons & emojis across the UI */
+        i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray {
+            filter: grayscale(100%);
+        }
     </style>
 </head>
 <body class="h-full flex flex-col antialiased overflow-hidden selection:bg-blue-100 selection:text-blue-900">
@@ -301,16 +305,24 @@
                         <!-- Top Action & Search Bar for Analysts -->
                         <div class="bg-white rounded-2xl p-3.5 border border-gemini-border flex flex-col gap-3 shadow-2xs">
                             <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-                                <div class="flex items-center gap-2 flex-1">
-                                    <div class="relative flex-1">
+                                <div class="flex flex-wrap items-center gap-2 flex-1">
+                                    <div class="relative flex-1 min-w-[200px]">
                                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                                         <input type="text" id="speakerSearchInput" oninput="applySpeakerFilters()" placeholder="Поиск аналитика по имени, биографии или соцсети..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none">
                                     </div>
+                                    <select id="speakerPeriodSelect" onchange="setSpeakerAccuracyPeriod(this.value)" class="text-xs bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-800 font-semibold focus:outline-none" title="Период проверки точности аналитиков">
+                                        <option value="1y" selected>◷ Точность: За 1 год</option>
+                                        <option value="6m">◷ Точность: За 6 месяцев</option>
+                                        <option value="90d">◷ Точность: За 90 дней</option>
+                                        <option value="30d">◷ Точность: За 30 дней</option>
+                                        <option value="all">◷ Точность: За всё время</option>
+                                    </select>
                                     <select id="speakerSortSelect" onchange="applySpeakerFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 font-semibold focus:outline-none">
-                                        <option value="credibility">⭐ По надежности</option>
-                                        <option value="brier">🎯 По Brier Score</option>
-                                        <option value="predictions">📊 По числу прогнозов</option>
-                                        <option value="name">🔤 По имени</option>
+                                        <option value="accuracy">◎ По точности за период</option>
+                                        <option value="credibility" selected>★&#xFE0E; По надежности</option>
+                                        <option value="brier">◈ По Brier Score</option>
+                                        <option value="predictions">▤ По числу прогнозов</option>
+                                        <option value="name">А-Я По имени</option>
                                     </select>
                                 </div>
 
@@ -320,12 +332,22 @@
                                 </button>
                             </div>
 
-                            <!-- Interactive Speaker Domain Tag Chips -->
-                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
-                                <button onclick="setSpeakerDomainFilter('')" id="spTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все аналитики</button>
-                                <button onclick="setSpeakerDomainFilter('crypto')" id="spTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-amber-500 text-[10px]"></i> <span>Крипто</span></button>
-                                <button onclick="setSpeakerDomainFilter('macro')" id="spTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-emerald-500 text-[10px]"></i> <span>Макро</span></button>
-                                <button onclick="setSpeakerDomainFilter('tech')" id="spTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-800 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-blue-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                            <!-- Interactive Speaker Domain & Period Tag Chips -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <button onclick="setSpeakerDomainFilter('')" id="spTagBtn-all" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-blue-600 text-white border border-blue-600 shadow-2xs">Все аналитики</button>
+                                    <button onclick="setSpeakerDomainFilter('crypto')" id="spTagBtn-crypto" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-bitcoin-sign text-slate-500 text-[10px]"></i> <span>Крипто</span></button>
+                                    <button onclick="setSpeakerDomainFilter('macro')" id="spTagBtn-macro" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up text-slate-500 text-[10px]"></i> <span>Макро</span></button>
+                                    <button onclick="setSpeakerDomainFilter('tech')" id="spTagBtn-tech" class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1"><i class="fa-solid fa-robot text-slate-500 text-[10px]"></i> <span>Технологии & AI</span></button>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1 text-[11px]">
+                                    <span class="text-slate-500 font-medium mr-1">Период:</span>
+                                    <button onclick="setSpeakerAccuracyPeriod('1y')" id="spPeriodBtn-1y" class="px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-800 text-white border border-slate-800">За 1 год</button>
+                                    <button onclick="setSpeakerAccuracyPeriod('6m')" id="spPeriodBtn-6m" class="px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">6 мес.</button>
+                                    <button onclick="setSpeakerAccuracyPeriod('90d')" id="spPeriodBtn-90d" class="px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">90 дн.</button>
+                                    <button onclick="setSpeakerAccuracyPeriod('30d')" id="spPeriodBtn-30d" class="px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">30 дн.</button>
+                                    <button onclick="setSpeakerAccuracyPeriod('all')" id="spPeriodBtn-all" class="px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">Всё время</button>
+                                </div>
                             </div>
                         </div>
 
@@ -532,11 +554,11 @@
                             
                             <!-- Domain select pill -->
                             <select id="promptDomain" class="text-xs bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 text-slate-700 font-medium focus:outline-none focus:border-blue-500">
-                                <option value="auto" selected>✨ Авто-тег сферы</option>
-                                <option value="crypto">🪙 Криптовалюты</option>
-                                <option value="macro">📈 Макроэкономика</option>
-                                <option value="tech">🤖 Технологии и AI</option>
-                                <option value="general">🌐 Общее</option>
+                                <option value="auto" selected>✦ Авто-тег сферы</option>
+                                <option value="crypto">◈ Криптовалюты</option>
+                                <option value="macro">↗&#xFE0E; Макроэкономика</option>
+                                <option value="tech">⚙&#xFE0E; Технологии и AI</option>
+                                <option value="general">◎ Общее</option>
                             </select>
 
                         </div>
@@ -745,9 +767,9 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Сфера дискуссии:</label>
                     <select id="newTopicDomain" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
-                        <option value="crypto">🪙 Криптовалюты</option>
-                        <option value="macro">📈 Макроэкономика</option>
-                        <option value="tech">🤖 Технологии и AI</option>
+                        <option value="crypto">◈ Криптовалюты</option>
+                        <option value="macro">↗&#xFE0E; Макроэкономика</option>
+                        <option value="tech">⚙&#xFE0E; Технологии и AI</option>
                     </select>
                 </div>
 
@@ -764,6 +786,49 @@
                 <button onclick="submitNewTopic()" id="btnSubmitNewTopic" class="px-4 py-2 rounded-lg bg-gemini-blue hover:bg-gemini-blueHover text-white text-xs font-semibold transition shadow-sm">
                     Создать тему
                 </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =================== SPEAKER ACCURACY VERIFICATION MODAL (ПРОВЕРКА ТОЧНОСТИ ЗА ГОД / ПЕРИОД) =================== -->
+    <div id="speakerAccuracyModal" onclick="if(event.target === this) closeSpeakerAccuracyModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-gemini-border overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gemini-border flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm border border-slate-300" id="accModalInitials">
+                        АЭ
+                    </div>
+                    <div>
+                        <h3 id="accModalSpeakerName" class="text-sm md:text-base font-bold text-slate-900">Имя аналитика</h3>
+                        <p id="accModalSpeakerBio" class="text-[11px] text-slate-500 line-clamp-1">Калибровка и проверка точности прогнозов</p>
+                    </div>
+                </div>
+                <button onclick="closeSpeakerAccuracyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Period Selector Bar inside Modal -->
+            <div class="px-6 py-3 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="font-semibold text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-regular fa-calendar-check text-slate-500"></i>
+                    <span>Горизонт проверки точности:</span>
+                </span>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button onclick="switchModalAccuracyPeriod('1y')" id="modalAccBtn-1y" class="px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-800 text-white border border-slate-800">За 1 год</button>
+                    <button onclick="switchModalAccuracyPeriod('6m')" id="modalAccBtn-6m" class="px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">За 6 месяцев</button>
+                    <button onclick="switchModalAccuracyPeriod('90d')" id="modalAccBtn-90d" class="px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">За 90 дней</button>
+                    <button onclick="switchModalAccuracyPeriod('30d')" id="modalAccBtn-30d" class="px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">За 30 дней</button>
+                    <button onclick="switchModalAccuracyPeriod('all')" id="modalAccBtn-all" class="px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">За всё время</button>
+                </div>
+            </div>
+
+            <!-- Modal Scrollable Content -->
+            <div class="p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5" id="accModalBody">
+                <!-- Populated dynamically via JS -->
             </div>
         </div>
     </div>
@@ -1111,7 +1176,7 @@
 
                 if (resolvedCount > 0) {
                     const titles = summary.resolved_events.map(e => e.title).slice(0, 2).join('; ');
-                    showToast(`🤖 Оракул автоматически закрыл ${resolvedCount} прогноза(ов): «${titles}»! Рейтинги экспертов обновлены.`);
+                    showToast(`Оракул автоматически закрыл ${resolvedCount} прогноза(ов): «${titles}»! Рейтинги экспертов обновлены.`);
                     await loadAllData();
                 } else if (!silent) {
                     showToast(`Оракул проверил ${summary.total_active_checked || 0} активных событий. Все прогнозы актуальны.`, 'info');
@@ -1327,9 +1392,15 @@
 
         // =================== TAB 2: ACCEPTED ANALYSTS ===================
 
+        let activeSpeakerDomainFilter = '';
+        let activeSpeakerPeriod = '1y';
+        let activeAccuracyModalSpeakerId = null;
+        let activeAccuracyModalSpeakerName = '';
+        let activeAccuracyModalPeriod = '1y';
+
         async function loadSpeakers() {
             try {
-                const res = await fetch('/api/speakers?sort_by=credibility');
+                const res = await fetch(`/api/speakers?sort_by=credibility&period=${encodeURIComponent(activeSpeakerPeriod)}`);
                 if (!res.ok) throw new Error('Failed to load speakers');
                 rawSpeakers = await res.json();
                 updateNavCounts();
@@ -1339,7 +1410,23 @@
             }
         }
 
-        let activeSpeakerDomainFilter = '';
+        async function setSpeakerAccuracyPeriod(period) {
+            activeSpeakerPeriod = period || '1y';
+            const sel = document.getElementById('speakerPeriodSelect');
+            if (sel && sel.value !== activeSpeakerPeriod) {
+                sel.value = activeSpeakerPeriod;
+            }
+            ['1y', '6m', '90d', '30d', 'all'].forEach(p => {
+                const btn = document.getElementById(`spPeriodBtn-${p}`);
+                if (!btn) return;
+                if (p === activeSpeakerPeriod) {
+                    btn.className = 'px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-800 text-white border border-slate-800';
+                } else {
+                    btn.className = 'px-2.5 py-0.5 rounded-full font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200';
+                }
+            });
+            await loadSpeakers();
+        }
 
         function setSpeakerDomainFilter(domain) {
             activeSpeakerDomainFilter = domain;
@@ -1414,9 +1501,17 @@
             });
 
             filtered.sort((a, b) => {
+                const accA = a.period_accuracy?.accuracy_percent ?? (a.overall_credibility * 100);
+                const accB = b.period_accuracy?.accuracy_percent ?? (b.overall_credibility * 100);
+                const brierA = a.period_accuracy?.brier_score ?? a.overall_brier_score;
+                const brierB = b.period_accuracy?.brier_score ?? b.overall_brier_score;
+                const predsA = a.period_accuracy?.total_predictions ?? a.total_predictions;
+                const predsB = b.period_accuracy?.total_predictions ?? b.total_predictions;
+
+                if (sortVal === 'accuracy') return accB - accA;
                 if (sortVal === 'credibility') return b.overall_credibility - a.overall_credibility;
-                if (sortVal === 'brier') return a.overall_brier_score - b.overall_brier_score;
-                if (sortVal === 'predictions') return b.total_predictions - a.total_predictions;
+                if (sortVal === 'brier') return brierA - brierB;
+                if (sortVal === 'predictions') return predsB - predsA;
                 if (sortVal === 'name') return a.name.localeCompare(b.name);
                 return 0;
             });
@@ -1443,9 +1538,22 @@
                 return;
             }
 
+            const periodShortNames = {
+                '1y': 'за 1 год',
+                '6m': 'за 6 мес.',
+                '90d': 'за 90 дн.',
+                '30d': 'за 30 дн.',
+                'all': 'за всё время'
+            };
+            const pLabel = periodShortNames[activeSpeakerPeriod] || 'за 1 год';
+
             container.innerHTML = filtered.map(sp => {
-                const credPercent = Math.round(sp.overall_credibility * 100);
-                const brier = (sp.overall_brier_score || 0.25).toFixed(2);
+                const pAcc = sp.period_accuracy || {};
+                const accPercent = pAcc.accuracy_percent !== undefined ? Math.round(pAcc.accuracy_percent) : Math.round(sp.overall_credibility * 100);
+                const credPercent = pAcc.credibility_percent !== undefined ? pAcc.credibility_percent : Math.round(sp.overall_credibility * 100);
+                const brier = (pAcc.brier_score !== undefined ? pAcc.brier_score : (sp.overall_brier_score || 0.25)).toFixed(2);
+                const resolvedCount = pAcc.resolved_predictions !== undefined ? pAcc.resolved_predictions : sp.resolved_predictions;
+                const correctCount = pAcc.correct_predictions !== undefined ? pAcc.correct_predictions : sp.correct_predictions;
                 const initials = sp.name.split(' ').map(n => n[0]).join('').slice(0, 2);
 
                 const domainScores = sp.domain_scores || {};
@@ -1475,7 +1583,7 @@
                         <div>
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-start gap-3 flex-1 min-w-0">
-                                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200 flex-shrink-0">
+                                    <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-sm border border-slate-200 flex-shrink-0">
                                         ${initials}
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -1486,29 +1594,39 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button onclick="confirmDeleteSpeaker('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs flex-shrink-0" title="Удалить аналитика «${sp.name}» из системы">
+                                <button onclick="confirmDeleteSpeaker('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition text-xs flex-shrink-0" title="Удалить аналитика «${sp.name}» из системы">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 mt-4 p-2.5 rounded-lg bg-gemini-sidebar border border-gemini-border text-center">
+                            <div class="grid grid-cols-4 gap-2 mt-4 p-2.5 rounded-xl bg-gemini-sidebar border border-gemini-border text-center">
+                                <div>
+                                    <span class="text-[10px] text-gemini-mutedText block">Точность (${pLabel}):</span>
+                                    <b class="text-xs font-mono text-slate-900 font-bold">${accPercent}%</b>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gemini-mutedText block">Сбылось:</span>
+                                    <b class="text-xs font-mono text-slate-800">${correctCount}/${resolvedCount}</b>
+                                </div>
                                 <div>
                                     <span class="text-[10px] text-gemini-mutedText block">Надежность:</span>
-                                    <b class="text-xs font-mono text-blue-600 font-bold">${credPercent}%</b>
+                                    <b class="text-xs font-mono text-slate-800 font-bold">${credPercent}%</b>
                                 </div>
                                 <div>
                                     <span class="text-[10px] text-gemini-mutedText block">Brier Score:</span>
                                     <b class="text-xs font-mono text-slate-700">${brier}</b>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] text-gemini-mutedText block">Прогнозов:</span>
-                                    <b class="text-xs font-mono text-slate-700">${sp.total_predictions}</b>
-                                </div>
                             </div>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-100">
-                            <span class="block text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider mb-1.5">Все сети аналитика:</span>
+                        <div class="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-semibold text-gemini-mutedText uppercase tracking-wider">Все сети аналитика:</span>
+                                <button onclick="openSpeakerAccuracyModal('${sp.id}', '${sp.name.replace(/'/g, "\\'")}')" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[11px] font-semibold transition flex items-center gap-1.5">
+                                    <i class="fa-regular fa-calendar-check text-slate-600"></i>
+                                    <span>Проверить точность за год</span>
+                                </button>
+                            </div>
                             <div class="flex flex-wrap gap-1.5">
                                 ${socialBadges}
                             </div>
@@ -1516,6 +1634,157 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        async function openSpeakerAccuracyModal(speakerId, speakerName, period = null) {
+            activeAccuracyModalSpeakerId = speakerId || null;
+            activeAccuracyModalSpeakerName = speakerName || '';
+            activeAccuracyModalPeriod = period || activeSpeakerPeriod || '1y';
+
+            const modal = document.getElementById('speakerAccuracyModal');
+            const body = document.getElementById('accModalBody');
+            if (!modal || !body) return;
+
+            document.getElementById('accModalSpeakerName').textContent = activeAccuracyModalSpeakerName || 'Аналитик';
+            document.getElementById('accModalInitials').textContent = (activeAccuracyModalSpeakerName || 'АЭ').split(' ').map(w => w[0]).join('').slice(0, 2);
+            body.innerHTML = `
+                <div class="p-8 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    <span>Загрузка и проверка прогнозов аналитика за выбранный период...</span>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            await switchModalAccuracyPeriod(activeAccuracyModalPeriod);
+        }
+
+        async function switchModalAccuracyPeriod(period) {
+            activeAccuracyModalPeriod = period || '1y';
+            ['1y', '6m', '90d', '30d', 'all'].forEach(p => {
+                const btn = document.getElementById(`modalAccBtn-${p}`);
+                if (!btn) return;
+                if (p === activeAccuracyModalPeriod) {
+                    btn.className = 'px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-800 text-white border border-slate-800';
+                } else {
+                    btn.className = 'px-3 py-1 rounded-full text-[11px] font-semibold transition bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200';
+                }
+            });
+
+            const body = document.getElementById('accModalBody');
+            if (!body) return;
+
+            try {
+                let url = '';
+                if (activeAccuracyModalSpeakerId) {
+                    url = `/api/speakers/${encodeURIComponent(activeAccuracyModalSpeakerId)}/accuracy?period=${encodeURIComponent(activeAccuracyModalPeriod)}`;
+                } else {
+                    url = `/api/speakers/accuracy-by-name?name=${encodeURIComponent(activeAccuracyModalSpeakerName)}&period=${encodeURIComponent(activeAccuracyModalPeriod)}`;
+                }
+
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Accuracy load failed');
+                const data = await res.json();
+
+                document.getElementById('accModalSpeakerName').textContent = data.name || activeAccuracyModalSpeakerName;
+                document.getElementById('accModalSpeakerBio').textContent = data.bio || 'Калибровка и проверка точности прогнозов';
+
+                const acc = data.period_accuracy || {};
+                const history = acc.history || [];
+                const domBreakdown = acc.domain_breakdown || {};
+
+                const domHtml = Object.keys(domBreakdown).map(d => {
+                    const dm = domainMeta[d] || { label: d };
+                    const st = domBreakdown[d];
+                    return `
+                        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-2">
+                            <span class="font-semibold text-slate-700">${dm.label}:</span>
+                            <b class="font-mono text-slate-900">${st.accuracy_percent}%</b>
+                            <span class="text-[11px] text-slate-500">(${st.correct}/${st.resolved})</span>
+                        </div>
+                    `;
+                }).join('');
+
+                const historyRows = history.map(item => {
+                    const confPct = Math.round((item.speaker_confidence || 0.5) * 100);
+                    let statusBadge = '';
+                    if (item.status === 'RESOLVED_TRUE' || item.status === 'RESOLVED_FALSE') {
+                        if (item.is_correct) {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-check text-slate-600"></i> Прогноз сбылся</span>`;
+                        } else {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-xmark text-slate-500"></i> Ошибка прогноза</span>`;
+                        }
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 text-[10px] font-semibold flex items-center gap-1"><i class="fa-regular fa-clock text-slate-500"></i> В ожидании</span>`;
+                    }
+
+                    return `
+                        <div class="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200 flex flex-col gap-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-[11px] text-slate-500 font-mono">${item.date} (${item.days_ago} дн. назад)</span>
+                                ${statusBadge}
+                            </div>
+                            <h5 class="text-xs md:text-sm font-bold text-slate-900">${item.title}</h5>
+                            ${item.notes ? `<p class="text-[11px] text-slate-600 leading-relaxed">${item.notes}</p>` : ''}
+                            <div class="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-600 border-t border-slate-200/70">
+                                <span>Уверенность аналитика: <b class="font-mono text-slate-900">${confPct}%</b></span>
+                                ${item.brier !== null && item.brier !== undefined ? `<span>•</span><span>Ошибка Brier: <b class="font-mono text-slate-800">${item.brier.toFixed(3)}</b></span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                body.innerHTML = `
+                    <!-- Summary Metrics for Selected Period -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                            <span class="text-[11px] text-slate-500 block">Точность (${acc.period_label || 'За 1 год'})</span>
+                            <b class="text-lg font-mono font-bold text-slate-900 mt-0.5 block">${Math.round(acc.accuracy_percent || 0)}%</b>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                            <span class="text-[11px] text-slate-500 block">Сбылось / Проверено</span>
+                            <b class="text-lg font-mono font-bold text-slate-900 mt-0.5 block">${acc.correct_predictions || 0} из ${acc.resolved_predictions || 0}</b>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                            <span class="text-[11px] text-slate-500 block">Brier Score</span>
+                            <b class="text-lg font-mono font-bold text-slate-800 mt-0.5 block">${(acc.brier_score ?? 0.25).toFixed(3)}</b>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                            <span class="text-[11px] text-slate-500 block">Индекс надежности</span>
+                            <b class="text-lg font-mono font-bold text-slate-800 mt-0.5 block">${acc.credibility_percent || 50}%</b>
+                        </div>
+                    </div>
+
+                    ${domHtml ? `
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-600">По сферам:</span>
+                            ${domHtml}
+                        </div>
+                    ` : ''}
+
+                    <!-- Historical & Active Predictions in Period -->
+                    <div class="flex flex-col gap-2.5">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Прогнозы аналитика (${acc.period_label || 'За 1 год'})</h4>
+                            <span class="text-[11px] text-slate-500">Всего записей: <b>${history.length}</b></span>
+                        </div>
+                        <div class="flex flex-col gap-2.5">
+                            ${historyRows || '<div class="p-4 text-center text-xs text-slate-500">За выбранный период прогнозов не найдено.</div>'}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                body.innerHTML = `<div class="p-6 text-center text-xs text-slate-600">Не удалось загрузить статистику точности аналитика.</div>`;
+            }
+        }
+
+        function closeSpeakerAccuracyModal() {
+            const modal = document.getElementById('speakerAccuracyModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
 
         // Open Modal in "Accepted Analyst" mode
@@ -1912,11 +2181,20 @@
                     `;
                 }
 
+                const safeCandName = (cand.name || '').replace(/'/g, "\\'");
+                const accCheckBtn = `
+                    <button onclick="openSpeakerAccuracyModal('${cand.id}', '${safeCandName}', '1y')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-semibold transition flex items-center gap-1" title="Проверить точность прогнозов кандидата за 1 год">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        <span>Точность за год</span>
+                    </button>
+                `;
+
                 let actionBtns = '';
                 if (isApproved) {
                     actionBtns = `
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="text-xs font-semibold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Принят в аналитики</span>
+                            ${accCheckBtn}
                             <button onclick="fetchCandidateSocials('${cand.id}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1">
                                 <i class="fa-solid fa-share-nodes"></i> Обновить сети
                             </button>
@@ -1926,6 +2204,7 @@
                     actionBtns = `
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-semibold text-rose-500 flex items-center gap-1"><i class="fa-solid fa-xmark"></i> Отклонен</span>
+                            ${accCheckBtn}
                             <button onclick="approveCandidate('${cand.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-semibold transition">
                                 Вернуть и принять
                             </button>
@@ -1938,6 +2217,7 @@
                                 <i class="fa-solid fa-check"></i>
                                 <span>Принять в аналитики</span>
                             </button>
+                            ${accCheckBtn}
                             <button onclick="fetchCandidateSocials('${cand.id}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1" title="Найти и подтянуть все соцсети кандидата и свежие прогнозы">
                                 <i class="fa-solid fa-share-nodes"></i>
                                 <span>Подтянуть сети</span>
@@ -1955,13 +2235,13 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-start gap-3 min-w-0">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-100 to-blue-100 text-indigo-700 font-bold flex items-center justify-center text-xs border border-indigo-200 flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs border border-slate-200 flex-shrink-0">
                                         ${initials}
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex flex-wrap items-center gap-1.5">
                                             <h4 class="text-sm md:text-base font-bold text-slate-900">${cand.name}</h4>
-                                            ${cand.mention_count >= 2 ? '<span class="text-blue-600 text-xs" title="Подтвержденные упоминания в медиа"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                                            ${cand.mention_count >= 2 ? '<span class="text-slate-600 text-xs" title="Подтвержденные упоминания в медиа"><i class="fa-solid fa-circle-check"></i></span>' : ''}
                                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium border border-slate-200">${cand.discovered_via_channel}</span>
                                         </div>
                                         <p class="text-xs text-gemini-grayText mt-0.5">${cand.bio || 'Аналитик и автор рыночных прогнозов'}</p>
@@ -1977,7 +2257,7 @@
                             <!-- Candidate Social Networks Row -->
                             <div class="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
                                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">
-                                    <i class="fa-solid fa-link text-indigo-500"></i> Сети кандидата:
+                                    <i class="fa-solid fa-link text-slate-500"></i> Сети кандидата:
                                 </span>
                                 ${socialBadges}
                             </div>
@@ -1991,8 +2271,8 @@
                             ${claimsHtml}
                         </div>
 
-                        <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                            <span class="text-[11px] text-slate-400">Точность извлечения: <b class="text-blue-600">${Math.round((cand.claim_density_score || 0.75) * 100)}%</b></span>
+                        <div class="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-[11px] text-slate-400">Точность извлечения: <b class="text-slate-700">${Math.round((cand.claim_density_score || 0.75) * 100)}%</b></span>
                             ${actionBtns}
                         </div>
                     </div>
@@ -2401,7 +2681,7 @@
 
                 if (!res.ok) throw new Error('Failed to create topic');
                 const created = await res.json();
-                showToast('🤖 Тема добавлена, сгенерировано ИИ-описание и рассчитана вероятность!');
+                showToast('Тема добавлена, сгенерировано ИИ-описание и рассчитана вероятность!');
                 closeCreateTopicModal();
                 document.getElementById('newTopicTitle').value = '';
                 document.getElementById('newTopicKeywords').value = '';
@@ -2584,7 +2864,7 @@
                 const prob = Math.round((created.current_probability || 0.5) * 100);
                 const stCount = created.statements?.length || 0;
 
-                showToast(`🤖 Автоматический прогноз рассчитан: ${prob}%! Учтено экспертов: ${stCount}.`);
+                showToast(`Автоматический прогноз рассчитан: ${prob}%! Учтено экспертов: ${stCount}.`);
                 input.value = '';
                 if (document.getElementById('promptSpeakerSearch')) {
                     document.getElementById('promptSpeakerSearch').value = '';

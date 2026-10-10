@@ -27,6 +27,7 @@ class SpeakerResponse(SpeakerBase):
     domain_scores: Dict[str, Any]
     created_at: datetime
     social_accounts: List[SocialAccount] = []
+    period_accuracy: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
 
