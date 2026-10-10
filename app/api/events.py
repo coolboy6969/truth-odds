@@ -28,14 +28,20 @@ def _serialize_event(ev: Event, db: Session) -> dict:
             "created_at": st.created_at
         })
 
+    clean_title = AutoEventAnalysisEngine.clean_event_title(ev.title)
+    if clean_title and clean_title != ev.title:
+        ev.title = clean_title
+        db.commit()
+
     ai_analysis = AutoEventAnalysisEngine.generate_ai_topic_analysis(
         title=ev.title,
         domain=ev.domain,
         probability=ev.current_probability,
-        statements_count=len(stmts)
+        statements_count=len(stmts),
+        statements=stmts
     )
     desc = ev.description
-    if not desc or "Тема проверена автоматической системой" in desc or len(desc) < 40:
+    if AutoEventAnalysisEngine.is_boilerplate_description(desc):
         desc = ai_analysis["summary"]
 
     return {

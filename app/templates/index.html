@@ -1471,13 +1471,12 @@
             `).join('');
 
             return `
-                <div class="rounded-2xl bg-gradient-to-br from-purple-50/80 via-indigo-50/50 to-blue-50/70 p-4 border border-indigo-200/80 flex flex-col gap-3 shadow-2xs">
+                <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200 flex flex-col gap-3 shadow-2xs">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i>
-                            <span>Аналитическое описание темы от ИИ</span>
+                        <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-lines text-slate-600"></i>
+                            <span>Описание предположения и факторы оценки</span>
                         </span>
-                        <span class="px-2 py-0.5 rounded-full bg-white/90 text-purple-700 border border-purple-200 text-[10px] font-semibold">AI Consensus</span>
                     </div>
 
                     <p class="text-xs text-slate-800 leading-relaxed bg-white/80 p-3 rounded-xl border border-indigo-100/80">
@@ -1834,7 +1833,7 @@
             ` : '';
 
             const statementsCount = ev.statements?.length || 0;
-            const aiSummarySnippet = ev.ai_analysis?.summary || ev.description || '';
+            const hypothesisDesc = ev.description || ev.ai_analysis?.summary || '';
             
             let probColor = 'text-blue-600';
             let barBg = 'bg-blue-600';
@@ -1849,9 +1848,6 @@
                             <span>•</span>
                             ${statusBadge}
                             ${manualBadge}
-                            <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> ИИ-описание
-                            </span>
                         </div>
                         <span class="font-mono text-[10px]">${new Date(ev.created_at).toLocaleDateString()}</span>
                     </div>
@@ -1860,9 +1856,9 @@
                         ${ev.title}
                     </h3>
 
-                    ${aiSummarySnippet ? `
+                    ${hypothesisDesc ? `
                         <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                            <i class="fa-solid fa-robot text-indigo-500 mr-1"></i>${aiSummarySnippet}
+                            ${hypothesisDesc}
                         </p>
                     ` : ''}
 

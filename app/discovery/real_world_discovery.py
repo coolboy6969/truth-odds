@@ -104,16 +104,21 @@ class RealWorldAnalystDiscoveryService:
                     root = ET.fromstring(resp.text)
                     items = root.findall('.//item')
                     for it in items[:limit]:
-                        raw_title = it.findtext('title') or ''
+                        raw_title = (it.findtext('title') or '').replace('\xa0', ' ').strip()
                         publisher = ""
                         title = raw_title
-                        if " - " in raw_title:
-                            parts = raw_title.rsplit(" - ", 1)
-                            title = parts[0].strip()
-                            publisher = parts[1].strip()
+                        dash_parts = re.split(r'\s+(?:-|–|—)\s+', raw_title)
+                        if len(dash_parts) > 1:
+                            publisher = dash_parts[-1].strip()
+                            title = " — ".join(dash_parts[:-1]).strip()
 
                         raw_desc = it.findtext('description') or ''
-                        clean_desc = re.sub(r'<[^>]+>', ' ', html.unescape(raw_desc)).strip()
+                        clean_desc = re.sub(r'<[^>]+>', ' ', html.unescape(raw_desc)).replace('\xa0', ' ')
+                        clean_desc = re.sub(r'\s+', ' ', clean_desc).strip()
+                        if publisher and clean_desc.lower().endswith(publisher.lower()):
+                            clean_desc = clean_desc[:-len(publisher)].strip(" -–—.")
+                        if clean_desc.lower().startswith(title.lower()[:35]):
+                            clean_desc = ""
                         link = it.findtext('link') or ""
                         pub_date = it.findtext('pubDate') or ""
 
@@ -278,7 +283,11 @@ class RealWorldAnalystDiscoveryService:
         total_claims_found = 0
 
         for art in articles:
-            combined_text = f"{art['title']}. {art['description']}"
+            desc_str = (art.get('description') or '').strip()
+            if desc_str and not desc_str.lower().startswith(art['title'].lower()[:35]):
+                combined_text = f"{art['title']}. {desc_str}"
+            else:
+                combined_text = art['title']
             speaker_name = cls.extract_speaker_from_text(art['title'], default_hint=speaker_hint)
             if not speaker_name:
                 speaker_name = cls.extract_speaker_from_text(combined_text, default_hint=speaker_hint)
