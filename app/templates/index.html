@@ -408,18 +408,8 @@
                             <!-- Keep hidden input for backward filter compatibility -->
                             <input type="hidden" id="candidateSearchInput" value="">
 
-                            <!-- Quick Filter Bar & Popular Search Chips -->
-                            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[11px]">
-                                <div class="flex flex-wrap items-center gap-1.5">
-                                    <span class="text-gemini-mutedText font-semibold">Быстрый поиск:</span>
-                                    <button onclick="runRealWorldAnalystSearch('Arthur Hayes')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Arthur Hayes</button>
-                                    <button onclick="runRealWorldAnalystSearch('Cathie Wood')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Cathie Wood</button>
-                                    <button onclick="runRealWorldAnalystSearch('Raoul Pal')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Raoul Pal</button>
-                                    <button onclick="runRealWorldAnalystSearch('Lyn Alden')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Lyn Alden</button>
-                                    <button onclick="runRealWorldAnalystSearch('Евгений Коган')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Евгений Коган</button>
-                                    <button onclick="runRealWorldAnalystSearch('Роберт Кийосаки')" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition font-medium">Роберт Кийосаки</button>
-                                </div>
-
+                            <!-- Quick Filter Bar -->
+                            <div class="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-slate-100 text-[11px]">
                                 <div class="flex items-center gap-2">
                                     <select id="candidateStatusFilter" onchange="applyCandidateFilters()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-slate-700 font-medium focus:outline-none">
                                         <option value="">Все статусы</option>
