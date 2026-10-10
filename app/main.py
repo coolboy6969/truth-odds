@@ -57,6 +57,33 @@ async def serve_dashboard(request: Request):
 def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
+RUNTIME_PLATFORM_SETTINGS = {
+    "autoOracleIntervalSec": 30,
+    "priceTickerIntervalSec": 60,
+    "showHeaderTickers": True,
+    "defaultAccuracyPeriod": "1y",
+    "defaultBaseRate": 50,
+    "bayesianSensitivity": "standard",
+    "infiniteScrollBatchSize": 6,
+    "monochromeIcons": True,
+    "showBottomPromptCapsule": True,
+    "operatorName": "Локальный аналитик",
+    "operatorRole": "Quant & Forecast Operator",
+}
+
+@app.get("/api/settings")
+def get_platform_settings():
+    return RUNTIME_PLATFORM_SETTINGS
+
+@app.post("/api/settings")
+async def update_platform_settings(request: Request):
+    data = await request.json()
+    if isinstance(data, dict):
+        for k, v in data.items():
+            if k in RUNTIME_PLATFORM_SETTINGS:
+                RUNTIME_PLATFORM_SETTINGS[k] = v
+    return {"status": "ok", "settings": RUNTIME_PLATFORM_SETTINGS}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

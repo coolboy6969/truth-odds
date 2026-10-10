@@ -145,6 +145,23 @@
                         </span>
                         <span id="navCountSpeakers" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">0</span>
                     </button>
+
+                    <div class="my-1.5 border-t border-gemini-border/80"></div>
+
+                    <button onclick="switchTab('settings')" id="nav-settings" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-sliders w-4 text-center text-slate-500"></i>
+                            <span>Настройки</span>
+                        </span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Система</span>
+                    </button>
+                    <button onclick="switchTab('account')" id="nav-account" class="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-user-shield w-4 text-center text-slate-500"></i>
+                            <span>Аккаунт</span>
+                        </span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">Профиль</span>
+                    </button>
                 </nav>
             </div>
 
@@ -157,13 +174,18 @@
 
                 <!-- User & Mode Status Pill -->
                 <div class="mt-2 pt-2 border-t border-gemini-border flex items-center justify-between px-1 text-[11px] text-gemini-mutedText">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span class="font-medium text-slate-600">Локальный режим</span>
+                    <button onclick="switchTab('account')" class="flex items-center gap-1.5 hover:text-slate-900 transition text-left" title="Открыть вкладку Аккаунт">
+                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                        <span id="sidebarOperatorLabel" class="font-medium text-slate-700 truncate max-w-[140px]">Локальный аналитик</span>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="switchTab('settings')" title="Настройки системы" class="hover:text-slate-900 transition">
+                            <i class="fa-solid fa-gear text-xs"></i>
+                        </button>
+                        <a href="/docs" target="_blank" title="API документация" class="hover:text-slate-900 transition">
+                            <i class="fa-solid fa-code text-xs"></i>
+                        </a>
                     </div>
-                    <a href="/docs" target="_blank" title="API документация" class="hover:text-blue-600">
-                        <i class="fa-solid fa-code text-xs"></i>
-                    </a>
                 </div>
             </div>
         </aside>
@@ -184,29 +206,40 @@
                 <div class="flex items-center gap-2.5 md:gap-3">
                     
                     <!-- Auto Oracle Status Badge & Action -->
-                    <button onclick="triggerAutoOracleCheck()" id="autoOracleBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-semibold transition shadow-2xs" title="Автоматическая сверка котировок и дедлайнов. Нажмите для немедленной проверки">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <button onclick="triggerAutoOracleCheck()" id="autoOracleBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-semibold transition shadow-2xs" title="Автоматическая сверка котировок и дедлайнов. Нажмите для немедленной проверки">
+                        <span id="autoOracleDot" class="w-2 h-2 rounded-full bg-slate-700 animate-pulse"></span>
                         <span id="autoOracleText">Автопроверка: Активна</span>
                         <i id="autoOracleIcon" class="fa-solid fa-arrows-rotate text-[10px] ml-0.5"></i>
                     </button>
 
                     <!-- Live Crypto Price Ticker Pills -->
-                    <div class="hidden lg:flex items-center gap-2 text-xs font-medium">
+                    <div id="headerLiveTickers" class="hidden lg:flex items-center gap-2 text-xs font-medium">
                         <div class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 font-mono text-[11px]">
-                            <i class="fa-brands fa-bitcoin text-amber-500"></i>
+                            <i class="fa-brands fa-bitcoin text-slate-600"></i>
                             <span>BTC:</span>
                             <b id="head-btc">$...</b>
                         </div>
                         <div class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 font-mono text-[11px]">
-                            <i class="fa-brands fa-ethereum text-indigo-500"></i>
+                            <i class="fa-brands fa-ethereum text-slate-600"></i>
                             <span>ETH:</span>
                             <b id="head-eth">$...</b>
                         </div>
                         <div class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5 font-mono text-[11px]">
-                            <i class="fa-solid fa-bolt text-purple-500"></i>
+                            <i class="fa-solid fa-bolt text-slate-600"></i>
                             <span>SOL:</span>
                             <b id="head-sol">$...</b>
                         </div>
+                    </div>
+
+                    <!-- Quick Header Settings & Account Buttons -->
+                    <div class="flex items-center gap-1.5 pl-1 border-l border-slate-200">
+                        <button onclick="switchTab('settings')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Настройки платформы">
+                            <i class="fa-solid fa-sliders text-xs"></i>
+                        </button>
+                        <button onclick="switchTab('account')" class="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition" title="Профиль и заставка аккаунта">
+                            <i class="fa-solid fa-user-shield text-[10px]"></i>
+                            <span class="hidden sm:inline" id="headerAccountBtnText">Аккаунт</span>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -572,11 +605,368 @@
 
                     </section>
 
+                    <!-- =================== TAB 5: НАСТРОЙКИ СИСТЕМЫ (WORKING SETTINGS TAB) =================== -->
+                    <section id="view-settings" class="hidden flex-col gap-5">
+                        <!-- Settings Header Banner -->
+                        <div class="bg-white rounded-3xl p-5 md:p-6 border border-gemini-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex items-start gap-3.5">
+                                <div class="w-11 h-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                                    <i class="fa-solid fa-sliders text-base"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-base md:text-lg font-bold text-slate-900">Настройки аналитической платформы</h3>
+                                        <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">v1.0 LOCAL</span>
+                                    </div>
+                                    <p class="text-xs text-gemini-grayText mt-1">
+                                        Управление параметрами Байесовского движка, автопроверкой Оракула, калибровкой точности аналитиков и интерфейсом.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="resetAppSettingsToDefault()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    <span>По умолчанию</span>
+                                </button>
+                                <button onclick="saveAppSettings()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Сохранить настройки</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Settings Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Card 1: Oracle & Live Market Data -->
+                            <div class="bg-white rounded-2xl p-5 border border-gemini-border shadow-2xs flex flex-col gap-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                                            <i class="fa-solid fa-scale-balanced text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900">Авто-Оракул и рыночные котировки</h4>
+                                            <span class="text-[11px] text-gemini-mutedText">Интервалы сверки прогнозов и биржевых тикеров</span>
+                                        </div>
+                                    </div>
+                                    <span id="settingsOracleStatusPill" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-semibold">Активен</span>
+                                </div>
+
+                                <div class="flex flex-col gap-3.5 text-xs">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <label for="settingOracleInterval" class="font-semibold text-slate-800 block">Интервал автопроверки Оракула</label>
+                                            <span class="text-[11px] text-slate-500">Частота фоновой сверки дедлайнов и целевых цен</span>
+                                        </div>
+                                        <select id="settingOracleInterval" onchange="saveAppSettings(true)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-500">
+                                            <option value="0">Выключено (только вручную)</option>
+                                            <option value="15">Каждые 15 секунд</option>
+                                            <option value="30" selected>Каждые 30 секунд</option>
+                                            <option value="60">Каждую 1 минуту</option>
+                                            <option value="300">Каждые 5 минут</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <label for="settingTickerInterval" class="font-semibold text-slate-800 block">Обновление котировок (BTC / ETH / SOL)</label>
+                                            <span class="text-[11px] text-slate-500">Частота запроса актуальных цен для шапки</span>
+                                        </div>
+                                        <select id="settingTickerInterval" onchange="saveAppSettings(true)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-500">
+                                            <option value="30">Каждые 30 секунд</option>
+                                            <option value="60" selected>Каждую 1 минуту</option>
+                                            <option value="300">Каждые 5 минут</option>
+                                        </select>
+                                    </div>
+
+                                    <label class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 cursor-pointer">
+                                        <div>
+                                            <span class="font-semibold text-slate-800 block">Показывать котировки в верхней панели</span>
+                                            <span class="text-[11px] text-slate-500">Отображение живых цен BTC, ETH и SOL в шапке</span>
+                                        </div>
+                                        <input type="checkbox" id="settingShowHeaderTickers" checked onchange="saveAppSettings(true)" class="w-4 h-4 accent-slate-900 rounded cursor-pointer">
+                                    </label>
+
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                                        <span class="text-[11px] text-slate-500">Принудительная проверка всех открытых прогнозов:</span>
+                                        <button onclick="triggerAutoOracleCheck(false)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5">
+                                            <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                                            <span>Проверить сейчас</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Bayesian Calibration & Analyst Accuracy -->
+                            <div class="bg-white rounded-2xl p-5 border border-gemini-border shadow-2xs flex flex-col gap-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                                            <i class="fa-solid fa-square-root-variable text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900">Байесовская модель и точность аналитиков</h4>
+                                            <span class="text-[11px] text-gemini-mutedText">Параметры верификации за период и априорных шансов</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">Brier & Log-Odds</span>
+                                </div>
+
+                                <div class="flex flex-col gap-3.5 text-xs">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <label for="settingDefaultAccuracyPeriod" class="font-semibold text-slate-800 block">Горизонт проверки точности по умолчанию</label>
+                                            <span class="text-[11px] text-slate-500">Период расчета процента попаданий аналитика</span>
+                                        </div>
+                                        <select id="settingDefaultAccuracyPeriod" onchange="saveAppSettings(true)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-500">
+                                            <option value="1y" selected>За 1 год (365 дней)</option>
+                                            <option value="6m">За 6 месяцев (180 дней)</option>
+                                            <option value="90d">За 90 дней (квартал)</option>
+                                            <option value="all">За все время</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                                        <div class="flex items-center justify-between">
+                                            <label for="settingDefaultBaseRate" class="font-semibold text-slate-800">Априорная вероятность новых событий (Prior Base Rate)</label>
+                                            <span id="settingBaseRateValueLabel" class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">50%</span>
+                                        </div>
+                                        <input type="range" id="settingDefaultBaseRate" min="15" max="85" step="5" value="50" oninput="document.getElementById('settingBaseRateValueLabel').textContent = this.value + '%'" onchange="saveAppSettings(true)" class="w-full accent-slate-900 cursor-pointer">
+                                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                            <span>15% (Скептический)</span>
+                                            <span>50% (Нейтральный)</span>
+                                            <span>85% (Оптимистичный)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                                        <div>
+                                            <label for="settingBayesianSensitivity" class="font-semibold text-slate-800 block">Чувствительность веса эксперта (Log-Odds Shift)</label>
+                                            <span class="text-[11px] text-slate-500">Влияние исторического Brier Score на итоговую вероятность</span>
+                                        </div>
+                                        <select id="settingBayesianSensitivity" onchange="saveAppSettings(true)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-500">
+                                            <option value="conservative">Консервативная (сглаженная)</option>
+                                            <option value="standard" selected>Стандартная (сбалансированная)</option>
+                                            <option value="aggressive">Высокая (строгий фильтр точности)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Interface & Search Feed Preferences -->
+                            <div class="bg-white rounded-2xl p-5 border border-gemini-border shadow-2xs flex flex-col gap-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                                            <i class="fa-solid fa-eye text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900">Интерфейс и поисковая лента</h4>
+                                            <span class="text-[11px] text-gemini-mutedText">Настройки прокрутки списков и визуального стиля</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-semibold">UI / UX</span>
+                                </div>
+
+                                <div class="flex flex-col gap-3.5 text-xs">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <label for="settingBatchSize" class="font-semibold text-slate-800 block">Порция подгрузки при прокрутке вниз</label>
+                                            <span class="text-[11px] text-slate-500">Число карточек за один шаг в Радаре и Поиске тем</span>
+                                        </div>
+                                        <select id="settingBatchSize" onchange="saveAppSettings(true)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-500">
+                                            <option value="6" selected>По 6 карточек</option>
+                                            <option value="10">По 10 карточек</option>
+                                            <option value="15">По 15 карточек</option>
+                                        </select>
+                                    </div>
+
+                                    <label class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 cursor-pointer">
+                                        <div>
+                                            <span class="font-semibold text-slate-800 block">Строгий монохромный режим иконок и эмодзи</span>
+                                            <span class="text-[11px] text-slate-500">Применять серый фильтр (grayscale) ко всем значкам</span>
+                                        </div>
+                                        <input type="checkbox" id="settingMonochromeIcons" checked onchange="saveAppSettings(true)" class="w-4 h-4 accent-slate-900 rounded cursor-pointer">
+                                    </label>
+
+                                    <label class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 cursor-pointer">
+                                        <div>
+                                            <span class="font-semibold text-slate-800 block">Плавающяя капсула быстрого прогноза внизу экрана</span>
+                                            <span class="text-[11px] text-slate-500">Поле быстрого ввода темы поверх ленты</span>
+                                        </div>
+                                        <input type="checkbox" id="settingShowBottomCapsule" checked onchange="saveAppSettings(true)" class="w-4 h-4 accent-slate-900 rounded cursor-pointer">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Database Storage & Export -->
+                            <div class="bg-white rounded-2xl p-5 border border-gemini-border shadow-2xs flex flex-col gap-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                                            <i class="fa-solid fa-database text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900">Локальное хранилище и экспорт данных</h4>
+                                            <span class="text-[11px] text-gemini-mutedText">Статистика SQLite базы данных и резервное копирование</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">SQLite Local</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                        <span class="text-[10px] text-slate-500 block">Событий</span>
+                                        <b id="settingsStatEvents" class="text-sm font-mono font-bold text-slate-900">0</b>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                        <span class="text-[10px] text-slate-500 block">Аналитиков</span>
+                                        <b id="settingsStatSpeakers" class="text-sm font-mono font-bold text-slate-900">0</b>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                        <span class="text-[10px] text-slate-500 block">Кандидатов</span>
+                                        <b id="settingsStatCandidates" class="text-sm font-mono font-bold text-slate-900">0</b>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                        <span class="text-[10px] text-slate-500 block">Тем оценки</span>
+                                        <b id="settingsStatNarratives" class="text-sm font-mono font-bold text-slate-900">0</b>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                                    <button onclick="exportPlatformDataJson()" class="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-file-arrow-down"></i>
+                                        <span>Экспорт базы и настроек (JSON)</span>
+                                    </button>
+                                    <button onclick="openResetModal()" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                        <span>Сброс БД</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- =================== TAB 6: ЗАСТАВКА ВКЛАДКИ «АККАУНТ» (ACCOUNT SPLASH SCREEN) =================== -->
+                    <section id="view-account" class="hidden flex-col gap-5">
+                        <!-- Hero Account Splash Card -->
+                        <div class="bg-white rounded-3xl p-6 md:p-8 border border-gemini-border shadow-xs flex flex-col gap-6 relative overflow-hidden">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-2xl font-bold shadow-sm flex-shrink-0">
+                                        <i class="fa-solid fa-user-shield"></i>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-mono font-bold uppercase tracking-wider">LOCAL-FIRST SANDBOX</span>
+                                            <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-semibold">Автономный профиль</span>
+                                        </div>
+                                        <h3 id="accountSplashName" class="text-lg md:text-xl font-bold text-slate-900 mt-0.5">Локальный аналитик</h3>
+                                        <p id="accountSplashRole" class="text-xs text-gemini-grayText">Quant & Forecast Operator • Персональный узел верификации прогнозов</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button onclick="switchTab('settings')" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5">
+                                        <i class="fa-solid fa-sliders"></i>
+                                        <span>Настройки узла</span>
+                                    </button>
+                                    <button onclick="exportPlatformDataJson()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5">
+                                        <i class="fa-solid fa-download"></i>
+                                        <span>Резервная копия профиля</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Session & Workspace Telemetry -->
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-1">
+                                    <span class="text-[11px] text-slate-500 font-medium">Отслеживаемых событий</span>
+                                    <div class="flex items-baseline justify-between">
+                                        <b id="accountStatEvents" class="text-xl font-black font-mono text-slate-900">0</b>
+                                        <span class="text-[10px] text-slate-500 font-mono">Brier Engine</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-1">
+                                    <span class="text-[11px] text-slate-500 font-medium">Верифицированных аналитиков</span>
+                                    <div class="flex items-baseline justify-between">
+                                        <b id="accountStatSpeakers" class="text-xl font-black font-mono text-slate-900">0</b>
+                                        <span class="text-[10px] text-slate-500 font-mono">1Y Track</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-1">
+                                    <span class="text-[11px] text-slate-500 font-medium">Кандидатов в радаре</span>
+                                    <div class="flex items-baseline justify-between">
+                                        <b id="accountStatCandidates" class="text-xl font-black font-mono text-slate-900">0</b>
+                                        <span class="text-[10px] text-slate-500 font-mono">Discovery</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-1">
+                                    <span class="text-[11px] text-slate-500 font-medium">Тем для оценки</span>
+                                    <div class="flex items-baseline justify-between">
+                                        <b id="accountStatNarratives" class="text-xl font-black font-mono text-slate-900">0</b>
+                                        <span class="text-[10px] text-slate-500 font-mono">AI Consensus</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Centerpiece Splash Screen Banner: Cloud Sync & Account Portal Placeholder -->
+                            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                                <div class="flex flex-col gap-2.5 max-w-2xl">
+                                    <div class="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-white border border-slate-200 text-[11px] font-semibold text-slate-800">
+                                        <i class="fa-solid fa-lock text-[10px]"></i>
+                                        <span>Заставка модуля «Облачный аккаунт TruthOdds ID»</span>
+                                    </div>
+                                    <h4 class="text-base font-bold text-slate-900">
+                                        Ваша платформа работает в защищенном локальном режиме без внешней авторизации
+                                    </h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Все расчеты вероятностей, база экспертов, история котировок и настройки хранятся локально на вашем устройстве. В будущих релизах здесь появится подключение облачного аккаунта <b>TruthOdds ID</b> для синхронизации между устройствами, командных воркспейсов и Telegram-уведомлений Оракула.
+                                    </p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+                                        <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700">
+                                            <i class="fa-solid fa-cloud-arrow-up text-slate-500"></i>
+                                            <span>Облачный бэкап портфеля прогнозов</span>
+                                        </div>
+                                        <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700">
+                                            <i class="fa-solid fa-bell text-slate-500"></i>
+                                            <span>Алерты в Telegram при разрешении споров</span>
+                                        </div>
+                                        <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700">
+                                            <i class="fa-solid fa-key text-slate-500"></i>
+                                            <span>Персональные API-ключи и вебхуки</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Local Operator Profile Card -->
+                                <div class="w-full lg:w-80 bg-white rounded-2xl p-4 border border-slate-200 flex flex-col gap-3 flex-shrink-0">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-900">Подпись локального профиля</span>
+                                        <span class="text-[10px] font-mono text-slate-500">LOCAL ID</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Отображаемое имя оператора:</label>
+                                        <input type="text" id="accountOperatorNameInput" value="Локальный аналитик" class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Роль / специализация:</label>
+                                        <input type="text" id="accountOperatorRoleInput" value="Quant & Forecast Operator" class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-500">
+                                    </div>
+                                    <button onclick="saveOperatorProfileFromAccount()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Обновить локальный профиль</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
             </div>
 
             <!-- =================== BEAUTIFUL FLOATING GEMINI BOTTOM PROMPT CAPSULE OVERLAY =================== -->
-            <div class="fixed bottom-0 left-0 lg:left-64 right-0 z-30 pointer-events-none p-4 pb-5 flex justify-center bg-gradient-to-t from-gemini-bg via-gemini-bg/90 to-transparent pt-6">
+            <div id="bottomPromptCapsule" class="fixed bottom-0 left-0 lg:left-64 right-0 z-30 pointer-events-none p-4 pb-5 flex justify-center bg-gradient-to-t from-gemini-bg via-gemini-bg/90 to-transparent pt-6">
                 <div class="pointer-events-auto w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl p-3 md:p-3.5 shadow-xl border border-slate-200/90 hover:shadow-2xl focus-within:shadow-2xl focus-within:border-blue-400 transition-all flex flex-col gap-2">
                     
                     <!-- Textarea input -->
@@ -907,6 +1297,7 @@
         let selectedNarrativeId = null;
         let activeModalEventId = null;
         let autoOracleTimer = null;
+        let priceTickerTimer = null;
 
         // Candidate Radar Search Engine & Infinite Scroll State
         let visibleCandidatesCount = 6;
@@ -922,17 +1313,11 @@
 
         // Initialize App on DOM Ready
         document.addEventListener('DOMContentLoaded', () => {
+            loadAppSettings();
             loadAllData();
             refreshLivePrices();
             initRadarInfiniteScroll();
             initNarrativeInfiniteScroll();
-            
-            setInterval(refreshLivePrices, 60000);
-            
-            // Background periodic check of prediction fulfillment (every 30 seconds)
-            autoOracleTimer = setInterval(() => {
-                triggerAutoOracleCheck(true);
-            }, 30000);
 
             // Close dropdowns on outside click
             document.addEventListener('click', (e) => {
@@ -949,10 +1334,27 @@
             const spEl = document.getElementById('navCountSpeakers');
             const caEl = document.getElementById('navCountCandidates');
             const naEl = document.getElementById('navCountNarratives');
+            const candCount = rawCandidates.filter(c => c.status === 'CANDIDATE').length || rawCandidates.length;
             if (evEl) evEl.textContent = rawEvents.length;
             if (spEl) spEl.textContent = rawSpeakers.length;
-            if (caEl) caEl.textContent = rawCandidates.filter(c => c.status === 'CANDIDATE').length || rawCandidates.length;
+            if (caEl) caEl.textContent = candCount;
             if (naEl) naEl.textContent = rawNarratives.length;
+
+            // Sync Settings & Account telemetry counters
+            const mapIds = {
+                settingsStatEvents: rawEvents.length,
+                settingsStatSpeakers: rawSpeakers.length,
+                settingsStatCandidates: candCount,
+                settingsStatNarratives: rawNarratives.length,
+                accountStatEvents: rawEvents.length,
+                accountStatSpeakers: rawSpeakers.length,
+                accountStatCandidates: candCount,
+                accountStatNarratives: rawNarratives.length
+            };
+            Object.entries(mapIds).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            });
         }
 
         // Render Social Account Pills for Speakers & Candidates (X, YouTube, Telegram, Web)
@@ -1062,7 +1464,7 @@
         // Switch Navigation Tabs
         function switchTab(tabId) {
             currentTab = tabId;
-            const tabs = ['events', 'speakers', 'candidates', 'narratives', 'sources', 'parser'];
+            const tabs = ['events', 'speakers', 'candidates', 'narratives', 'settings', 'account', 'sources', 'parser'];
             
             // Show Hero Banner ONLY on Events tab to keep other views clean & focused
             const hero = document.getElementById('heroSection');
@@ -1080,14 +1482,20 @@
                         const ic = navBtn.querySelector('i');
                         if (ic) ic.classList.add('text-blue-600');
                     }
-                    if (viewSec) viewSec.classList.remove('hidden');
+                    if (viewSec) {
+                        viewSec.classList.remove('hidden');
+                        if (t === 'settings' || t === 'account') viewSec.classList.add('flex');
+                    }
                 } else {
                     if (navBtn) {
                         navBtn.className = "flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-gemini-hover text-gemini-grayText transition text-left";
                         const ic = navBtn.querySelector('i');
                         if (ic) ic.classList.remove('text-blue-600');
                     }
-                    if (viewSec) viewSec.classList.add('hidden');
+                    if (viewSec) {
+                        viewSec.classList.add('hidden');
+                        if (t === 'settings' || t === 'account') viewSec.classList.remove('flex');
+                    }
                 }
             });
 
@@ -1097,6 +1505,8 @@
                 speakers: 'Принятые аналитики',
                 candidates: 'Поисковый радар кандидатов',
                 narratives: 'Поиск тем для оценки',
+                settings: 'Настройки системы',
+                account: 'Аккаунт и локальный профиль',
                 sources: 'Мониторинг YouTube каналов',
                 parser: 'Интеллектуальный разбор цитаты'
             };
@@ -1107,6 +1517,10 @@
             if (tabId === 'candidates') loadCandidates();
             if (tabId === 'narratives') loadNarratives();
             if (tabId === 'sources') loadSources();
+            if (tabId === 'settings' || tabId === 'account') {
+                updateNavCounts();
+                syncSettingsFormControls();
+            }
         }
 
         function focusHeroInput() {
@@ -3358,6 +3772,241 @@
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> <span>Да, очистить базу</span>`;
             }
+        }
+
+        // =================== TAB 5 & 6: SETTINGS & ACCOUNT LOGIC ===================
+
+        const DEFAULT_APP_SETTINGS = {
+            autoOracleIntervalSec: 30,
+            priceTickerIntervalSec: 60,
+            showHeaderTickers: true,
+            defaultAccuracyPeriod: '1y',
+            defaultBaseRate: 50,
+            bayesianSensitivity: 'standard',
+            infiniteScrollBatchSize: 6,
+            monochromeIcons: true,
+            showBottomPromptCapsule: true,
+            operatorName: 'Локальный аналитик',
+            operatorRole: 'Quant & Forecast Operator'
+        };
+
+        let appSettings = { ...DEFAULT_APP_SETTINGS };
+
+        async function loadAppSettings() {
+            try {
+                const rawLocal = localStorage.getItem('truthodds_settings_v1');
+                if (rawLocal) {
+                    const parsed = JSON.parse(rawLocal);
+                    appSettings = { ...DEFAULT_APP_SETTINGS, ...parsed };
+                } else {
+                    const res = await fetch('/api/settings');
+                    if (res.ok) {
+                        const srv = await res.json();
+                        appSettings = { ...DEFAULT_APP_SETTINGS, ...srv };
+                    }
+                }
+            } catch (e) {
+                console.warn('Settings load fallback to defaults:', e);
+            }
+            syncSettingsFormControls();
+            applyRuntimeAppSettings();
+        }
+
+        function syncSettingsFormControls() {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = String(val);
+            };
+            const setChecked = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.checked = Boolean(val);
+            };
+
+            setVal('settingOracleInterval', appSettings.autoOracleIntervalSec);
+            setVal('settingTickerInterval', appSettings.priceTickerIntervalSec);
+            setChecked('settingShowHeaderTickers', appSettings.showHeaderTickers);
+            setVal('settingDefaultAccuracyPeriod', appSettings.defaultAccuracyPeriod);
+            setVal('settingDefaultBaseRate', appSettings.defaultBaseRate);
+            const baseLabel = document.getElementById('settingBaseRateValueLabel');
+            if (baseLabel) baseLabel.textContent = `${appSettings.defaultBaseRate}%`;
+            setVal('settingBayesianSensitivity', appSettings.bayesianSensitivity);
+            setVal('settingBatchSize', appSettings.infiniteScrollBatchSize);
+            setChecked('settingMonochromeIcons', appSettings.monochromeIcons);
+            setChecked('settingShowBottomCapsule', appSettings.showBottomPromptCapsule);
+
+            setVal('accountOperatorNameInput', appSettings.operatorName);
+            setVal('accountOperatorRoleInput', appSettings.operatorRole);
+        }
+
+        function applyRuntimeAppSettings() {
+            // 1. Auto-Oracle interval timer & header status pill
+            if (autoOracleTimer) {
+                clearInterval(autoOracleTimer);
+                autoOracleTimer = null;
+            }
+            const oracleSec = Number(appSettings.autoOracleIntervalSec) || 0;
+            const oracleText = document.getElementById('autoOracleText');
+            const oracleDot = document.getElementById('autoOracleDot');
+            const settingsOraclePill = document.getElementById('settingsOracleStatusPill');
+
+            if (oracleSec > 0) {
+                autoOracleTimer = setInterval(() => {
+                    triggerAutoOracleCheck(true);
+                }, oracleSec * 1000);
+                if (oracleText) oracleText.textContent = `Автопроверка: ${oracleSec}с`;
+                if (oracleDot) oracleDot.classList.add('animate-pulse');
+                if (settingsOraclePill) settingsOraclePill.textContent = `Активен (${oracleSec}с)`;
+            } else {
+                if (oracleText) oracleText.textContent = 'Автопроверка: Вручную';
+                if (oracleDot) oracleDot.classList.remove('animate-pulse');
+                if (settingsOraclePill) settingsOraclePill.textContent = 'Ручной режим';
+            }
+
+            // 2. Live price ticker interval & visibility
+            if (priceTickerTimer) {
+                clearInterval(priceTickerTimer);
+                priceTickerTimer = null;
+            }
+            const tickerSec = Math.max(15, Number(appSettings.priceTickerIntervalSec) || 60);
+            priceTickerTimer = setInterval(refreshLivePrices, tickerSec * 1000);
+
+            const headerTickers = document.getElementById('headerLiveTickers');
+            if (headerTickers) {
+                if (appSettings.showHeaderTickers) {
+                    headerTickers.classList.remove('!hidden');
+                } else {
+                    headerTickers.classList.add('!hidden');
+                }
+            }
+
+            // 3. Default analyst accuracy period sync
+            const periodSel = document.getElementById('speakerPeriodFilter');
+            if (periodSel && appSettings.defaultAccuracyPeriod) {
+                periodSel.value = appSettings.defaultAccuracyPeriod;
+            }
+
+            // 4. Infinite scroll batch size
+            const batch = Math.max(4, Number(appSettings.infiniteScrollBatchSize) || 6);
+            visibleCandidatesCount = Math.max(visibleCandidatesCount, batch);
+            visibleNarrativesCount = Math.max(visibleNarrativesCount, batch);
+
+            // 5. Monochrome icon filter
+            let monoStyle = document.getElementById('dynamicMonochromeOverride');
+            if (!monoStyle) {
+                monoStyle = document.createElement('style');
+                monoStyle.id = 'dynamicMonochromeOverride';
+                document.head.appendChild(monoStyle);
+            }
+            monoStyle.textContent = appSettings.monochromeIcons
+                ? 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: grayscale(100%) !important; }'
+                : 'i.fa-solid, i.fa-brands, i.fa-regular, .emoji-gray { filter: none !important; }';
+
+            // 6. Floating bottom prompt capsule visibility
+            const bottomCapsule = document.getElementById('bottomPromptCapsule');
+            if (bottomCapsule) {
+                bottomCapsule.classList.toggle('hidden', !appSettings.showBottomPromptCapsule);
+            }
+
+            // 7. Operator display name & role in Sidebar, Header & Account splash
+            const opName = appSettings.operatorName || 'Локальный аналитик';
+            const opRole = appSettings.operatorRole || 'Quant & Forecast Operator';
+            const sbLabel = document.getElementById('sidebarOperatorLabel');
+            const splashName = document.getElementById('accountSplashName');
+            const splashRole = document.getElementById('accountSplashRole');
+            if (sbLabel) sbLabel.textContent = opName;
+            if (splashName) splashName.textContent = opName;
+            if (splashRole) splashRole.textContent = `${opRole} • Персональный узел верификации прогнозов`;
+        }
+
+        async function saveAppSettings(silent = false) {
+            appSettings = {
+                ...appSettings,
+                autoOracleIntervalSec: Number(document.getElementById('settingOracleInterval')?.value ?? 30),
+                priceTickerIntervalSec: Number(document.getElementById('settingTickerInterval')?.value ?? 60),
+                showHeaderTickers: Boolean(document.getElementById('settingShowHeaderTickers')?.checked ?? true),
+                defaultAccuracyPeriod: document.getElementById('settingDefaultAccuracyPeriod')?.value || '1y',
+                defaultBaseRate: Number(document.getElementById('settingDefaultBaseRate')?.value ?? 50),
+                bayesianSensitivity: document.getElementById('settingBayesianSensitivity')?.value || 'standard',
+                infiniteScrollBatchSize: Number(document.getElementById('settingBatchSize')?.value ?? 6),
+                monochromeIcons: Boolean(document.getElementById('settingMonochromeIcons')?.checked ?? true),
+                showBottomPromptCapsule: Boolean(document.getElementById('settingShowBottomCapsule')?.checked ?? true)
+            };
+
+            localStorage.setItem('truthodds_settings_v1', JSON.stringify(appSettings));
+            applyRuntimeAppSettings();
+
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appSettings)
+                });
+            } catch (e) {
+                console.warn('Could not sync settings to backend:', e);
+            }
+
+            if (!silent) {
+                showToast('Настройки системы сохранены и применены!');
+            }
+        }
+
+        async function resetAppSettingsToDefault() {
+            appSettings = { ...DEFAULT_APP_SETTINGS };
+            localStorage.setItem('truthodds_settings_v1', JSON.stringify(appSettings));
+            syncSettingsFormControls();
+            applyRuntimeAppSettings();
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appSettings)
+                });
+            } catch (e) {}
+            showToast('Настройки возвращены к значениям по умолчанию');
+        }
+
+        async function saveOperatorProfileFromAccount() {
+            const nameVal = (document.getElementById('accountOperatorNameInput')?.value || '').trim() || 'Локальный аналитик';
+            const roleVal = (document.getElementById('accountOperatorRoleInput')?.value || '').trim() || 'Quant & Forecast Operator';
+            appSettings.operatorName = nameVal;
+            appSettings.operatorRole = roleVal;
+            localStorage.setItem('truthodds_settings_v1', JSON.stringify(appSettings));
+            applyRuntimeAppSettings();
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appSettings)
+                });
+            } catch (e) {}
+            showToast(`Профиль оператора «${nameVal}» обновлен!`);
+        }
+
+        function exportPlatformDataJson() {
+            const payload = {
+                exported_at: new Date().toISOString(),
+                platform: 'TruthOdds Local Forecast Node',
+                settings: appSettings,
+                counts: {
+                    events: rawEvents.length,
+                    speakers: rawSpeakers.length,
+                    candidates: rawCandidates.length,
+                    narratives: rawNarratives.length
+                },
+                events: rawEvents,
+                speakers: rawSpeakers,
+                narratives: rawNarratives
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `truthodds_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Снимок базы и настроек экспортирован в JSON');
         }
 
         // Close Modals on Escape Key
