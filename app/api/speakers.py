@@ -471,6 +471,7 @@ def _enrich_speaker_socials(
     eff_resolved = sp.resolved_predictions or 0
     eff_correct = sp.correct_predictions or 0
 
+    curated = SocialDiscoveryService.get_curated_entry(eng_name)
     is_known_real_analyst = bool(curated or eng_name.strip().lower() in BENCHMARK_YEARLY_RECORDS)
     if eff_resolved == 0 and is_known_real_analyst and period_acc.get("resolved_predictions", 0) > 0:
         eff_cred = period_acc["credibility"]
