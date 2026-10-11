@@ -29,7 +29,14 @@ class SemanticEventMatcher:
         best_match = None
         highest_similarity = 0.0
 
+        from app.engine.auto_analysis import AutoEventAnalysisEngine
+        target_is_bearish = AutoEventAnalysisEngine.is_bearish_or_negated_claim(hypothesis)
+
         for ev in active_events:
+            ev_is_bearish = AutoEventAnalysisEngine.is_bearish_or_negated_claim(ev.title)
+            if target_is_bearish != ev_is_bearish:
+                continue
+
             ev_tokens = cls._tokenize_and_normalize(ev.title)
             similarity = cls._calculate_jaccard_similarity(target_tokens, ev_tokens)
             
@@ -48,18 +55,24 @@ class SemanticEventMatcher:
         return None
 
     @staticmethod
-    def _tokenize_and_normalize(text: str) -> set:
-        text = text.lower()
+    def _normalize_numbers(text: str) -> str:
+        t = text.lower()
+        t = t.replace("150,000", "150k").replace("150 000", "150k").replace("150000", "150k").replace("150к", "150k")
+        t = t.replace("100,000", "100k").replace("100 000", "100k").replace("100000", "100k").replace("100к", "100k")
+        t = t.replace("200,000", "200k").replace("200 000", "200k").replace("200000", "200k").replace("200к", "200k")
+        t = t.replace("250,000", "250k").replace("250 000", "250k").replace("250000", "250k").replace("250к", "250k")
+        t = t.replace("1,000,000", "1m").replace("1 000 000", "1m").replace("1000000", "1m").replace("1м", "1m").replace("1млн", "1m")
+        return t
+
+    @classmethod
+    def _tokenize_and_normalize(cls, text: str) -> set:
+        text = cls._normalize_numbers(text)
         # Synonyms normalization
-        text = text.replace("bitcoin", "btc").replace("биткоин", "btc").replace("биткоина", "btc")
+        text = text.replace("bitcoin", "btc").replace("биткоин", "btc").replace("биткоина", "btc").replace("биткойн", "btc")
         text = text.replace("ethereum", "eth").replace("эфириум", "eth").replace("эфир", "eth")
-        text = text.replace("150,000", "150k").replace("150000", "150k").replace("150к", "150k")
-        text = text.replace("100,000", "100k").replace("100000", "100k").replace("100к", "100k")
-        text = text.replace("200,000", "200k").replace("200000", "200k").replace("200к", "200k")
-        text = text.replace("1,000,000", "1m").replace("1000000", "1m").replace("1м", "1m").replace("1млн", "1m")
         
-        words = re.findall(r'\b[a-zA-Zа-яА-Я0-9_]{3,}\b', text)
-        stopwords = {"достигнет", "превысит", "пробьет", "будет", "года", "концу", "перед", "после", "year", "reach", "above"}
+        words = re.findall(r'\b[a-zA-Zа-яА-Я0-9_]{2,}\b', text)
+        stopwords = {"достигнет", "превысит", "пробьет", "будет", "года", "году", "концу", "перед", "после", "year", "reach", "above", "до", "на", "за", "из", "от", "по"}
         return {w for w in words if w not in stopwords}
 
     @staticmethod
@@ -70,10 +83,15 @@ class SemanticEventMatcher:
         union = len(tokens1.union(tokens2))
         return intersection / union
 
-    @staticmethod
-    def _compare_numeric_targets(text1: str, text2: str) -> float:
-        nums1 = set(re.findall(r'\b\d+(?:k|m|к|м)?\b', text1.lower()))
-        nums2 = set(re.findall(r'\b\d+(?:k|m|к|м)?\b', text2.lower()))
-        if nums1 and nums2 and nums1.intersection(nums2):
-            return 0.35  # Strong boost when price targets match
+    @classmethod
+    def _compare_numeric_targets(cls, text1: str, text2: str) -> float:
+        t1 = cls._normalize_numbers(text1)
+        t2 = cls._normalize_numbers(text2)
+        years = {str(y) for y in range(2015, 2040)}
+        nums1 = set(re.findall(r'\b\d+(?:k|m|к|м)?\b', t1)) - years
+        nums2 = set(re.findall(r'\b\d+(?:k|m|к|м)?\b', t2)) - years
+        if nums1 and nums2:
+            if nums1.intersection(nums2):
+                return 0.35  # Strong boost when non-year price targets match
+            return -0.50     # Different numeric targets must not merge
         return 0.0

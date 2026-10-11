@@ -66,3 +66,14 @@ def test_bayesian_aggregation_consensus():
     ]
     prob = ForecasterScorer.aggregate_event_probability(statements, base_rate)
     assert prob > 0.85
+
+def test_bayesian_aggregation_below_fifty_percent():
+    # Skeptical forecasters and low prior base rate must produce probability well below 50%
+    base_rate = 0.30
+    statements = [
+        {"speaker_confidence": 0.20, "speaker_weight": 0.75},
+        {"speaker_confidence": 0.25, "speaker_weight": 0.65}
+    ]
+    prob = ForecasterScorer.aggregate_event_probability(statements, base_rate)
+    assert prob < 0.15
+

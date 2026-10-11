@@ -115,12 +115,10 @@ class ForecasterScorer:
             speaker_confidence = stmt.get("speaker_confidence", 0.5)
             weight = stmt.get("speaker_weight", 0.5)
             
-            # Speaker's log odds
+            # Speaker's log-likelihood ratio relative to neutral 50% (logit(0.5) = 0):
+            # > 0 when confidence > 50%, < 0 when confidence < 50%
             l_speaker = cls.prob_to_log_odds(speaker_confidence)
-            
-            # Weighted evidence shift
-            delta = l_speaker - l_base
-            l_posterior += weight * delta
+            l_posterior += weight * l_speaker
             
         prob = cls.log_odds_to_prob(l_posterior)
         return round(prob, 4)

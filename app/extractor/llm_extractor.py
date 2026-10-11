@@ -138,13 +138,15 @@ Guidelines:
         if found:
             return predictions
 
-        # Look for confidence markers (ru/en)
+        # Look for confidence markers (ru/en), including bearish/skeptical/negated statements
         confidence_rules = [
             (r'(точно|несомненно|гарантирую|definitely|certainly|100%)', 0.90, "Высокая уверенность спикера"),
-            (r'(скорее всего|вероятно|ожидаю|высокие шансы|probably|likely|expect)', 0.75, "Умеренно-высокая вероятность"),
-            (r'(возможно|может быть|не исключено|maybe|perhaps|possible)', 0.55, "Нейтральная / умеренная оценка"),
-            (r'(маловероятно|сомневаюсь|вряд ли|unlikely|doubtful)', 0.25, "Низкая вероятность события"),
-            (r'(невозможно|этого не будет|абсурд|impossible|never)', 0.10, "Категорическое отрицание события"),
+            (r'(невозможно|этого не будет|абсурд|обнулится|impossible|never)', 0.10, "Категорическое отрицание события"),
+            (r'(маловероятно|сомневаюсь|вряд ли|unlikely|doubtful|скептически)', 0.24, "Низкая вероятность события"),
+            (r'(\bне\s+(?:достигнет|войдет|превысит|пробьет|вырастет|сможет|будет)|будет\s+ниже|рухнет|обвалится|упадет\s+ниже)', 0.28, "Медвежий или отрицающий сценарий с повышенным скепсисом рынка"),
+            (r'(сократит|замедление|коррекция|рецессия|девальваци|комнат\w*\s+ожидания|риск)', 0.42, "Осторожная / сдержанная оценка с балансом рисков ниже 50%"),
+            (r'(скорее всего|вероятно|ожидаю|высокие шансы|probably|likely|expect)', 0.72, "Умеренно-высокая вероятность"),
+            (r'(возможно|может быть|не исключено|maybe|perhaps|possible)', 0.48, "Дискуссионная / неопределенная оценка"),
         ]
 
         sentences = [s.strip() for s in re.split(r'[.!?\n]+', text) if len(s.strip()) > 20]
@@ -165,17 +167,19 @@ Guidelines:
             if len(predictions) >= 3:
                 break
 
-        # If nothing matched, construct a default parsed item from the text summary
+        # If nothing matched, construct a parsed item with calibrated confidence
         if not predictions and len(text.strip()) > 10:
             domain = cls._guess_domain(text)
+            first_sent = sentences[0] if sentences else text.strip()
+            default_conf = 0.45 if re.search(r'(\bне\s+|ниже|сократ|спад|коррекц|упад|риск)', first_sent, re.IGNORECASE) else 0.58
             predictions.append({
                 "speaker_name": speaker,
-                "event_hypothesis": text.strip()[:150],
+                "event_hypothesis": first_sent[:150],
                 "domain": domain,
-                "speaker_confidence": 0.65,
+                "speaker_confidence": default_conf,
                 "deadline_str": "уточняется",
-                "raw_quote": text.strip()[:200],
-                "reasoning": "По умолчанию определено как умеренно-позитивный прогноз"
+                "raw_quote": first_sent[:200],
+                "reasoning": "Калиброванная базовая оценка по контексту заявления"
             })
 
         return predictions

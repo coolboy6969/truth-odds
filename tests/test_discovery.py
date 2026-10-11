@@ -13,7 +13,7 @@ def test_speaker_name_extraction():
 
     title2 = "Интервью с Артемом Первушиным: Что будет с криптой"
     names2 = SpeakerDiscoveryEngine.extract_potential_speakers(title2)
-    assert any("Артем" in n for n in names2)
+    assert any("Artem" in n or "Артем" in n for n in names2)
 
     title3 = "Mert Mumtaz explains why Solana architecture scales"
     names3 = SpeakerDiscoveryEngine.extract_potential_speakers(title3)

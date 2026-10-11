@@ -1,13 +1,16 @@
+import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.config import settings
 from app.models.entities import Base
 
+_db_url = "sqlite:///./test_truth_odds.db" if "pytest" in sys.modules else settings.DATABASE_URL
+
 # Using SQLite with check_same_thread=False for async/FastAPI compatibility
-connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+connect_args = {"check_same_thread": False} if _db_url.startswith("sqlite") else {}
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    _db_url,
     connect_args=connect_args,
     echo=False
 )
@@ -127,7 +130,7 @@ def clean_db_artifacts(db: Session):
     for ev in db.query(Event).all():
         if not getattr(ev, "is_manual", 0) and ev.id not in promoted_ids:
             stmts = ev.statements or []
-            if any((s.source_url or "").startswith("https://truthodds.local/") for s in stmts):
+            if stmts and all((s.source_url or "").startswith("https://truthodds.local/") for s in stmts):
                 ev.is_manual = 1
 
     db.commit()

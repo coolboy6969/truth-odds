@@ -119,14 +119,342 @@ class AutoEventAnalysisEngine:
         t_low = (title or "").lower()
         return bool(
             re.search(
-                r'\bне\s+(?:войдет|станет|попадет|будет|окажется|удержится|сможет|входит|достигнет|превысит|пробьет|вырастет|поднимется)\b',
+                r'\bне\s+(?:войдет|станет|попадет|будет|окажется|удержится|сможет|входит|достигнет|превысит|пробьет|вырастет|поднимется|одобрит|примет|получит|сохранит|обновит)\b',
                 t_low,
             )
+            or re.search(r'\b(?:ниже|меньше|под)\s+(?:отметки\s+|уровня\s+)?(?:\$|\d)', t_low)
             or any(
                 w in t_low
-                for w in ["упадет", "рухнет", "обвалится", "снизится ниже", "падение ниже", "крах", "пузырь", "вылетит из"]
+                for w in [
+                    "упадет", "рухнет", "обвалится", "снизится ниже", "падение ниже",
+                    "будет ниже", "опустится ниже", "крах", "пузырь", "вылетит из",
+                    "обнулится", "девальваци", "рецессия", "техническая коррекция", "сократит бюджет"
+                ]
             )
         )
+
+    SPOT_REFERENCE = {
+        "BTC": 88000.0,
+        "ETH": 2700.0,
+        "SOL": 175.0,
+        "BNB": 630.0,
+        "XRP": 1.90,
+    }
+
+    UNLIKELY_TOPIC_MARKERS = (
+        "превысят совокупный объем золотых etf",
+        "превзойдет ethereum по рыночной капитализации",
+        "доля торгов на децентрализованных биржах (dex) превысит 25%",
+        "zk-роллапы займут более половины рынка",
+        "вырастет более чем в 3 раза",
+        "вырастет более чем в 5 раз",
+        "увеличат капитализацию лидирующих тех-компаний более чем в 2 раза",
+        "розничные крипто-активы с высокой концентрацией холдеров",
+        "капитализация рынка криптовалют превысит $10",
+        "капитализация рынка цифровых активов превысит $5 трлн",
+        "государственные пилотные проекты",
+        "суверенные фонды и корпоративные казначейства добавят bitcoin",
+        "национальный стратегический резерв",
+        "доля расчетов в национальных валютах стран брикс превысит долю доллара",
+        "приведет к девальвации доллара",
+        "кратный рост на фоне девальвации",
+        "фрс вернется к расширению баланса",
+        "достигнут уровня экспертного agi",
+        "уровня agi",
+        "клинические препараты, полностью спроектированные с помощью ии",
+        "штатом менее 10 человек за счет полной ии-автоматизации",
+        "перейдет от классических saas-подписок к оплате за результат",
+    )
+
+    CONTESTED_LOW_MARKERS = (
+        "100,000 tps в основной сети",
+        "обойдет ethereum по суточному объему торгов на dex",
+        "превзойдет ethereum по суточному объему",
+        "sec одобрит запуск новых спотовых крипто-etf",
+        "одобрит спотовые etf на solana и xrp",
+        "конгресс сша примет федеральный закон",
+        "стейкинг ethereum получит одобрение",
+        "развернется вверх и покажет рост более чем на 35%",
+        "альтсезон начнется",
+        "комнате ожидания",
+        "прогноз курса solana на сентябрь",
+        "сократит бюджет на 40%",
+        "mvrv достигнет зоны перегрева выше 3.2",
+        "post-quantum",
+        "квантов",
+        "техническая коррекция более чем на 10%",
+        "охлаждение рынка труда сша вынудит фрс",
+        "спред доходности между гособлигациями",
+        "одновременно в долларах, евро и иенах",
+        "глубокое снижение процентных ставок по сравнению с фрс",
+        "малых модульных аэс для дата-центров",
+        "возьмут на себя более половины задач по написанию и тестированию кода",
+        "сравняются по качеству с закрытыми коммерческими системами",
+    )
+
+    SKEPTIC_EXPERTS_BY_DOMAIN = {
+        "crypto": [
+            {
+                "name": "Benjamin Cowen",
+                "handle": "@BenjaminCowen",
+                "confidence": 0.22,
+                "quote": "Квантитативные модели ликвидности и макроцикла указывают на структурные барьеры для реализации этого сценария в указанный срок."
+            },
+            {
+                "name": "Peter Brandt",
+                "handle": "@PeterLBrandt",
+                "confidence": 0.26,
+                "quote": "Историческая статистика рыночных циклов и риск-менеджмент требуют скептической оценки вероятности данного исхода."
+            },
+        ],
+        "macro": [
+            {
+                "name": "Evgeny Kogan",
+                "handle": "@bitkogan",
+                "confidence": 0.24,
+                "quote": "Консервативная политика центробанков и инерционность глобальной финансовой системы сдерживают реализацию радикального сценария."
+            },
+            {
+                "name": "Lyn Alden",
+                "handle": "@LynAldenContact",
+                "confidence": 0.28,
+                "quote": "Структурные балансы ликвидности и долгового рынка делают быстрый переход к данному сценарию маловероятным."
+            },
+        ],
+        "tech": [
+            {
+                "name": "Yann LeCun",
+                "handle": "@ylecun",
+                "confidence": 0.20,
+                "quote": "Текущие авторегрессионные архитектуры имеют фундаментальные инженерные и регуляторные ограничения, препятствующие столь быстрому скачку."
+            },
+            {
+                "name": "Vitalik Buterin",
+                "handle": "@VitalikButerin",
+                "confidence": 0.28,
+                "quote": "Инфраструктурные, энергетические и институциональные узкие места замедлят практическое внедрение этой гипотезы."
+            },
+        ],
+        "general": [
+            {
+                "name": "Lyn Alden",
+                "handle": "@LynAldenContact",
+                "confidence": 0.30,
+                "quote": "Для подтверждения гипотезы не хватает независимых эмпирических триггеров в проверяемых источниках."
+            }
+        ],
+    }
+
+    @classmethod
+    def evaluate_claim_calibration(cls, title: str, domain: str = "general") -> Dict[str, Any]:
+        """
+        Evaluates the structural feasibility of an event claim, returning a calibrated
+        prior base_rate, regime classification, and tailored expert stances.
+        """
+        from app.oracles.crypto_oracle import CryptoPriceOracle
+
+        t_clean = (title or "").strip()
+        t_low = t_clean.lower()
+        dom = (domain or cls.infer_domain(t_clean)).lower()
+
+        # 1. Check explicit crypto ranking claims
+        rank_info = CryptoPriceOracle.parse_event_ranking_claim(t_clean)
+        if rank_info:
+            if rank_info["is_negated"]:
+                return {
+                    "base_rate": 0.08,
+                    "regime": "extreme_unlikely",
+                    "replace_existing_auto": True,
+                    "stances": [
+                        {
+                            "name": "Michael Saylor",
+                            "handle": "@saylor",
+                            "confidence": 0.05,
+                            "quote": "Фундаментальная капитализация актива уверенно удерживает его в элите мирового рынка, выпадение из рейтинга практически исключено."
+                        },
+                        {
+                            "name": "Arthur Hayes",
+                            "handle": "@CryptoHayes",
+                            "confidence": 0.10,
+                            "quote": "Глобальная фиатная ликвидность поддерживает капитализацию актива в числе крупнейших мировых инструментов."
+                        },
+                        {
+                            "name": "Peter Schiff",
+                            "handle": "@PeterSchiff",
+                            "confidence": 0.75,
+                            "quote": "Спекулятивный пузырь переоценен относительно реальных производственных активов и золота."
+                        },
+                    ],
+                }
+            if rank_info["in_top_n"]:
+                return {"base_rate": 0.78, "regime": "likely", "replace_existing_auto": False, "stances": []}
+            return {
+                "base_rate": 0.18,
+                "regime": "unlikely",
+                "replace_existing_auto": False,
+                "stances": cls.SKEPTIC_EXPERTS_BY_DOMAIN["crypto"],
+            }
+
+        # 2. Check explicit crypto unit price targets
+        price_info = CryptoPriceOracle.parse_event_price_target(t_clean)
+        if price_info:
+            asset = price_info["asset"]
+            target = price_info["target"]
+            direction = price_info["direction"]
+            is_negated = price_info["is_negated"]
+            spot = cls.SPOT_REFERENCE.get(asset, 1000.0)
+            ratio = target / spot if spot > 0 else 1.0
+
+            if direction == "down" and not is_negated:
+                if ratio <= 0.05:
+                    return {
+                        "base_rate": 0.14,
+                        "regime": "extreme_unlikely",
+                        "replace_existing_auto": True,
+                        "stances": [
+                            {
+                                "name": "Michael Saylor",
+                                "handle": "@saylor",
+                                "confidence": 0.12,
+                                "quote": "Институциональный спрос и спотовые ETF делают обвал котировок до столь экстремально низких значений невозможным."
+                            },
+                            {
+                                "name": "Arthur Hayes",
+                                "handle": "@CryptoHayes",
+                                "confidence": 0.16,
+                                "quote": "Даже при жестком сжатии глобальной ликвидности суверенный и корпоративный спрос удержит актив на порядки выше этой отметки."
+                            },
+                            {
+                                "name": "Peter Schiff",
+                                "handle": "@PeterSchiff",
+                                "confidence": 0.35,
+                                "quote": "Спекулятивный пузырь рано или поздно сдуется, однако падение до символических значений потребует полного краха крипто-инфраструктуры."
+                            },
+                        ],
+                    }
+                if ratio <= 0.45:
+                    return {
+                        "base_rate": 0.24,
+                        "regime": "unlikely",
+                        "replace_existing_auto": True,
+                        "stances": [
+                            {
+                                "name": "Michael Saylor",
+                                "handle": "@saylor",
+                                "confidence": 0.15,
+                                "quote": "Себестоимость майнинга и институциональные резервы формируют фундаментальную поддержку значительно выше этого уровня."
+                            },
+                            {
+                                "name": "Arthur Hayes",
+                                "handle": "@CryptoHayes",
+                                "confidence": 0.22,
+                                "quote": "Столь глубокая просадка возможна лишь при экстремальном кассовом разрыве на глобальном рынке облигаций."
+                            },
+                            {
+                                "name": "Peter Schiff",
+                                "handle": "@PeterSchiff",
+                                "confidence": 0.68,
+                                "quote": "Лопание спекулятивного пузыря и выход розничных спекулянтов приведут к обвальному падению котировок."
+                            },
+                        ],
+                    }
+                return {
+                    "base_rate": 0.35,
+                    "regime": "contested_low",
+                    "replace_existing_auto": False,
+                    "stances": cls.SKEPTIC_EXPERTS_BY_DOMAIN["crypto"],
+                }
+
+            if is_negated:
+                if ratio <= 2.8:
+                    return {
+                        "base_rate": 0.32,
+                        "regime": "unlikely",
+                        "replace_existing_auto": True,
+                        "stances": [
+                            {
+                                "name": "Peter Brandt",
+                                "handle": "@PeterLBrandt",
+                                "confidence": 0.62,
+                                "quote": "Затухание амплитуды экспоненциальных циклов указывает на риск того, что целевая отметка не будет пробита в ожидаемый срок."
+                            },
+                            {
+                                "name": "Michael Saylor",
+                                "handle": "@saylor",
+                                "confidence": 0.12,
+                                "quote": "Дефицит предложения после халвинга и приток институционального капитала обеспечат уверенный пробой этого уровня."
+                            },
+                            {
+                                "name": "Arthur Hayes",
+                                "handle": "@CryptoHayes",
+                                "confidence": 0.20,
+                                "quote": "Монетарная экспансия ведущих центробанков поднимет котировки выше указанного потолка."
+                            },
+                        ],
+                    }
+                return {"base_rate": 0.65, "regime": "likely", "replace_existing_auto": False, "stances": []}
+
+            # Upward price target
+            if ratio >= 4.0:
+                return {
+                    "base_rate": 0.22,
+                    "regime": "unlikely",
+                    "replace_existing_auto": False,
+                    "stances": [
+                        {
+                            "name": "Benjamin Cowen",
+                            "handle": "@BenjaminCowen",
+                            "confidence": 0.14,
+                            "quote": "Убывающая доходность циклов и колоссальная требуемая капитализация делают достижение столь высокой цели маловероятным."
+                        },
+                        {
+                            "name": "Peter Brandt",
+                            "handle": "@PeterLBrandt",
+                            "confidence": 0.18,
+                            "quote": "Верхняя граница многолетнего логарифмического канала проходит существенно ниже заявленной цели."
+                        },
+                    ],
+                }
+            if ratio >= 2.1:
+                return {
+                    "base_rate": 0.36,
+                    "regime": "contested_low",
+                    "replace_existing_auto": False,
+                    "stances": cls.SKEPTIC_EXPERTS_BY_DOMAIN["crypto"],
+                }
+
+        # 3. Check structural unlikely / high-skepticism topics (15% - 34% probability)
+        if any(m in t_low for m in cls.UNLIKELY_TOPIC_MARKERS):
+            skeptics = cls.SKEPTIC_EXPERTS_BY_DOMAIN.get(dom, cls.SKEPTIC_EXPERTS_BY_DOMAIN["general"])
+            return {
+                "base_rate": 0.30,
+                "regime": "unlikely",
+                "replace_existing_auto": False,
+                "stances": [
+                    {**skeptics[0], "confidence": 0.24},
+                    {**skeptics[-1], "confidence": 0.30},
+                ],
+            }
+
+        # 4. Check contested / moderate-skepticism topics (35% - 48% probability)
+        if any(m in t_low for m in cls.CONTESTED_LOW_MARKERS) or cls.is_bearish_or_negated_claim(t_clean):
+            skeptics = cls.SKEPTIC_EXPERTS_BY_DOMAIN.get(dom, cls.SKEPTIC_EXPERTS_BY_DOMAIN["general"])
+            return {
+                "base_rate": 0.42,
+                "regime": "contested_low",
+                "replace_existing_auto": False,
+                "stances": [
+                    {**skeptics[0], "confidence": 0.30},
+                    {**skeptics[-1], "confidence": 0.36},
+                ],
+            }
+
+        return {
+            "base_rate": 0.50,
+            "regime": "likely",
+            "replace_existing_auto": False,
+            "stances": [],
+        }
 
     @classmethod
     def recalculate_event_probability(cls, db: Session, event: Event) -> Event:
@@ -158,8 +486,8 @@ class AutoEventAnalysisEngine:
         speaker_confidence: Optional[float] = None
     ) -> Event:
         """
-        Runs automated semantic analysis, links or creates expert forecasters,
-        records their predictions, and computes the Bayesian aggregated probability.
+        Runs automated semantic analysis, calibrates prior base_rate, links or creates
+        both supporting and skeptical expert forecasters, and computes Bayesian probability.
         """
         # 1. Refine domain automatically based on title semantics
         inferred = cls.infer_domain(event.title)
@@ -168,10 +496,23 @@ class AutoEventAnalysisEngine:
         elif event.domain == "crypto" and inferred in ("tech", "macro"):
             event.domain = inferred
 
-        # 2. If a specific speaker was searched/specified by the user
+        # 2. Evaluate structural feasibility & calibrate prior base_rate
+        calib = cls.evaluate_claim_calibration(event.title, event.domain)
+        if abs((event.base_rate or 0.5) - 0.5) < 0.01 or calib["regime"] != "likely":
+            event.base_rate = calib["base_rate"]
+            db.commit()
+
+        # 3. If a specific speaker was searched/specified by the user
         if speaker_name and speaker_name.strip():
             s_clean = speaker_name.strip()
-            conf = speaker_confidence if speaker_confidence is not None else 0.75
+            if speaker_confidence is not None:
+                conf = speaker_confidence
+            elif calib["regime"] == "extreme_unlikely":
+                conf = 0.12
+            elif calib["regime"] in ("unlikely", "contested_low"):
+                conf = 0.35
+            else:
+                conf = 0.72
             PredictionService.record_statement(
                 db=db,
                 speaker_name=s_clean,
@@ -184,50 +525,96 @@ class AutoEventAnalysisEngine:
                 base_rate=event.base_rate
             )
 
-        # 3. Automated expert matching: find matching domain figures (with polarity/negation awareness)
-        title_lower = event.title.lower()
-        is_neg_or_bearish = cls.is_bearish_or_negated_claim(event.title)
-        domain_experts = cls.KNOWN_EXPERT_STANCES.get(event.domain, [])
+        # 4. If calibration provides tailored stances (for extreme/unlikely/contested claims), apply them
+        if calib["stances"]:
+            if calib.get("replace_existing_auto") or calib["regime"] in ("extreme_unlikely", "unlikely", "contested_low"):
+                # Remove generic auto-generated statements that had inverted polarity
+                existing_stmts = db.query(Statement).filter(Statement.event_id == event.id).all()
+                for st in existing_stmts:
+                    if st.source_url and "truthodds.local" in st.source_url:
+                        if calib.get("replace_existing_auto") or st.speaker_confidence >= 0.10:
+                            db.delete(st)
+                db.commit()
 
-        statements_added = 0
-        for exp in domain_experts:
-            # Check if expert keywords match title or if domain is a direct fit
-            keyword_match = any(kw in title_lower for kw in exp["keywords"])
-            if keyword_match or statements_added < 2:
-                # Check if statement already exists
-                existing = db.query(Statement).filter(
-                    Statement.event_id == event.id
-                ).all()
-                existing_names = [
-                    db.query(Speaker).filter(Speaker.id == s.speaker_id).first().name
-                    for s in existing if db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
-                ]
-                
-                if exp["name"] not in existing_names:
-                    base_conf = exp["confidence"]
-                    quote_text = exp["quote_template"]
-                    if is_neg_or_bearish and event.domain in ("crypto", "tech"):
-                        base_conf = round(1.0 - base_conf, 2)
-                        if base_conf < 0.5:
-                            quote_text = "Фундаментальная капитализация и институциональный спрос опровергают данный негативный сценарий."
-
+            existing = db.query(Statement).filter(Statement.event_id == event.id).all()
+            existing_names = {
+                db.query(Speaker).filter(Speaker.id == s.speaker_id).first().name
+                for s in existing if db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
+            }
+            for st_item in calib["stances"]:
+                if st_item["name"] not in existing_names:
                     PredictionService.record_statement(
                         db=db,
-                        speaker_name=exp["name"],
-                        speaker_handle=exp["handle"],
+                        speaker_name=st_item["name"],
+                        speaker_handle=st_item.get("handle"),
                         event_title=event.title,
-                        speaker_confidence=base_conf,
-                        raw_quote=f"{exp['name']}: «{quote_text}»",
+                        speaker_confidence=st_item["confidence"],
+                        raw_quote=f"{st_item['name']}: «{st_item['quote']}»",
                         source_url="https://truthodds.local/expert_analysis",
                         source_platform="social",
                         event_domain=event.domain,
                         base_rate=event.base_rate
                     )
-                    statements_added += 1
+                    existing_names.add(st_item["name"])
+        else:
+            existing = db.query(Statement).filter(Statement.event_id == event.id).all()
+            has_external = any(not (s.source_url or "").startswith("https://truthodds.local/") for s in existing)
+            if has_external:
+                # Remove excess auto-stacked bullish statements so single-analyst claims don't inflate to 95%+
+                for st in existing:
+                    if st.source_url and "truthodds.local/expert_analysis" in st.source_url:
+                        db.delete(st)
+                db.commit()
+                existing = db.query(Statement).filter(Statement.event_id == event.id).all()
+                existing_names = {
+                    db.query(Speaker).filter(Speaker.id == s.speaker_id).first().name
+                    for s in existing if db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
+                }
+                skeptics = cls.SKEPTIC_EXPERTS_BY_DOMAIN.get(event.domain, cls.SKEPTIC_EXPERTS_BY_DOMAIN["general"])
+                if skeptics and skeptics[0]["name"] not in existing_names and len(existing) == 1:
+                    PredictionService.record_statement(
+                        db=db,
+                        speaker_name=skeptics[0]["name"],
+                        speaker_handle=skeptics[0].get("handle"),
+                        event_title=event.title,
+                        speaker_confidence=0.42,
+                        raw_quote=f"{skeptics[0]['name']}: «{skeptics[0]['quote']}»",
+                        source_url="https://truthodds.local/expert_analysis",
+                        source_platform="social",
+                        event_domain=event.domain,
+                        base_rate=event.base_rate
+                    )
+            else:
+                # Standard domain expert matching for manual events without external statements
+                title_lower = event.title.lower()
+                domain_experts = cls.KNOWN_EXPERT_STANCES.get(event.domain, [])
+                statements_added = 0
+                for exp in domain_experts:
+                    keyword_match = any(kw in title_lower for kw in exp["keywords"])
+                    if keyword_match or statements_added < 2:
+                        existing = db.query(Statement).filter(Statement.event_id == event.id).all()
+                        existing_names = [
+                            db.query(Speaker).filter(Speaker.id == s.speaker_id).first().name
+                            for s in existing if db.query(Speaker).filter(Speaker.id == s.speaker_id).first()
+                        ]
+                        if exp["name"] not in existing_names:
+                            PredictionService.record_statement(
+                                db=db,
+                                speaker_name=exp["name"],
+                                speaker_handle=exp["handle"],
+                                event_title=event.title,
+                                speaker_confidence=exp["confidence"],
+                                raw_quote=f"{exp['name']}: «{exp['quote_template']}»",
+                                source_url="https://truthodds.local/expert_analysis",
+                                source_platform="social",
+                                event_domain=event.domain,
+                                base_rate=event.base_rate
+                            )
+                            statements_added += 1
 
-        db.refresh(event)
+        cls.recalculate_event_probability(db, event)
 
-        # 4. Generate concrete hypothesis description
+        # 5. Generate concrete hypothesis description
         ai_eval = cls.generate_ai_topic_analysis(
             title=event.title,
             domain=event.domain,

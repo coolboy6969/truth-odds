@@ -212,8 +212,10 @@ def seed_crypto_top10(db: Session = Depends(get_db)):
         ResolutionEngine.recalculate_speaker_track_record(db, speaker.id)
 
         # 2. Process Active Predictions
+        from app.engine.auto_analysis import AutoEventAnalysisEngine
         for ev_title, conf, quote in fig["active"]:
-            PredictionService.record_statement(
+            calib = AutoEventAnalysisEngine.evaluate_claim_calibration(ev_title, "crypto")
+            stmt = PredictionService.record_statement(
                 db=db,
                 speaker_name=fig["name"],
                 event_title=ev_title,
@@ -222,8 +224,11 @@ def seed_crypto_top10(db: Session = Depends(get_db)):
                 source_url=f"https://youtube.com/watch?v={fig['youtube_channel'][:11]}",
                 source_platform="youtube",
                 event_domain="crypto",
-                speaker_handle=fig["handle"]
+                speaker_handle=fig["handle"],
+                base_rate=float(calib.get("base_rate", 0.5))
             )
+            if stmt and stmt.event:
+                AutoEventAnalysisEngine.analyze_and_forecast_event(db, stmt.event)
 
         created_speakers.append({
             "name": speaker.name,

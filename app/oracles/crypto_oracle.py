@@ -182,14 +182,22 @@ class CryptoPriceOracle:
         )
 
         # 4. Detect direction & negation
-        is_downward = any(
-            w in title_lower
-            for w in ["упадет", "рухнет", "опустится", "падение ниже", "снизится ниже", "fall below", "drop below", "crash"]
+        is_downward = bool(
+            any(
+                w in title_lower
+                for w in [
+                    "упадет", "рухнет", "опустится", "обвалится", "падение ниже",
+                    "снизится ниже", "будет ниже", "окажется ниже", "торговаться ниже",
+                    "fall below", "drop below", "crash", "below "
+                ]
+            )
+            or re.search(r'\b(?:ниже|меньше|под)\s+(?:отметки\s+|уровня\s+)?(?:\$|\d)', cleaned)
         )
         is_negated = cls.is_negated_claim(title_lower)
 
         # 5. Extract unit price target only when accompanied by explicit currency/price markers
         target = None
+        has_explicit_currency = False
 
         # 5a. $150k / 150k USD / $150 тыс
         match_k = re.search(
@@ -199,6 +207,7 @@ class CryptoPriceOracle:
         if match_k:
             num_str = match_k.group(1) or match_k.group(2)
             target = float(num_str) * 1000.0
+            has_explicit_currency = True
         else:
             # 5b. Explicit $ or USD/доллар with thousands separator ($150,000 or $200 000)
             match_curr_sep = re.search(
@@ -208,15 +217,17 @@ class CryptoPriceOracle:
             if match_curr_sep:
                 raw_num = (match_curr_sep.group(1) or match_curr_sep.group(2)).replace(",", "").replace(" ", "")
                 target = float(raw_num)
+                has_explicit_currency = True
             else:
-                # 5c. Explicit $ or USD/доллар with plain digits ($3000, $150000)
+                # 5c. Explicit $ or USD/доллар with plain digits ($10, 10 долларов, $3000, $150000)
                 match_curr_plain = re.search(
-                    r'(?:\$\s*(\d{2,7}(?:\.\d+)?)|(\d{2,7}(?:\.\d+)?)\s*(?:\$|usd|usdt|доллар\w*))',
+                    r'(?:\$\s*(\d{1,7}(?:\.\d+)?)|(\d{1,7}(?:\.\d+)?)\s*(?:\$|usd|usdt|доллар\w*))',
                     cleaned,
                 )
                 if match_curr_plain:
                     raw_num = match_curr_plain.group(1) or match_curr_plain.group(2)
                     target = float(raw_num)
+                    has_explicit_currency = True
                 elif any(p in title_lower for p in ["цена", "курс", "котировк", "отметк", "уровен"]):
                     # 5d. Explicit price word + comma-formatted number (e.g. "достигнет отметки 150,000")
                     match_price_sep = re.search(r'\b(\d{1,3}(?:,\d{3})+)\b', cleaned)
@@ -227,7 +238,8 @@ class CryptoPriceOracle:
             return None
 
         # 6. Validate against realistic unit price bounds for the asset
-        min_p = cls.MIN_VALID_UNIT_PRICE.get(asset, 0.01)
+        # If explicit currency ($ / доллар) is specified on a downward crash claim, allow down to $0.01
+        min_p = 0.01 if (has_explicit_currency and is_downward) else cls.MIN_VALID_UNIT_PRICE.get(asset, 0.01)
         max_p = cls.MAX_VALID_UNIT_PRICE.get(asset, 10000000.0)
         if target < min_p or target > max_p:
             return None

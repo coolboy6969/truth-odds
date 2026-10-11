@@ -95,14 +95,17 @@ class EventDiscoveryEngine:
 
         # Clean event title
         event_title = cls._clean_narrative_to_event_title(cluster.topic_summary)
+        from app.engine.auto_analysis import AutoEventAnalysisEngine
+        calib = AutoEventAnalysisEngine.evaluate_claim_calibration(event_title, cluster.domain)
 
         # Create official event
         event = PredictionService.get_or_create_event(
             db=db,
             title=event_title,
             domain=cluster.domain,
-            base_rate=0.5
+            base_rate=float(calib.get("base_rate", 0.5))
         )
+        AutoEventAnalysisEngine.analyze_and_forecast_event(db, event)
 
         cluster.status = "PROMOTED"
         cluster.promoted_event_id = event.id

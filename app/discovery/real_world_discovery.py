@@ -434,6 +434,7 @@ class RealWorldAnalystDiscoveryService:
             raw_quote = pred.get("raw_quote") or candidate.context_quote or hypothesis
             src_url = pred.get("source_url") or candidate.source_url or "https://news.google.com"
             dom = pred.get("domain") or AutoEventAnalysisEngine.infer_domain(hypothesis)
+            calib = AutoEventAnalysisEngine.evaluate_claim_calibration(hypothesis, dom)
 
             stmt = PredictionService.record_statement(
                 db=db,
@@ -444,8 +445,10 @@ class RealWorldAnalystDiscoveryService:
                 source_url=src_url,
                 source_platform="media",
                 event_domain=dom,
-                base_rate=0.5
+                base_rate=float(calib.get("base_rate", 0.5))
             )
+            if stmt and stmt.event:
+                AutoEventAnalysisEngine.analyze_and_forecast_event(db, stmt.event)
             recorded_statements.append({
                 "statement_id": stmt.id,
                 "event": hypothesis,
