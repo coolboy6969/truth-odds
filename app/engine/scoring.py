@@ -109,7 +109,9 @@ class ForecasterScorer:
             return base_rate
         
         l_base = cls.prob_to_log_odds(base_rate)
-        l_posterior = l_base
+        n = len(statements)
+        panel_scale = math.sqrt(2.5 / n) if n > 3 else 1.0
+        l_shift = 0.0
         
         for stmt in statements:
             speaker_confidence = stmt.get("speaker_confidence", 0.5)
@@ -118,7 +120,8 @@ class ForecasterScorer:
             # Speaker's log-likelihood ratio relative to neutral 50% (logit(0.5) = 0):
             # > 0 when confidence > 50%, < 0 when confidence < 50%
             l_speaker = cls.prob_to_log_odds(speaker_confidence)
-            l_posterior += weight * l_speaker
+            l_shift += weight * l_speaker
             
+        l_posterior = l_base + panel_scale * l_shift
         prob = cls.log_odds_to_prob(l_posterior)
         return round(prob, 4)

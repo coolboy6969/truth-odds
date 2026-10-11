@@ -465,17 +465,34 @@ def _enrich_speaker_socials(
         events_by_id=events_by_id,
     )
 
+    eff_cred = sp.overall_credibility
+    eff_brier = sp.overall_brier_score
+    eff_total = max(sp.total_predictions or 0, len(sp_stmts) if sp_stmts is not None else 0, period_acc.get("total_predictions", 0))
+    eff_resolved = sp.resolved_predictions or 0
+    eff_correct = sp.correct_predictions or 0
+
+    if eff_resolved == 0 and period_acc.get("resolved_predictions", 0) > 0:
+        eff_cred = period_acc["credibility"]
+        eff_brier = period_acc["brier_score"]
+        eff_resolved = period_acc["resolved_predictions"]
+        eff_correct = period_acc["correct_predictions"]
+        sp.overall_credibility = eff_cred
+        sp.overall_brier_score = eff_brier
+        sp.total_predictions = eff_total
+        sp.resolved_predictions = eff_resolved
+        sp.correct_predictions = eff_correct
+
     return {
         "id": sp.id,
         "name": eng_name,
         "handle_or_channel": sp.handle_or_channel,
         "bio": sp.bio,
         "avatar_url": sp.avatar_url,
-        "overall_credibility": sp.overall_credibility,
-        "overall_brier_score": sp.overall_brier_score,
-        "total_predictions": sp.total_predictions,
-        "resolved_predictions": sp.resolved_predictions,
-        "correct_predictions": sp.correct_predictions,
+        "overall_credibility": eff_cred,
+        "overall_brier_score": eff_brier,
+        "total_predictions": eff_total,
+        "resolved_predictions": eff_resolved,
+        "correct_predictions": eff_correct,
         "domain_scores": sp.domain_scores or {},
         "created_at": sp.created_at,
         "social_accounts": socials,
